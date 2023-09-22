@@ -5,11 +5,11 @@ import { Dropzone, IMAGE_MIME_TYPE, FileWithPath } from '@mantine/dropzone';
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
 import { useState } from "react";
 
-interface dropProps {
-    setCoverImage: (file: FileWithPath[]) => void
+interface dropImgProps {
+    setCoverImage: (file: FileWithPath) => void
 }
 
-export default function ImageDropzone({ setCoverImage }: dropProps) {
+export default function ImageDropzone({ setCoverImage }: dropImgProps) {
     const [files, setFiles] = useState<FileWithPath[]>([]);
     const imgSrc = files.length > 0 ? URL.createObjectURL(files[0]) : "";
 
@@ -20,7 +20,7 @@ export default function ImageDropzone({ setCoverImage }: dropProps) {
         >
             <Dropzone accept={IMAGE_MIME_TYPE}
                 onDrop={(files) => {
-                    console.log('files', files)
+                    setCoverImage(files[0]);
                     setFiles(files);
                 }
                 }>
@@ -83,6 +83,19 @@ export default function ImageDropzone({ setCoverImage }: dropProps) {
                     </Text>
                 </div>
             </Dropzone>
+
+
+            {/* 
+            <Dropzone accept={IMAGE_MIME_TYPE}
+                onDrop={(files) => {
+                    setFiles(files);
+                    setCoverImage(files[0]);
+                    console.log('inside dropzone');
+                }}
+            >
+                <Text ta="center">Drop images here</Text>
+            </Dropzone> 
+            */}
 
         </Box>
     )
