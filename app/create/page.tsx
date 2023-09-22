@@ -32,6 +32,8 @@ export default function Create() {
         },
         {
             label: "Type",
+            data: ["Sound", "Pack", "Preset", "Plugin"],
+            maxTags: 1,
             description: "Sound / Sample Pack / Preset / Plugin",
             opened: false,
         },
@@ -126,6 +128,8 @@ export default function Create() {
                                         description={state.description}
                                         key={index}
                                         opened={state.opened}
+                                        maxTags={state.maxTags}
+                                        data={state.data}
                                         toggle={() => toggleCollapse(index)}
                                     />
                                 ))}
@@ -254,11 +258,15 @@ const InputTags = ({
     label,
     opened,
     description,
+    data,
     toggle,
+    maxTags,
 }: {
     label: string;
     opened: boolean;
     description: string;
+    data?: string[],
+    maxTags?: number,
     toggle: () => void;
 }) => {
     return (
@@ -290,7 +298,11 @@ const InputTags = ({
                 </Box>
             </Flex>
             <Collapse in={opened}>
-                <TagsInput placeholder="Enter tag" />
+                <TagsInput 
+                data={data}
+                placeholder="Enter tag" 
+                maxTags={maxTags}
+                />
             </Collapse>
         </Flex>
     );
