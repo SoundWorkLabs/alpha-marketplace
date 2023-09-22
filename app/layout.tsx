@@ -5,12 +5,13 @@ import ConnectWallet from "./components/connect";
 import { Wallet } from "./components/Wallet";
 import CustomPill from "./components/pill";
 
-import { theme } from "../theme";
+import { resolver, theme } from "../theme";
 import { SideNav } from "./components/nav";
 
 import './globals.css';
 import "@mantine/core/styles.css";
 import '@solana/wallet-adapter-react-ui/styles.css';
+import Link from "next/link";
 export const metadata = {
   title: "Soundwork",
   description: "soundwork web app!",
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>
+        <MantineProvider theme={theme} cssVariablesResolver={resolver}>
           <Wallet>
             <div className="flex">
               <nav>
@@ -38,9 +39,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="w-screen">
                 <div className="flex justify-end p-5 ">
                   <Group>
-                    <CustomPill label="Create Music" color="transparent" />
+                    <Link href='/create' passHref>
+                      <CustomPill label="Create" color="transparent" />
+                    </Link>
                     <CustomPill label="SOL" color="transparent" />
-                    <CustomPill label="SOL" color="transparent">
+                    <CustomPill color="transparent"> {/* // todo: enable user to change network settings here */}
                       <ConnectWallet />
                     </CustomPill>
                   </Group>
