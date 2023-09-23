@@ -12,6 +12,7 @@ import './globals.css';
 import "@mantine/core/styles.css";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import Link from "next/link";
+import Footer from "./components/footer";
 export const metadata = {
   title: "Soundwork",
   description: "soundwork web app!",
@@ -51,9 +52,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
               </main>
             </div>
+            <footer>
+              <Footer />
+            </footer>
           </Wallet>
         </MantineProvider>
-
       </body>
     </html >
   );
