@@ -197,14 +197,7 @@ export default function Create() {
                             </Group>
 
                             <Box>
-                                <Button
-                                    variant="gradient"
-                                    gradient={{
-                                        from: "rgba(0, 145, 215, 1)",
-                                        to: "rgba(254, 15, 212, 1)",
-                                        deg: 90,
-                                    }}
-                                >
+                                <Button variant='primary'>
                                     Mint
                                 </Button>
                             </Box>
