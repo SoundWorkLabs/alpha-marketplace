@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Group, Code } from '@mantine/core';
+import { Group, } from '@mantine/core';
 import {
     IconCategory,
     IconUserCircle,
@@ -12,21 +12,25 @@ import {
 
 import { ThemeToggle } from './themeToggle';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+
+import SoundWorkLogo from './icon';
 
 const data = [
     { link: '/explore', label: 'Explore', icon: IconCategory },
-    { link: '/profile', label: 'My Profile', icon: IconUserCircle },
-    { link: '/sounds', label: 'My Sounds', icon: IconHeadphones }, // todo: use figma svg
-    { link: '/create', label: 'Music Maker', icon: IconAdjustmentsHorizontal },
+    { link: '/profile', label: 'Profile', icon: IconUserCircle },
+    { link: '/sounds', label: 'Sounds', icon: IconHeadphones }, // todo: use figma svg
+    { link: '/music', label: 'Music Maker', icon: IconAdjustmentsHorizontal },
     { link: '/help', label: 'Help', icon: IconHelp },
 ];
 
 export function SideNav() {
     const [active, setActive] = useState('Explore');
+    const pathname = usePathname()
 
     const links = data.map((item) => (
         <Link
-            className="flex my-3"
+            className={`flex p-2 bg-${pathname === item.link ? "slate-600" : "pink"} hover:cursor-pointer hover:bg-[var(--soundwork-hover-one)]`}
             href={item.link}
             key={item.label}
         >
@@ -36,13 +40,13 @@ export function SideNav() {
     ));
 
     return (
-        <nav className="w-max border-r-2">
+        <nav className="w-max border-r-2 h-[100%]">
             <div className='flex flex-col justify-between p-5 h-screen'>
                 <div className='flex flex-col gap-5'>
-                    <Group justify="space-between">
+                    <Group className='mt-10 mb-10' justify="center">
                         <Link href='/'>
                             <div>
-                                Logo goes here
+                                <SoundWorkLogo/>
                             </div>
                         </Link>
                     </Group>

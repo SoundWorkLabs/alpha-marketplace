@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@mantine/core": "7.0.0",
+    "@mantine/dropzone": "^7.0.0",
+    "@mantine/form": "^7.0.0",
     "@mantine/hooks": "7.0.0",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",

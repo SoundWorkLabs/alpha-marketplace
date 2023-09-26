@@ -8,7 +8,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Image from 'next/image';
 
-function Test() {
+export default function ConnectWalletModal() {
     const [opened, { open, close }] = useDisclosure(false);
     const { publicKey, wallets, select, connect } = useWallet();
 
@@ -29,7 +29,7 @@ function Test() {
             >
 
                 <Title order={3} mb="20">
-                    Connect Solana Wallet
+                    Select Wallet
                 </Title>
                 <Box>
                     <Stack>
@@ -42,6 +42,14 @@ function Test() {
                                         key={wallet.adapter.name}
                                         onClick={() => { select(wallet.adapter.name) }}
                                         size="lg"
+                                        styles={{
+                                            root: {
+                                                borderRadius: "0",
+                                                background: "none",
+                                                color: 'var(--mantine-color-bright)',
+                                                border: '2px solid var(--mantine-color-bright)'
+                                            }
+                                        }}
                                         leftSection={
                                             <Image
                                                 src={wallet.adapter.icon}
@@ -51,7 +59,16 @@ function Test() {
                                             />
                                         }
                                     >
-                                        <Button onClick={() => select(wallet.adapter.name)}>
+                                        <Button
+                                            styles={{
+                                                root: {
+                                                    background: "none",
+                                                    borderRadius: "0",
+                                                    color: 'var(--mantine-color-bright)',
+                                                }
+                                            }}
+                                            onClick={() => select(wallet.adapter.name)}
+                                        >
                                             {wallet.adapter.name}
                                         </Button>
                                     </Button>
@@ -63,7 +80,7 @@ function Test() {
                 </Box>
             </Modal>
 
-
+            <Button style={{ background: "none" }} onClick={open}>Connect</Button>
         </>
     );
 }
