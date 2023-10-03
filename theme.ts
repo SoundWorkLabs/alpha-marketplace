@@ -23,7 +23,7 @@ export const theme = createTheme({
           return {
             root: {
               "--button-radius": "0px",
-              "--button-bd": "none", 
+              "--button-bd": "none",
               "--button-bg":
                 "linear-gradient(90deg, rgba(0, 145, 215, 1), rgba(254, 15, 212, 1))",
               // "--button-hover": "2px solid white"

@@ -12,19 +12,19 @@ import {
     Text,
     Textarea,
     TextInput,
-    Title,
+    Title
 } from "@mantine/core";
 import { FileWithPath } from "@mantine/dropzone";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { AudioDropzone, ImageDropzone } from "../components/FileDropzone";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsTransaction } from "@metaplex-foundation/umi-web3js-adapters";
 import { mintSingle } from "../../services/NFT";
 
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
 
 export default function Create() {
@@ -114,16 +114,18 @@ export default function Create() {
 
                 const serializedTx = await mintSingle(formData);
                 if (serializedTx instanceof Error) {
-                    console.error('An error occurred:', serializedTx.message);
+                    console.error("An error occurred:", serializedTx.message);
                     console.log("serialized", serializedTx);
 
-                    toast.dismiss()
-                    notifyErr(serializedTx.message)
+                    toast.dismiss();
+                    notifyErr(serializedTx.message);
                     return;
                 }
-                toast.dismiss(toastId)
+                toast.dismiss(toastId);
 
-                notifySuccess("Success. Please sign the transaction to finish NFT mint");
+                notifySuccess(
+                    "Success. Please sign the transaction to finish NFT mint"
+                );
 
                 handleSignTx(serializedTx.tx); // todo: error when this fails
             } catch (err) {
@@ -140,7 +142,7 @@ export default function Create() {
             coverImage,
             publicKey,
             attributes,
-            handleSignTx,
+            handleSignTx
         ]
     );
 
@@ -251,7 +253,7 @@ export default function Create() {
                                                 "sound",
                                                 "pack",
                                                 "preset",
-                                                "plugin",
+                                                "plugin"
                                             ]}
                                             value={soundType}
                                             // @ts-ignore
@@ -287,34 +289,38 @@ export default function Create() {
                                         <Switch
                                             styles={{
                                                 trackLabel: {
-                                                    background: `${allowDownload
-                                                        ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
-                                                        : "transparent"
-                                                        }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
+                                                            : "transparent"
+                                                    }`
                                                 },
                                                 thumb: {
-                                                    background: `${allowDownload
-                                                        ? "white"
-                                                        : "rgba(230, 2, 147, 1)"
-                                                        }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "white"
+                                                            : "rgba(230, 2, 147, 1)"
+                                                    }`,
                                                     outline: "none",
                                                     // border: `${allowDownload ? "" : "none"}`,
-                                                    border: "none",
+                                                    border: "none"
                                                 },
                                                 track: {
-                                                    border: `${allowDownload
-                                                        ? "none"
-                                                        : ""
-                                                        }`,
-                                                    background: `${allowDownload
-                                                        ? "rgba(230, 2, 147, 1)"
-                                                        : "transparent"
-                                                        }`,
-                                                },
+                                                    border: `${
+                                                        allowDownload
+                                                            ? "none"
+                                                            : ""
+                                                    }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "rgba(230, 2, 147, 1)"
+                                                            : "transparent"
+                                                    }`
+                                                }
                                             }}
                                             checked={allowDownload}
                                             onChange={({
-                                                target: { checked },
+                                                target: { checked }
                                             }) => setAllowDownload(checked)}
                                         />
                                     </Box>
@@ -337,7 +343,7 @@ export default function Create() {
                                 <Button
                                     variant="primary"
                                     type="submit"
-                                // onClick={() => notificationHandler(true)}
+                                    // onClick={() => notificationHandler(true)}
                                 >
                                     Mint
                                 </Button>
@@ -363,7 +369,7 @@ function TextInputField({
     placeholder,
     onChange,
     type,
-    description,
+    description
 }: TextInputFieldProps) {
     return (
         <Flex direction="column" gap="3" w={"40vw"}>
@@ -393,7 +399,7 @@ const CollapsibleField = ({
     opened,
     description,
     toggle,
-    children,
+    children
 }: {
     label: string;
     opened: boolean;
@@ -419,7 +425,7 @@ const CollapsibleField = ({
                         border: "1px solid transparent",
                         borderImage:
                             "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))",
-                        borderImageSlice: 1,
+                        borderImageSlice: 1
                     }}
                 >
                     {opened ? (

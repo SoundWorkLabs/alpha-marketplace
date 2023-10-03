@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint --fix",
+    "format:all": "prettier --write app/",
+    "format:staged": "prettier --write $(git diff --staged --name-only --diff-filter d | xargs)"
   },
   "dependencies": {
     "@mantine/core": "7.0.0",
@@ -34,12 +36,17 @@
     "@types/node": "20.2.5",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
     "autoprefixer": "^10.4.15",
-    "eslint": "8.41.0",
-    "eslint-config-next": "13.4.4",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^13.5.4",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "husky": "^8.0.3",
     "postcss": "^8.4.30",
     "postcss-preset-mantine": "1.6.0",
     "postcss-simple-vars": "^7.0.1",
+    "prettier": "^3.0.3",
     "tailwindcss": "^3.3.3",
     "typescript": "5.0.4"
   }

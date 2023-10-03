@@ -2,14 +2,14 @@ import { toast } from "react-hot-toast";
 
 const defaultToastStyles = {
     borderRadius: "0px",
-    border: '1px solid black',
-    width: "200vw",
-}
+    border: "1px solid black",
+    width: "200vw"
+};
 
 export function notifyErr(errMsg?: string) {
     toast.error(`Error: ${errMsg}`, {
         style: { ...defaultToastStyles }
-    })
+    });
 }
 
 export function notifySuccess(msg?: string) {
@@ -26,8 +26,7 @@ export function notifyLoading(loadingMsg?: string): string {
     return id;
 }
 
-
-// todo: use modals for these 
+// todo: use modals for these
 // function notificationHandler(isErr?: boolean, isComplete?: boolean, prom?: Promise<string>) {
 //     const id = notifications.show({
 //         loading: true,
