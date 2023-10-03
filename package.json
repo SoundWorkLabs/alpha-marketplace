@@ -13,15 +13,22 @@
     "@mantine/dropzone": "^7.0.0",
     "@mantine/form": "^7.0.0",
     "@mantine/hooks": "7.0.0",
+    "@metaplex-foundation/umi": "^0.8.9",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.9",
+    "@metaplex-foundation/umi-web3js-adapters": "^0.8.9",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.34",
     "@solana/wallet-adapter-wallets": "^0.19.22",
     "@solana/web3.js": "^1.78.5",
     "@tabler/icons-react": "^2.34.0",
+    "bs58": "^5.0.0",
+    "install": "^0.13.0",
     "next": "13.4.4",
+    "pnpm": "^8.8.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@types/node": "20.2.5",

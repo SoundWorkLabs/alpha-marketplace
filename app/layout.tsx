@@ -1,5 +1,5 @@
 import React from "react";
-import { MantineProvider, ColorSchemeScript, Group, Badge, Button } from "@mantine/core";
+import { MantineProvider, ColorSchemeScript, Group } from "@mantine/core";
 
 import ConnectWallet from "./components/connect";
 import { Wallet } from "./components/Wallet";
@@ -13,6 +13,8 @@ import "@mantine/core/styles.css";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import Link from "next/link";
 import Footer from "./components/footer";
+import { Toaster } from "react-hot-toast";
+
 export const metadata = {
   title: "Soundwork",
   description: "soundwork web app!",
@@ -50,6 +52,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </Group>
                 </div>
                 {children}
+                <Toaster
+                  position="bottom-center"
+                />
               </main>
             </div>
             <footer>
