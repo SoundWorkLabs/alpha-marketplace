@@ -28,8 +28,8 @@ import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
 
 interface attributesType {
-    traitType: string,
-    traitValue: string
+    traitType: string;
+    traitValue: string;
 }
 
 export default function Create() {
@@ -54,8 +54,10 @@ export default function Create() {
     const [allowDownload, setAllowDownload] = useState(false);
     // attributes
     const [attributeKey, setAttributeKey] = useState<string>("");
-    const [attributeValue, setAttributeValue] = useState<string>("")
-    const [attributes, setAttributes] = useState<{ [traitKey: string]: string; }[]>([]);
+    const [attributeValue, setAttributeValue] = useState<string>("");
+    const [attributes, setAttributes] = useState<
+        { [traitKey: string]: string }[]
+    >([]);
 
     console.log("attributes", attributes);
 
@@ -157,24 +159,22 @@ export default function Create() {
     );
 
     function handleAddAttribute() {
-        if (!attributeKey && !attributeValue) return
+        if (!attributeKey && !attributeValue) return;
 
-        console.log("key", attributeKey)
-        console.log("value", attributeValue)
+        console.log("key", attributeKey);
+        console.log("value", attributeValue);
 
         // push to the field
         // attributes.push(attributes[attributeKey] = attributeValue)
         const newAttribute = { [attributeKey]: attributeValue };
 
-        setAttributes([...attributes, newAttribute])
+        setAttributes([...attributes, newAttribute]);
 
         // onclick, clear attributes input
-        console.log('clear input')
-        setAttributeKey("")
-        setAttributeValue("")
+        console.log("clear input");
+        setAttributeKey("");
+        setAttributeValue("");
     }
-
-
 
     return (
         <Box>
@@ -216,7 +216,7 @@ export default function Create() {
                                             placeholder="Pick sound type you want to mint"
                                             data={[
                                                 "sound",
-                                                "collection",
+                                                "collection"
                                                 // "preset",
                                                 // "plugin"
                                             ]}
@@ -305,7 +305,11 @@ export default function Create() {
                                         onChange={setAttributes}
                                     />
                                      */}
-                                    <Flex justify='space-between' wrap="wrap" gap={10}>
+                                    <Flex
+                                        justify="space-between"
+                                        wrap="wrap"
+                                        gap={10}
+                                    >
                                         <TextInput
                                             placeholder="trait type"
                                             value={attributeKey}
@@ -323,8 +327,9 @@ export default function Create() {
                                     </Flex>
                                     <Button
                                         variant="primary"
-                                        mt={4} display='flex'
-                                        justify='center'
+                                        mt={4}
+                                        display="flex"
+                                        justify="center"
                                         onClick={handleAddAttribute}
                                     >
                                         add trait
@@ -336,21 +341,29 @@ export default function Create() {
                                             padding: "10px 2px",
                                             background: "var(--_input-bg)",
                                             margin: "10px 0"
-                                        }}>
-                                        {
-                                            attributes.length > 0 && attributes.map((attribute, index) => (
-                                                <Box
-                                                    key={index}
-                                                >
-                                                    &nbsp;
-                                                    &#123;
-                                                    {" "}{Object.keys(attribute)[0]} {": "}
-                                                    &nbsp;
-                                                    {Object.values(attribute)[0]} {" "}
-                                                    &#125;
-                                                </Box>
-                                            ))
-                                        }
+                                        }}
+                                    >
+                                        {attributes.length > 0 &&
+                                            attributes.map(
+                                                (attribute, index) => (
+                                                    <Box key={index}>
+                                                        &nbsp; &#123;{" "}
+                                                        {
+                                                            Object.keys(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        {": "}
+                                                        &nbsp;
+                                                        {
+                                                            Object.values(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        &#125;
+                                                    </Box>
+                                                )
+                                            )}
                                     </Box>
                                 </CollapsibleField>
                             </Group>
@@ -370,29 +383,33 @@ export default function Create() {
                                         <Switch
                                             styles={{
                                                 trackLabel: {
-                                                    background: `${allowDownload
-                                                        ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
-                                                        : "transparent"
-                                                        }`
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
+                                                            : "transparent"
+                                                    }`
                                                 },
                                                 thumb: {
-                                                    background: `${allowDownload
-                                                        ? "white"
-                                                        : "rgba(230, 2, 147, 1)"
-                                                        }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "white"
+                                                            : "rgba(230, 2, 147, 1)"
+                                                    }`,
                                                     outline: "none",
                                                     // border: `${allowDownload ? "" : "none"}`,
                                                     border: "none"
                                                 },
                                                 track: {
-                                                    border: `${allowDownload
-                                                        ? "none"
-                                                        : ""
-                                                        }`,
-                                                    background: `${allowDownload
-                                                        ? "rgba(230, 2, 147, 1)"
-                                                        : "transparent"
-                                                        }`
+                                                    border: `${
+                                                        allowDownload
+                                                            ? "none"
+                                                            : ""
+                                                    }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "rgba(230, 2, 147, 1)"
+                                                            : "transparent"
+                                                    }`
                                                 }
                                             }}
                                             checked={allowDownload}
@@ -420,7 +437,7 @@ export default function Create() {
                                 <Button
                                     variant="primary"
                                     type="submit"
-                                // onClick={() => notificationHandler(true)}
+                                    // onClick={() => notificationHandler(true)}
                                 >
                                     Mint
                                 </Button>
