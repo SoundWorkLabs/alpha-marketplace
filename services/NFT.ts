@@ -10,7 +10,7 @@ export async function mintSingle(postData: FormData) {
 
     try {
         const response = await fetch(
-            "http://localhost:3040/api/v1/nfts/create",
+            "http://localhost:3040/api/v1/nfts/create/mint",
             opts
         );
 

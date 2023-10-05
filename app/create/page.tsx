@@ -112,7 +112,7 @@ export default function Create() {
 
             const formData = new FormData();
             formData.append("authorityPubkey", publicKey?.toBase58());
-            formData.append("name", name);
+            formData.append("title", name);
             formData.append("symbol", symbol);
             formData.append("description", description);
             formData.append("externalLink", externalLink);
