@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base{
+    #app{
+        @apply bg-backgroundColor
+    }
+    #body{
+        @apply bg-backgroundColor text-textColor ;
+    }
+    .nav{
+        @apply bg-navBgColor;
+    }
+    .footer{
+        @apply bg-footerBgColor text-textColor;
+    }
+}

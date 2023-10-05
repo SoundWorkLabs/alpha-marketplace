@@ -6,7 +6,14 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        navBgColor: "#121426",
+        backgroundColor: "#020415",
+        textColor: "#ffffff",
+        footerBgColor: "#0B0D1D",
+      },
+    },
   },
   plugins: [],
-}
+};

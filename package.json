@@ -20,16 +20,18 @@
     "@solana/web3.js": "^1.78.5",
     "@tabler/icons-react": "^2.34.0",
     "next": "13.4.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "20.2.5",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
     "autoprefixer": "^10.4.15",
+    "axios": "^1.5.1",
     "eslint": "8.41.0",
     "eslint-config-next": "13.4.4",
+    "netlify-cli": "^16.5.1",
     "postcss": "^8.4.30",
     "postcss-preset-mantine": "1.6.0",
     "postcss-simple-vars": "^7.0.1",
