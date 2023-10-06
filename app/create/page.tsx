@@ -6,55 +6,175 @@ import {
     Collapse,
     Flex,
     Group,
+    Select,
     Switch,
     TagsInput,
     Text,
     Textarea,
     TextInput,
-    Title,
+    Title
 } from "@mantine/core";
 import { FileWithPath } from "@mantine/dropzone";
-import { useDisclosure } from "@mantine/hooks";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { useState } from "react";
-import ImageDropzone from "../components/ImageDropzone";
+import React, { useCallback, useState } from "react";
+import { AudioDropzone, ImageDropzone } from "../components/FileDropzone";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { toWeb3JsTransaction } from "@metaplex-foundation/umi-web3js-adapters";
+import { mintSingle } from "../../services/NFT";
+
+import toast from "react-hot-toast";
+import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
+
+interface attributesType {
+    traitType: string;
+    traitValue: string;
+}
 
 export default function Create() {
-    const [opened, { toggle }] = useDisclosure(false);
-    const { wallet } = useWallet();
-    // const [collapseStates, setCollapseStates] = useState([false, false, false]);
-    const [collapseStates, setCollapseStates] = useState([
-        {
-            label: "Properties",
-            description: "Textual traits. Press Enter to submit a tag",
-            opened: false,
-        },
-        {
-            label: "Type",
-            data: ["Sound", "Pack", "Preset", "Plugin"],
-            maxTags: 1,
-            description: "Sound / Sample Pack / Preset / Plugin",
-            opened: false,
-        },
-        {
-            label: "Stats",
-            description: "Numerical traits that show up as a number",
-            opened: false,
-        },
-    ]);
+    const { publicKey } = useWallet();
+    const { connection } = useConnection();
 
+    // ? UI STATE
+    const [collapseAttributes, setCollapseAttributes] =
+        useState<boolean>(false);
+    const [collapseType, setCollapseType] = useState<boolean>(false);
+
+    const [soundType, setSoundType] = useState<string>("");
+
+    // ? FORM DATA STATE
     const [coverImage, setCoverImage] = useState<FileWithPath>();
-    const [name, setName] = useState<string>();
-    const [externalLink, setExternalLink] = useState<string>();
-    const [description, setDescription] = useState<string>();
+    const [audioFile, setAudioFile] = useState<FileWithPath>();
+    const [name, setName] = useState<string>("");
+    const [symbol, setSymbol] = useState<string>("");
+    const [externalLink, setExternalLink] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [NotoMint, setNoToMint] = useState<number>();
     const [allowDownload, setAllowDownload] = useState(false);
+    // attributes
+    const [attributeKey, setAttributeKey] = useState<string>("");
+    const [attributeValue, setAttributeValue] = useState<string>("");
+    const [attributes, setAttributes] = useState<
+        { [traitKey: string]: string }[]
+    >([]);
 
-    const toggleCollapse = (index: number) => {
-        const newCollapseStates = [...collapseStates];
-        newCollapseStates[index].opened = !newCollapseStates[index].opened;
-        setCollapseStates(newCollapseStates);
-    };
+    console.log("attributes", attributes);
+
+    // todo: create a hook for this
+    const handleSignTx = useCallback(
+        async (serializedTx: string) => {
+            if (!publicKey) throw new WalletNotConnectedError();
+
+            // deserialize the tx
+            const umi = createUmi(connection.rpcEndpoint);
+            const deserializedTx = umi.transactions.deserialize(
+                Buffer.from(serializedTx, "base64")
+            );
+            const web3jsTx = toWeb3JsTransaction(deserializedTx);
+
+            // determine the provider and sign
+            // the tx ourselves
+            const { backpack }: any = window; // backpack
+            const { solana }: any = window; // phantom
+            const { glow }: any = window; // glow
+            const { braveSolana }: any = window; // brave
+
+            if (backpack.isConnected) {
+                console.log("backpack 👌");
+                let txHash = await backpack.sendAndConfirm(web3jsTx);
+                return txHash;
+            } else if (solana.isConnected) {
+                console.log("phantom 👌");
+                let txHash = await solana.signAndSendTransaction(web3jsTx);
+                return txHash;
+            } else if (glow.isConnected) {
+                console.log("glow 👌");
+                let txHash = glow.signAndSendTransaction(web3jsTx);
+                return txHash;
+            } else if (braveSolana.isConnected) {
+                console.log("brave 👌");
+                let txHash = braveSolana.signAndSendTransaction(web3jsTx);
+                return txHash;
+            } else {
+                // todo: proper error handling
+                console.error("selected wallet not supported");
+            }
+        },
+        [connection, publicKey]
+    );
+
+    const handleSubmit = useCallback(
+        async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+
+            if (!publicKey) throw new WalletNotConnectedError();
+
+            const formData = new FormData();
+            formData.append("authorityPubkey", publicKey?.toBase58());
+            formData.append("title", name);
+            formData.append("symbol", symbol);
+            formData.append("description", description);
+            formData.append("externalLink", externalLink);
+            formData.append("attributes", JSON.stringify(attributes));
+            formData.append("allowDownload", allowDownload.toString());
+            formData.append("audioFile", audioFile ?? "");
+            formData.append("coverImage", coverImage ?? "");
+
+            try {
+                let toastId = notifyLoading();
+
+                const serializedTx = await mintSingle(formData);
+                if (serializedTx instanceof Error) {
+                    console.error("An error occurred:", serializedTx.message);
+                    console.log("serialized", serializedTx);
+
+                    toast.dismiss();
+                    notifyErr(serializedTx.message);
+                    return;
+                }
+                toast.dismiss(toastId);
+
+                notifySuccess(
+                    "Success. Please sign the transaction to finish NFT mint"
+                );
+
+                handleSignTx(serializedTx.tx); // todo: error when this fails
+            } catch (err) {
+                console.error("error single mint", err);
+            }
+        },
+        [
+            name,
+            symbol,
+            description,
+            externalLink,
+            allowDownload,
+            audioFile,
+            coverImage,
+            publicKey,
+            attributes,
+            handleSignTx
+        ]
+    );
+
+    function handleAddAttribute() {
+        if (!attributeKey && !attributeValue) return;
+
+        console.log("key", attributeKey);
+        console.log("value", attributeValue);
+
+        // push to the field
+        // attributes.push(attributes[attributeKey] = attributeValue)
+        const newAttribute = { [attributeKey]: attributeValue };
+
+        setAttributes([...attributes, newAttribute]);
+
+        // onclick, clear attributes input
+        console.log("clear input");
+        setAttributeKey("");
+        setAttributeValue("");
+    }
 
     return (
         <Box>
@@ -63,7 +183,7 @@ export default function Create() {
                     <Title order={3}>Create New Sound NFT</Title>
                 </Box>
                 <Box>
-                    <form>
+                    <form onSubmit={(e) => handleSubmit(e)}>
                         <Flex direction="column" gap="30">
                             <Group>
                                 <Flex direction="column" gap="3" w={"40vw"}>
@@ -71,13 +191,10 @@ export default function Create() {
                                         <Text fw="bold" size="lg" lh={3}>
                                             Cover Image / Video
                                         </Text>
-                                        {/* <Text size='sm'>
-                                            MP3, WAV, AIFF, Max Size 10MB
-                                        </Text> */}
                                     </Box>
                                     <Box>
                                         <ImageDropzone
-                                            setCoverImage={(
+                                            setFileState={(
                                                 file: FileWithPath
                                             ) => setCoverImage(file)}
                                         />
@@ -85,22 +202,70 @@ export default function Create() {
                                 </Flex>
                             </Group>
 
+                            <Group mb={-20}>
+                                <CollapsibleField
+                                    label="Type"
+                                    opened={collapseType}
+                                    description="Sound / Collection"
+                                    toggle={() =>
+                                        setCollapseType(!collapseType)
+                                    }
+                                >
+                                    <Box>
+                                        <Select
+                                            placeholder="Pick sound type you want to mint"
+                                            data={[
+                                                "sound",
+                                                "collection"
+                                                // "preset",
+                                                // "plugin"
+                                            ]}
+                                            value={soundType}
+                                            // @ts-ignore
+                                            onChange={setSoundType}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        {soundType === "sound" && (
+                                            <Box mt={20}>
+                                                <AudioDropzone
+                                                    setFileState={(
+                                                        file: FileWithPath
+                                                    ) => setAudioFile(file)}
+                                                />
+                                            </Box>
+                                        )}
+                                    </Box>
+                                </CollapsibleField>
+                            </Group>
+
                             <Group>
                                 <TextInputField
                                     label="Name"
-                                    placeholder="Savannah Nguyen"
+                                    placeholder="Kobeni Higashiyama"
                                     onChange={({ target: { value } }) =>
                                         setName(value)
                                     }
                                 />
                             </Group>
+                            {/* 
+                            <Group>
+                                <TextInputField
+                                    label="Symbol"
+                                    placeholder="KBN"
+                                    onChange={({ target: { value } }) =>
+                                        setSymbol(value)
+                                    }
+                                />
+                            </Group> 
+                            */}
 
                             <Group>
                                 <TextInputField
                                     label="External Link"
-                                    placeholder="https://soundwork.io/assets"
+                                    placeholder="https://soundwork.io/assets/csm"
                                     onChange={({ target: { value } }) =>
-                                        setName(value)
+                                        setExternalLink(value)
                                     }
                                 />
                             </Group>
@@ -116,23 +281,91 @@ export default function Create() {
                                         <Textarea
                                             placeholder="start typing..."
                                             variant="filled" /* width='200vw' */
+                                            onChange={({ target: { value } }) =>
+                                                setDescription(value)
+                                            }
                                         />
                                     </Box>
                                 </Flex>
                             </Group>
 
-                            <Group>
-                                {collapseStates.map((state, index) => (
-                                    <InputTags
-                                        label={state.label}
-                                        description={state.description}
-                                        key={index}
-                                        opened={state.opened}
-                                        maxTags={state.maxTags}
-                                        data={state.data}
-                                        toggle={() => toggleCollapse(index)}
+                            <Group gap={30}>
+                                <CollapsibleField
+                                    label="Attributes"
+                                    opened={collapseAttributes}
+                                    description="Textual traits. Press Enter to submit a tag"
+                                    toggle={() =>
+                                        setCollapseAttributes(
+                                            !collapseAttributes
+                                        )
+                                    }
+                                >
+                                    {/* <TagsInput
+                                        placeholder="Enter tag"
+                                        onChange={setAttributes}
                                     />
-                                ))}
+                                     */}
+                                    <Flex
+                                        justify="space-between"
+                                        wrap="wrap"
+                                        gap={10}
+                                    >
+                                        <TextInput
+                                            placeholder="trait type"
+                                            value={attributeKey}
+                                            onChange={({ target: { value } }) =>
+                                                setAttributeKey(value)
+                                            }
+                                        />
+                                        <TextInput
+                                            placeholder="trait value"
+                                            value={attributeValue}
+                                            onChange={({ target: { value } }) =>
+                                                setAttributeValue(value)
+                                            }
+                                        />
+                                    </Flex>
+                                    <Button
+                                        variant="primary"
+                                        mt={4}
+                                        display="flex"
+                                        justify="center"
+                                        onClick={handleAddAttribute}
+                                    >
+                                        add trait
+                                    </Button>
+                                    <Box
+                                        bg={"var(--_input-bg)"}
+                                        style={{
+                                            border: "1px solid var(--mantine-color-bright)",
+                                            padding: "10px 2px",
+                                            background: "var(--_input-bg)",
+                                            margin: "10px 0"
+                                        }}
+                                    >
+                                        {attributes.length > 0 &&
+                                            attributes.map(
+                                                (attribute, index) => (
+                                                    <Box key={index}>
+                                                        &nbsp; &#123;{" "}
+                                                        {
+                                                            Object.keys(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        {": "}
+                                                        &nbsp;
+                                                        {
+                                                            Object.values(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        &#125;
+                                                    </Box>
+                                                )
+                                            )}
+                                    </Box>
+                                </CollapsibleField>
                             </Group>
 
                             <Group>
@@ -150,34 +383,38 @@ export default function Create() {
                                         <Switch
                                             styles={{
                                                 trackLabel: {
-                                                    background: `${allowDownload
-                                                        ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
-                                                        : "transparent"
-                                                        }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))"
+                                                            : "transparent"
+                                                    }`
                                                 },
                                                 thumb: {
-                                                    background: `${allowDownload
-                                                        ? "white"
-                                                        : "rgba(230, 2, 147, 1)"
-                                                        }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "white"
+                                                            : "rgba(230, 2, 147, 1)"
+                                                    }`,
                                                     outline: "none",
                                                     // border: `${allowDownload ? "" : "none"}`,
-                                                    border: "none",
+                                                    border: "none"
                                                 },
                                                 track: {
-                                                    border: `${allowDownload
-                                                        ? "none"
-                                                        : ""
-                                                        }`,
-                                                    background: `${allowDownload
-                                                        ? "rgba(230, 2, 147, 1)"
-                                                        : "transparent"
-                                                        }`,
-                                                },
+                                                    border: `${
+                                                        allowDownload
+                                                            ? "none"
+                                                            : ""
+                                                    }`,
+                                                    background: `${
+                                                        allowDownload
+                                                            ? "rgba(230, 2, 147, 1)"
+                                                            : "transparent"
+                                                    }`
+                                                }
                                             }}
                                             checked={allowDownload}
                                             onChange={({
-                                                target: { checked },
+                                                target: { checked }
                                             }) => setAllowDownload(checked)}
                                         />
                                     </Box>
@@ -191,13 +428,17 @@ export default function Create() {
                                     placeholder="1"
                                     description="Number of copies to be minted"
                                     onChange={({ target: { value } }) =>
-                                        setName(value)
+                                        setNoToMint(value)
                                     }
                                 />
                             </Group>
 
                             <Box>
-                                <Button variant='primary'>
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    // onClick={() => notificationHandler(true)}
+                                >
                                     Mint
                                 </Button>
                             </Box>
@@ -222,7 +463,7 @@ function TextInputField({
     placeholder,
     onChange,
     type,
-    description,
+    description
 }: TextInputFieldProps) {
     return (
         <Flex direction="column" gap="3" w={"40vw"}>
@@ -247,20 +488,18 @@ function TextInputField({
     );
 }
 
-const InputTags = ({
+const CollapsibleField = ({
     label,
     opened,
     description,
-    data,
     toggle,
-    maxTags,
+    children
 }: {
     label: string;
     opened: boolean;
     description: string;
-    data?: string[],
-    maxTags?: number,
     toggle: () => void;
+    children?: React.ReactNode;
 }) => {
     return (
         <Flex direction="column" gap="3" w={"40vw"}>
@@ -280,7 +519,7 @@ const InputTags = ({
                         border: "1px solid transparent",
                         borderImage:
                             "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))",
-                        borderImageSlice: 1,
+                        borderImageSlice: 1
                     }}
                 >
                     {opened ? (
@@ -291,11 +530,7 @@ const InputTags = ({
                 </Box>
             </Flex>
             <Collapse in={opened}>
-                <TagsInput 
-                data={data}
-                placeholder="Enter tag" 
-                maxTags={maxTags}
-                />
+                <Box my={10}>{children}</Box>
             </Collapse>
         </Flex>
     );
