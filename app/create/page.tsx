@@ -27,6 +27,11 @@ import { mintSingle } from "../../services/NFT";
 import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
 
+interface attributesType {
+    traitType: string;
+    traitValue: string;
+}
+
 export default function Create() {
     const { publicKey } = useWallet();
     const { connection } = useConnection();
@@ -47,7 +52,14 @@ export default function Create() {
     const [description, setDescription] = useState<string>("");
     const [NotoMint, setNoToMint] = useState<number>();
     const [allowDownload, setAllowDownload] = useState(false);
-    const [attributes, setAttributes] = useState<string[]>([]);
+    // attributes
+    const [attributeKey, setAttributeKey] = useState<string>("");
+    const [attributeValue, setAttributeValue] = useState<string>("");
+    const [attributes, setAttributes] = useState<
+        { [traitKey: string]: string }[]
+    >([]);
+
+    console.log("attributes", attributes);
 
     // todo: create a hook for this
     const handleSignTx = useCallback(
@@ -100,7 +112,7 @@ export default function Create() {
 
             const formData = new FormData();
             formData.append("authorityPubkey", publicKey?.toBase58());
-            formData.append("name", name);
+            formData.append("title", name);
             formData.append("symbol", symbol);
             formData.append("description", description);
             formData.append("externalLink", externalLink);
@@ -146,6 +158,24 @@ export default function Create() {
         ]
     );
 
+    function handleAddAttribute() {
+        if (!attributeKey && !attributeValue) return;
+
+        console.log("key", attributeKey);
+        console.log("value", attributeValue);
+
+        // push to the field
+        // attributes.push(attributes[attributeKey] = attributeValue)
+        const newAttribute = { [attributeKey]: attributeValue };
+
+        setAttributes([...attributes, newAttribute]);
+
+        // onclick, clear attributes input
+        console.log("clear input");
+        setAttributeKey("");
+        setAttributeValue("");
+    }
+
     return (
         <Box>
             <Box mx={100} mb={20}>
@@ -172,6 +202,43 @@ export default function Create() {
                                 </Flex>
                             </Group>
 
+                            <Group mb={-20}>
+                                <CollapsibleField
+                                    label="Type"
+                                    opened={collapseType}
+                                    description="Sound / Collection"
+                                    toggle={() =>
+                                        setCollapseType(!collapseType)
+                                    }
+                                >
+                                    <Box>
+                                        <Select
+                                            placeholder="Pick sound type you want to mint"
+                                            data={[
+                                                "sound",
+                                                "collection"
+                                                // "preset",
+                                                // "plugin"
+                                            ]}
+                                            value={soundType}
+                                            // @ts-ignore
+                                            onChange={setSoundType}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        {soundType === "sound" && (
+                                            <Box mt={20}>
+                                                <AudioDropzone
+                                                    setFileState={(
+                                                        file: FileWithPath
+                                                    ) => setAudioFile(file)}
+                                                />
+                                            </Box>
+                                        )}
+                                    </Box>
+                                </CollapsibleField>
+                            </Group>
+
                             <Group>
                                 <TextInputField
                                     label="Name"
@@ -181,7 +248,7 @@ export default function Create() {
                                     }
                                 />
                             </Group>
-
+                            {/* 
                             <Group>
                                 <TextInputField
                                     label="Symbol"
@@ -190,7 +257,8 @@ export default function Create() {
                                         setSymbol(value)
                                     }
                                 />
-                            </Group>
+                            </Group> 
+                            */}
 
                             <Group>
                                 <TextInputField
@@ -232,44 +300,70 @@ export default function Create() {
                                         )
                                     }
                                 >
-                                    <TagsInput
+                                    {/* <TagsInput
                                         placeholder="Enter tag"
                                         onChange={setAttributes}
                                     />
-                                </CollapsibleField>
-
-                                <CollapsibleField
-                                    label="Type"
-                                    opened={collapseType}
-                                    description="Sound / Sample Pack / Preset / Plugin"
-                                    toggle={() =>
-                                        setCollapseType(!collapseType)
-                                    }
-                                >
-                                    <Box>
-                                        <Select
-                                            placeholder="Pick sound type you want to mint"
-                                            data={[
-                                                "sound",
-                                                "pack",
-                                                "preset",
-                                                "plugin"
-                                            ]}
-                                            value={soundType}
-                                            // @ts-ignore
-                                            onChange={setSoundType}
+                                     */}
+                                    <Flex
+                                        justify="space-between"
+                                        wrap="wrap"
+                                        gap={10}
+                                    >
+                                        <TextInput
+                                            placeholder="trait type"
+                                            value={attributeKey}
+                                            onChange={({ target: { value } }) =>
+                                                setAttributeKey(value)
+                                            }
                                         />
-                                    </Box>
-                                    <Box>
-                                        {soundType === "sound" && (
-                                            <Box mt={20}>
-                                                <AudioDropzone
-                                                    setFileState={(
-                                                        file: FileWithPath
-                                                    ) => setAudioFile(file)}
-                                                />
-                                            </Box>
-                                        )}
+                                        <TextInput
+                                            placeholder="trait value"
+                                            value={attributeValue}
+                                            onChange={({ target: { value } }) =>
+                                                setAttributeValue(value)
+                                            }
+                                        />
+                                    </Flex>
+                                    <Button
+                                        variant="primary"
+                                        mt={4}
+                                        display="flex"
+                                        justify="center"
+                                        onClick={handleAddAttribute}
+                                    >
+                                        add trait
+                                    </Button>
+                                    <Box
+                                        bg={"var(--_input-bg)"}
+                                        style={{
+                                            border: "1px solid var(--mantine-color-bright)",
+                                            padding: "10px 2px",
+                                            background: "var(--_input-bg)",
+                                            margin: "10px 0"
+                                        }}
+                                    >
+                                        {attributes.length > 0 &&
+                                            attributes.map(
+                                                (attribute, index) => (
+                                                    <Box key={index}>
+                                                        &nbsp; &#123;{" "}
+                                                        {
+                                                            Object.keys(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        {": "}
+                                                        &nbsp;
+                                                        {
+                                                            Object.values(
+                                                                attribute
+                                                            )[0]
+                                                        }{" "}
+                                                        &#125;
+                                                    </Box>
+                                                )
+                                            )}
                                     </Box>
                                 </CollapsibleField>
                             </Group>
