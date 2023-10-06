@@ -1,6 +1,6 @@
 "use client";
-import { Box, TextInput, Flex, Tabs, Text, Grid } from "@mantine/core";
-import Cards from "./components/Card";
+import { Box, TextInput, Flex, Tabs, Text } from "@mantine/core";
+import Cards from "../components/Card";
 
 // import AudioPlayer from "./components/AudioPlayer";
 import AudioPlayer from "./components/LocalAudioPlayer";
