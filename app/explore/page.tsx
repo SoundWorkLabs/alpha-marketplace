@@ -2,8 +2,8 @@
 import { Box, TextInput, Flex, Tabs, Text } from "@mantine/core";
 import Cards from "../components/Card";
 
-// import AudioPlayer from "./components/AudioPlayer";
-import AudioPlayer from "./components/LocalAudioPlayer";
+import AudioPlayer from "./components/AudioPlayer";
+// import AudioPlayer from "./components/LocalAudioPlayer";
 
 export default function Explore() {
     const audioUrl = "/sunella.mp3"; // To be adjust to call the URL based on the Netlify function route
@@ -25,13 +25,25 @@ export default function Explore() {
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-8">
-                <AudioPlayer audioUrl={audioUrl} />
+            <Box className="my-8 p-5">
+                {/* <AudioPlayer audioUrl={audioUrl} /> */}
+                <AudioPlayer />
             </Box>
 
             {/* Sound Packs */}
             <Box>
                 <div className="text-xl font-semibold mb-4">Sound Packs</div>
+                <Box>
+                    <Flex>
+                        <Tabs defaultValue="pack" color="blue">
+                            {Cards()}
+                        </Tabs>
+                    </Flex>
+                </Box>
+            </Box>
+            {/* Sounds */}
+            <Box>
+                <div className="text-xl font-semibold mb-4">Sounds</div>
                 <Box>
                     <Flex>
                         <Tabs defaultValue="pack" color="blue">
