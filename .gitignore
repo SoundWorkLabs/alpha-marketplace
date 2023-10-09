@@ -37,3 +37,6 @@ next-env.d.ts
 
 .prettierignore
 .eslintcache
+.env.local
+.env.development
+.env.production

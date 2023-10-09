@@ -7,7 +7,7 @@
     },
     "rules": {
         // "no-duplicate-case": "off", // turn off duplicates erro
-        "no-unused-vars": "error", // notify violation but not output error
+        "no-unused-vars": "warn", // notify violation but not output error
         "no-func-assign": "error" // notify and output err
     }
 }

@@ -1,4 +1,4 @@
-const baseUrl = "";
+import { API_BASE_URL } from "../utils/config";
 
 /** generate uris and mint tx to be signed on the frontend */
 /*  returns a serialized transaction we need to sign */
@@ -9,10 +9,7 @@ export async function mintSingle(postData: FormData) {
     };
 
     try {
-        const response = await fetch(
-            "http://localhost:3040/api/v1/nfts/create/mint",
-            opts
-        );
+        const response = await fetch(`${API_BASE_URL}/nfts/create/mint`, opts);
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
