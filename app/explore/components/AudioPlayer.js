@@ -1,0 +1,40 @@
+import { useRef, useState } from "react";
+import Music from "./Music";
+
+import { tracks } from "../data/tracks";
+import Controls from "./Controls";
+import ProgressBar from "./ProgressBar";
+
+import { IconVolume, IconArrowsShuffle2 } from "@tabler/icons-react";
+
+function LibAudioPlayer() {
+    const [currentTrack, setCurrentTrack] = useState(tracks[0]);
+
+    const progressBarRef = useRef();
+    const audioRef = useRef();
+
+    const [timeProgress, setTimeProgress] = useState(0);
+    const [duration, setDuration] = useState(0);
+    return (
+        <div className="w-full flex justify-between items-center">
+            <Controls
+                {...{ audioRef, progressBarRef, duration, setTimeProgress }}
+            />
+            <Music
+                {...{ currentTrack, audioRef, setDuration, progressBarRef }}
+            />
+            <ProgressBar
+                {...{ progressBarRef, audioRef, timeProgress, duration }}
+            />
+            <div className="">
+                <button className="p-2">
+                    <IconVolume />
+                </button>
+                <button classNanme="p-2">
+                    <IconArrowsShuffle2 />
+                </button>
+            </div>
+        </div>
+    );
+}
+export default LibAudioPlayer;

@@ -20,6 +20,16 @@
             }
         ]
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts",
+        "app/explore/components/LocalAudioPlayer.js",
+        "app/explore/components/ProgressBar.js",
+        "app/explore/components/Music.js",
+        "app/explore/components/Controls.js",
+        "app/explore/components/AudioPlayer.js"
+    ],
     "exclude": ["node_modules"]
 }
