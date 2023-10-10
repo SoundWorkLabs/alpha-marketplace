@@ -22,15 +22,11 @@ import React, { useCallback, useState } from "react";
 import { AudioDropzone, ImageDropzone } from "../components/FileDropzone";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsTransaction } from "@metaplex-foundation/umi-web3js-adapters";
-import { mintSingle } from "../../services/NFT";
+import { mintSingle, saveMinted } from "../../services/NFT";
 
 import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
-
-interface attributesType {
-    traitType: string;
-    traitValue: string;
-}
+import { Transaction } from "@solana/web3.js";
 
 export default function Create() {
     const { publicKey } = useWallet();
@@ -59,11 +55,9 @@ export default function Create() {
         { [traitKey: string]: string }[]
     >([]);
 
-    console.log("attributes", attributes);
-
     // todo: create a hook for this
     const handleSignTx = useCallback(
-        async (serializedTx: string) => {
+        async (serializedTx: string): Promise<Transaction> => {
             if (!publicKey) throw new WalletNotConnectedError();
 
             // deserialize the tx
@@ -76,30 +70,34 @@ export default function Create() {
             // determine the provider and sign
             // the tx ourselves
             const { backpack }: any = window; // backpack
-            const { solana }: any = window; // phantom
+            const {
+                phantom: { solana: phantomProvider }
+            }: any = window; // phantom
             const { glow }: any = window; // glow
             const { braveSolana }: any = window; // brave
 
-            if (backpack.isConnected) {
+            let tx;
+            if (backpack?.isConnected) {
                 console.log("backpack 👌");
-                let txHash = await backpack.sendAndConfirm(web3jsTx);
-                return txHash;
-            } else if (solana.isConnected) {
+                tx = await backpack.sendAndConfirm(web3jsTx);
+            } else if (phantomProvider?.isConnected) {
                 console.log("phantom 👌");
-                let txHash = await solana.signAndSendTransaction(web3jsTx);
-                return txHash;
-            } else if (glow.isConnected) {
+                tx = await phantomProvider.signAndSendTransaction(web3jsTx);
+                // return txHash;
+            } else if (glow?.isConnected) {
                 console.log("glow 👌");
-                let txHash = glow.signAndSendTransaction(web3jsTx);
-                return txHash;
-            } else if (braveSolana.isConnected) {
+                tx = glow.signAndSendTransaction(web3jsTx);
+                // return txHash;
+            } else if (braveSolana?.isConnected) {
                 console.log("brave 👌");
-                let txHash = braveSolana.signAndSendTransaction(web3jsTx);
-                return txHash;
+                tx = braveSolana.signAndSendTransaction(web3jsTx);
+                // return txHash;
             } else {
                 // todo: proper error handling
                 console.error("selected wallet not supported");
             }
+
+            return tx;
         },
         [connection, publicKey]
     );
@@ -139,7 +137,16 @@ export default function Create() {
                     "Success. Please sign the transaction to finish NFT mint"
                 );
 
-                handleSignTx(serializedTx.tx); // todo: error when this fails
+                let tx = await handleSignTx(serializedTx.tx); // todo: error when this fails
+                console.log("the tx", tx);
+                if (tx) {
+                    await saveMinted(serializedTx.mint);
+                    notifySuccess(
+                        `https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`
+                    ); // todo (Jimii): should be a sucess modal
+                } else {
+                    notifyErr("err signing your tx, try again");
+                }
             } catch (err) {
                 console.error("error single mint", err);
             }
@@ -161,11 +168,6 @@ export default function Create() {
     function handleAddAttribute() {
         if (!attributeKey && !attributeValue) return;
 
-        console.log("key", attributeKey);
-        console.log("value", attributeValue);
-
-        // push to the field
-        // attributes.push(attributes[attributeKey] = attributeValue)
         const newAttribute = { [attributeKey]: attributeValue };
 
         setAttributes([...attributes, newAttribute]);
@@ -300,11 +302,6 @@ export default function Create() {
                                         )
                                     }
                                 >
-                                    {/* <TagsInput
-                                        placeholder="Enter tag"
-                                        onChange={setAttributes}
-                                    />
-                                     */}
                                     <Flex
                                         justify="space-between"
                                         wrap="wrap"
@@ -437,7 +434,7 @@ export default function Create() {
                                 <Button
                                     variant="primary"
                                     type="submit"
-                                    // onClick={() => notificationHandler(true)}
+                                    // onClick={() => console.log('wat up')}
                                 >
                                     Mint
                                 </Button>
