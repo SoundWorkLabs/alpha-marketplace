@@ -1,44 +1,17 @@
-import {
-    Card,
-    CardSection,
-    Group,
-    Image,
-    Button,
-    TabsPanel,
-    TabsTab,
-    Text
-} from "@mantine/core";
+import { Text } from "@mantine/core";
 
 export default function Cards() {
     return (
-        <Card padding="1xl">
-            <CardSection>
-                <TabsTab value="pack">
-                    <Image
-                        //   temp
-                        src="https://i.imgur.com/5fPwIQr.jpeg"
-                        alt=""
-                        h={208.85}
-                        w={234.27}
-                    />
-                    <Text fw={500}>Name of Collection</Text>
-
-                    <Group
-                        className=" text-black"
-                        justify="space-between"
-                        mt="md"
-                        mb="xs"
-                    >
-                        <TabsPanel value={"collection1"}>
-                            <Text fw={500}>Name of Collection</Text>
-                            <Text size="sm" c="blue">
-                                Artist name
-                            </Text>
-                        </TabsPanel>
-                    </Group>
-                    <Button>preview</Button>
-                </TabsTab>
-            </CardSection>
-        </Card>
+        <div className="collections-cards p-5 w-full ">
+            <div className="custom-border p-4">
+                <img
+                    src="https://i.imgur.com/5fPwIQr.jpeg"
+                    alt=""
+                    className="rounded-lg mb-5"
+                />
+                <Text fw={500}>Name of Collections</Text>
+                <Text size="sm">Artist name</Text>
+            </div>
+        </div>
     );
 }

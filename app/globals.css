@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.custom-border {
+    border-width: 2px;
+    border-style: solid;
+    border-image-source: linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%);
+    border-image-slice: 1;
+}

@@ -1,6 +1,7 @@
 "use client";
-import { Box, TextInput, Flex, Tabs, Text } from "@mantine/core";
+import { Box, TextInput, Text } from "@mantine/core";
 import Cards from "../components/Card";
+import NftCard from "../components/NftCard";
 
 import AudioPlayer from "./components/AudioPlayer";
 // import AudioPlayer from "./components/LocalAudioPlayer";
@@ -9,7 +10,7 @@ export default function Explore() {
     const audioUrl = "/sunella.mp3"; // To be adjust to call the URL based on the Netlify function route
 
     return (
-        <div className="p-5">
+        <div className="my-8 p-5">
             {/* Header Section */}
             <Box className="p-5">
                 <div className="flex justify-between items-center">
@@ -30,26 +31,27 @@ export default function Explore() {
                 <AudioPlayer />
             </Box>
 
-            {/* Sound Packs */}
-            <Box>
-                <div className="text-xl font-semibold mb-4">Sound Packs</div>
-                <Box>
-                    <Flex>
-                        <Tabs defaultValue="pack" color="blue">
-                            {Cards()}
-                        </Tabs>
-                    </Flex>
+            {/* Collections */}
+
+            {/* this will be derived from the collection component once the data is being feed from the backend */}
+            <Box className="my-8 p-5">
+                <div className="text-xl font-semibold mb-4">Collections</div>
+                <Box className="flex w-full">
+                    <Cards />
+                    <Cards />
+                    <Cards />
+                    <Cards />
                 </Box>
             </Box>
             {/* Sounds */}
-            <Box>
+            {/* this will be derived from the nft component once the data is being feed from the backend */}
+            <Box className="my-8 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
-                <Box>
-                    <Flex>
-                        <Tabs defaultValue="pack" color="blue">
-                            {Cards()}
-                        </Tabs>
-                    </Flex>
+                <Box className="flex">
+                    <NftCard />
+                    <NftCard />
+                    <NftCard />
+                    <NftCard />
                 </Box>
             </Box>
         </div>
