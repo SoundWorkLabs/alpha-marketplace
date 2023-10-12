@@ -15,7 +15,7 @@ export default function NftCard() {
     const [like, setLike] = useState(true);
 
     return (
-        <div className="nft-cards p-5 w-full ">
+        <div className="nft-cards p-5 w-full">
             <div className=" custom-border p-4 ">
                 <img
                     src="https://i.imgur.com/5fPwIQr.jpeg"
