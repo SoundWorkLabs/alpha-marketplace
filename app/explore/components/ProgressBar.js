@@ -24,6 +24,8 @@ function ProgressBar({ progressBarRef, audioRef, timeProgress, duration }) {
                 ref={progressBarRef}
                 defaultValue="0"
                 onChange={handleProgressChange}
+                className="appearance-none w-full 
+                overflow-hidden bg-gray-600 h-1 rounded-lg focus:outline-none range-slider"
             />
             <div className="time">{formatTime(duration)}</div>
         </div>

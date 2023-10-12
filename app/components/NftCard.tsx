@@ -15,7 +15,7 @@ export default function NftCard() {
     const [like, setLike] = useState(true);
 
     return (
-        <div className="nft-cards p-5 w-full">
+        <div className="nft-cards p-5 w-full ">
             <div className=" custom-border p-4 ">
                 <img
                     src="https://i.imgur.com/5fPwIQr.jpeg"
@@ -27,7 +27,7 @@ export default function NftCard() {
                 <Text>price</Text>
                 <Text>number available</Text>
                 <button onClick={handleLike} className="flex text-right">
-                    {like ? (
+                    {!like ? (
                         <IconHeartFilled className="text-red-500" />
                     ) : (
                         <IconHeart />
