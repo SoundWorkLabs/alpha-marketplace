@@ -6,7 +6,17 @@ module.exports = {
         "./components/**/*.{js,ts,jsx,tsx}"
     ],
     theme: {
-        extend: {}
+        extend: {
+            backgroundColor: {
+                "aduio-bg": "#21232C"
+            },
+            width: {
+                234.27: "234.27px"
+            },
+            height: {
+                208.85: "208.85px"
+            }
+        }
     },
     plugins: []
 };

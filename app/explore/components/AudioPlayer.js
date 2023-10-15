@@ -1,14 +1,16 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Music from "./Music";
-
-import { tracks } from "../data/tracks";
 import Controls from "./Controls";
 import ProgressBar from "./ProgressBar";
 
 import { IconVolume, IconArrowsShuffle2 } from "@tabler/icons-react";
 
 function LibAudioPlayer() {
-    const [currentTrack, setCurrentTrack] = useState(tracks[0]);
+    const [currentTrack, setCurrentTrack] = useState("");
+    // useEffect(() => {
+    //     setCurrentTrack(track);
+    //     console.log(currentTrack);
+    // }, [track]);
 
     const progressBarRef = useRef();
     const audioRef = useRef();

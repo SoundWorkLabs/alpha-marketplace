@@ -17,7 +17,7 @@ import { usePathname, useRouter } from "next/navigation";
 import SoundWorkLogo from "./icon";
 
 const data = [
-    { link: "/explore", label: "Explore", icon: IconCategory },
+    { link: "/", label: "Explore", icon: IconCategory },
     { link: "/profile", label: "Profile", icon: IconUserCircle },
     { link: "/sounds", label: "Sounds", icon: IconHeadphones }, // todo: use figma svg
     { link: "/music", label: "Music Maker", icon: IconAdjustmentsHorizontal },

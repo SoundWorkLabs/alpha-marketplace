@@ -4,31 +4,44 @@ import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
 
 import AudioPlayer from "./components/AudioPlayer";
-// import AudioPlayer from "./components/LocalAudioPlayer";
+import { tracks } from "./data/tracks";
+import { useState } from "react";
 
 export default function Explore() {
-    const audioUrl = "/sunella.mp3"; // To be adjust to call the URL based on the Netlify function route
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
+    const track = tracks;
+    // console.log(track);
     return (
-        <div className="my-8 p-5">
+        <div className="p-5">
             {/* Header Section */}
             <Box className="p-5">
-                <div className="flex justify-between items-center">
-                    <Text className="text-lg font-semibold">Explore</Text>
-                    <div className="flex-1 ml-8">
+                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent">
+                    <Text size="xl">Explore</Text>
+                    <div className="ml-auto">
+                        {" "}
                         <TextInput
-                            className="w-full p-2 rounded-md border border-gray-300"
+                            radius={20}
+                            className="w-80 p-2"
                             placeholder="Search by collection, music, or creators..."
                         />
                     </div>
-                    <Box className="ml-4">Sort by</Box>
+                    <button className="ml-4 bg-aduio-bg rounded-full p-4">
+                        Sort by
+                    </button>{" "}
                 </div>
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-8 p-5">
-                {/* <AudioPlayer audioUrl={audioUrl} /> */}
+            <Box className="my-5 p-5 bg-aduio-bg rounded-full">
                 <AudioPlayer />
+                {/* {audioUrl && (
+                    <AudioPlayer
+                        src={audioUrl}
+                        autoPlay={true}
+                        customControls={true}
+                    />
+                )} */}
             </Box>
 
             {/* Collections */}
@@ -36,7 +49,7 @@ export default function Explore() {
             {/* this will be derived from the collection component once the data is being feed from the backend */}
             <Box className="my-8 p-5">
                 <div className="text-xl font-semibold mb-4">Collections</div>
-                <Box className="flex w-full">
+                <Box className="flex flex-wrap">
                     <Cards />
                     <Cards />
                     <Cards />
@@ -44,13 +57,9 @@ export default function Explore() {
                 </Box>
             </Box>
             {/* Sounds */}
-            {/* this will be derived from the nft component once the data is being feed from the backend */}
             <Box className="my-8 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
-                <Box className="flex">
-                    <NftCard />
-                    <NftCard />
-                    <NftCard />
+                <Box className="flex flex-wrap">
                     <NftCard />
                 </Box>
             </Box>

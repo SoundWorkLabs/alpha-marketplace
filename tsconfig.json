@@ -29,7 +29,10 @@
         "app/explore/components/ProgressBar.js",
         "app/explore/components/Music.js",
         "app/explore/components/Controls.js",
-        "app/explore/components/AudioPlayer.js"
+        "app/explore/components/AudioPlayer.js",
+        "app/explore/data/tracks.js",
+        "app/components/AudioPlayer.tsx",
+        "details/[id].js"
     ],
     "exclude": ["node_modules"]
 }

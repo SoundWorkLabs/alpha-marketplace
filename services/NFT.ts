@@ -49,6 +49,10 @@ export async function saveMinted(nftMint: string) {
 
 async function fetchSoundworkNfts() {
     //nfts/soundwork
-    const response = await fetch(`${API_BASE_URL}/nfts/soundwork`);
-    return response;
+    try {
+        const response = await fetch(`${API_BASE_URL}/nfts/soundwork`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
 }

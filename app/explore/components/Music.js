@@ -7,9 +7,10 @@ function Music({ currentTrack, audioRef, setDuration, progressBarRef }) {
     return (
         <div>
             <audio
-                src={currentTrack.src}
+                src={currentTrack.audioUrl}
                 ref={audioRef}
                 onLoadedMetadata={onLoadedMetadata}
+                autoPlay={true}
             />
             <div className="audio-info">
                 <div className="audio-image">
