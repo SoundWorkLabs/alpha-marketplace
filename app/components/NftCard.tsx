@@ -29,14 +29,19 @@ export default function NftCard() {
             });
     }, []);
 
-    const handleCardClick = (nftAddress: string, metadataUri: string) => {
+    const handleCardClick = (
+        nftAddress: string,
+        metadataUri: string,
+        currentOwner: string
+    ) => {
         const router = useRouter();
         // router.push(`/details/${nftAddress}`);
         router.push({
             pathname: "/details/[id]",
             query: {
                 id: nftAddress,
-                metadata_uri: metadataUri
+                metadata_uri: metadataUri,
+                current_owner: currentOwner
             }
         });
     };
@@ -46,7 +51,7 @@ export default function NftCard() {
                 nfts.map((nft) => (
                     <Link
                         href="/details/[id}"
-                        as={`/details/${nft.nft_address}?metadata_uri=${nft.metadata_uri}`}
+                        as={`/details/${nft.nft_address}?metadata_uri=${nft.metadata_uri}&current_owner=${nft.current_owner}`}
                         passHref
                         key={nft.nft_address}
                     >
@@ -55,7 +60,8 @@ export default function NftCard() {
                             onClick={() =>
                                 handleCardClick(
                                     nft.nft_address,
-                                    nft.metadata_uri
+                                    nft.metadata_uri,
+                                    nft.current_owner
                                 )
                             }
                         >
