@@ -8,7 +8,10 @@ module.exports = {
     theme: {
         extend: {
             backgroundColor: {
-                "aduio-bg": "#21232C"
+                "aduio-bg": "#21232C",
+                "btn-bg": "#0091D7",
+                "btn-bg1": "#FE0FD4",
+                "detail-bg": "#03061B"
             },
             width: {
                 234.27: "234.27px"

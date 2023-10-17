@@ -3,7 +3,6 @@ import { IconHeartFilled, IconHeart } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { fetchNftData } from "../explore/data/tracks";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 interface NftSchema {
     nft_address: string;
@@ -28,43 +27,18 @@ export default function NftCard() {
                 console.error("Error fetching data:", err);
             });
     }, []);
-
-    const handleCardClick = (
-        nftAddress: string,
-        metadataUri: string,
-        currentOwner: string
-    ) => {
-        const router = useRouter();
-        // router.push(`/details/${nftAddress}`);
-        router.push({
-            pathname: "/details/[id]",
-            query: {
-                id: nftAddress,
-                metadata_uri: metadataUri,
-                current_owner: currentOwner
-            }
-        });
-    };
     return (
         <div className="flex flex-wrap">
             {nfts && nfts.length > 0 ? (
                 nfts.map((nft) => (
                     <Link
-                        href="/details/[id}"
-                        as={`/details/${nft.nft_address}?metadata_uri=${nft.metadata_uri}&current_owner=${nft.current_owner}`}
+                        href={`/nft/[id]?owner=${nft.current_owner}&metadata=${nft.metadata_uri}`}
+                        as={`/nft/${nft.nft_address}`}
                         passHref
                         key={nft.nft_address}
+                        shallow
                     >
-                        <span
-                            className="nft-cards p-5"
-                            onClick={() =>
-                                handleCardClick(
-                                    nft.nft_address,
-                                    nft.metadata_uri,
-                                    nft.current_owner
-                                )
-                            }
-                        >
+                        <span className="nft-cards">
                             <Card nft={nft} />
                         </span>
                     </Link>

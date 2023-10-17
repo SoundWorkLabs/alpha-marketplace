@@ -10,7 +10,7 @@ import {
     IconHelp
 } from "@tabler/icons-react";
 
-import { ThemeToggle } from "./themeToggle";
+// import { ThemeToggle } from "./themeToggle";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -55,7 +55,7 @@ export function SideNav() {
                     {links}
                 </div>
 
-                <div>
+                {/* <div>
                     <a
                         href="#"
                         className="flex gap-5"
@@ -65,13 +65,13 @@ export function SideNav() {
                             <ThemeToggle />{" "}
                         </span>
                         <span className="my-auto"></span>
-                    </a>
+                    </a> */}
 
-                    {/* <a href="#" className='flex gap-2'  onClick={(event) => event.preventDefault()}>
+                {/* <a href="#" className='flex gap-2'  onClick={(event) => event.preventDefault()}>
                         <span><IconLogout size="0px" stroke={1.5} /></span>
                         <span>Logout</span>
                     </a> */}
-                </div>
+                {/* </div> */}
             </div>
         </nav>
     );

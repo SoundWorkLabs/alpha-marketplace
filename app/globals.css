@@ -2,9 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .custom-border {
     border-width: 2px;
     /* border-style: solid; */
     border-image-source: linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%);
     border-image-slice: 1;
 }
+/* tr:nth-child(odd) {
+    background-color: #f2f2f2;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  } */
+  tr .columns{
+    border-bottom: 1px solid rgb(255, 255, 255);
+  }
+
+  .bg-sw-bg {
+    background-image: url('/bg-image.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  .dynamic-image {
+    width: 422px; 
+    height: 422px; 
+    object-fit: cover;
+  }
+  .title-box{
+    height: 
+    352px;
+  }

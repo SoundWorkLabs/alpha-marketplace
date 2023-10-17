@@ -35,7 +35,7 @@ export default function RootLayout({
                     content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
                 />
             </head>
-            <body>
+            <body className="bg-sw-bg">
                 <MantineProvider theme={theme} cssVariablesResolver={resolver}>
                     <Wallet>
                         <div className="flex">

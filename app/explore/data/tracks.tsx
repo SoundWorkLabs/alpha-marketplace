@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useState } from "react";
 
 // this should be in the netlify function when backend data is provided
 const apiUrl =
@@ -46,36 +47,35 @@ export async function trackss(trackUrl: string) {
     }
 }
 
-export async function nftData(id: string): Promise<{
-    title: string | undefined;
-    audioUrl: string | undefined;
-    coverArtUrl: string | undefined;
-    attributes: string | undefined;
-    description: string | undefined;
-    properties: string | undefined;
-}> {
-    const data = await axios.get(id);
+export async function nftData(target: string) {
+    try {
+        // Make the initial request to fetch the data
+        const response = await axios.get(apiUrl);
 
-    const res = data.data;
-    // console.log("in api", res.json().strinf);
-    const title: string = res.title;
-    const audioUrl: string = res.animation_url;
-    const coverArtUrl: string = res.image;
-    const attributes: string = res.attributes;
-    const description: string = res.description;
-    const properties: string = res.properties;
+        if (response.status !== 200) {
+            throw new Error("Network response was not ok");
+        }
 
-    console.log(res);
-    // console.log("title", title, "aUrl", audioUrl, "img", coverArtUrl);
-    const trackData = {
-        title,
-        audioUrl,
-        coverArtUrl,
-        attributes,
-        description,
-        properties
-    };
-    console.log(trackData);
+        const data = response.data;
 
-    return trackData;
+        const item = data.find((item) => item.nft_address === target);
+
+        if (item) {
+            const mData = item.metadata_uri;
+            const metaResponse = await axios.get(mData);
+            const metaDetails = metaResponse.data;
+
+            const currentOwner = item.current_owner;
+
+            console.log("meta", metaDetails);
+            // console.log("current_owner", currentOwner);
+            return { metaDetails, currentOwner }; // Return the metadata details
+        } else {
+            console.log("Item not found");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        return null;
+    }
 }
