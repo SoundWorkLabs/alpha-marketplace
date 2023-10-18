@@ -3,46 +3,62 @@
 import { useParams } from "next/navigation";
 import { nftData } from "../../explore/data/tracks";
 import React, { useEffect, useState } from "react";
-import { Box, CopyButton, ActionIcon, Tooltip, rem } from "@mantine/core";
+import { Box, CopyButton, ActionIcon, rem } from "@mantine/core";
+import Image from "next/image";
 import { IconCopy, IconCheck } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
+import { MetaSchemma } from "../../explore/data/tracks";
 
-export default function page() {
-    const currentURL = window.location.href;
-    const target = useParams();
-    console.log("t", target.id);
+export default function Page() {
+    // const currentURL = window.location.href;
+    const nftAddress = useParams();
+    console.log("t", nftAddress.id);
 
-    const [metaDetails, setMetaDetails] = useState(null);
-    const [currentOwner, setCurrentOwner] = useState(null);
+    const [metaDetails, setMetaDetails] = useState<MetaSchemma>();
+    const [currentOwner, setCurrentOwner] = useState<string>();
 
     useEffect(() => {
-        nftData(target.id).then((res) => {
+        nftData(nftAddress.id).then((res) => {
             if (res) {
                 setMetaDetails(res.metaDetails);
                 setCurrentOwner(res.currentOwner);
             }
         });
-    }, [target.id]);
+    }, [nftAddress.id]);
     if (!metaDetails) {
         return <div>loadind...</div>;
     }
-    const { animation_url, description, image, title } = metaDetails;
+
+    const animation_url = metaDetails?.animation_url;
+    const description = metaDetails?.description;
+    const image = metaDetails?.image;
+    const title = metaDetails?.title;
 
     return (
-        <div className="p-5 my-5 mx-5">
+        <div className="p-5 my-2 mx-5 scroll-smooth overflow-hidden">
             <Box className="flex flex-wrap">
-                <img src={image} className="rounded-md dynamic-image" />
+                <Image
+                    priority
+                    src={image}
+                    alt="nft imaga"
+                    className="rounded-md dynamic-image"
+                    height={600}
+                    width={600}
+                />
                 <Box className="mx-6 flex-1 ">
                     <div className="flex flex-wrap  my-5">
                         <span>Owner By: </span>
-                        <CopyButton value={currentOwner} timeout={250}>
+                        <CopyButton
+                            value={currentOwner ? (currentOwner as string) : ""}
+                            timeout={250}
+                        >
                             {({ copied, copy }) => (
                                 <div
                                     onClick={copy}
                                     // color={copied ? "blue" : "gray"}
                                     className="flex flex-wrap mx-3  "
                                 >
-                                    {currentOwner.slice(0, 10)}
+                                    {currentOwner?.slice(0, 10)}
                                     <ActionIcon
                                         color="transparent"
                                         className="mx-3 hover:bg-transparent"
@@ -63,36 +79,44 @@ export default function page() {
                     </div>
                     <Box className="border custom-border p-4 whitespace-pre-wrap justify-stretch bg-detail-bg title-box">
                         <div className="title flex flex-wrap">
-                            <img src="/minilogo.png" width={33} height={33} />
+                            <Image
+                                priority
+                                src="/minilogo.png"
+                                width={33}
+                                height={33}
+                                alt="sound work logo"
+                            />
 
                             <p className="text-3xl mx-5">{title}</p>
                         </div>
-                        <div className="mx-5 my-5">
-                            <button className="border rounded-full hover:bg-btn-bg1 mx-5 my-2 p-3 w-234.27">
+                        <div className=" mx-5 my-5">
+                            <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
                                 Download
                             </button>
-                            <button className="border rounded-full hover:bg-btn-bg mx-5 my-2 p-3 w-234.27">
+                            <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
                                 Sell
                             </button>
                         </div>
                         <table className="w-full">
-                            <tr className=" mx-5 ">
-                                <td className="columns">Files</td>
-                                <td className="columns">Type</td>
-                                <td className="columns">Format</td>
-                            </tr>
-
-                            <tr className="mx-3">
-                                <td className="rows my-5 mx-5">
-                                    Row 2, Column 1
-                                </td>
-                                <td className="rows my-5 mx-5">
-                                    Row 2, Column 2
-                                </td>
-                                <td className="rows my-5 mx-5">
-                                    Row 2, Column 3
-                                </td>
-                            </tr>
+                            <thead>
+                                <tr className=" mx-5 ">
+                                    <th className="columns">Files</th>
+                                    <th className="columns">Type</th>
+                                    <th className="columns">Format</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Row 2, Column 1</td>
+                                    <td>Row 2, Column 2</td>
+                                    <td>Row 2, Column 3</td>
+                                </tr>
+                                <tr>
+                                    <td>Row 2, Column 1</td>
+                                    <td>Row 2, Column 2</td>
+                                    <td>Row 2, Column 3</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </Box>
                 </Box>
@@ -108,37 +132,9 @@ export default function page() {
                 <p className="text-3xl my-3">Price History</p>
             </div>
             <div>animation_url: {animation_url}</div>
-            <div className="fixed left-9.75rem right-0 bg-aduio-bg  rounded-full p-4 transform -translate-x-1/2 left-1/2">
+            <div className="fixed bg-aduio-bg  bottom-4 rounded-full w-3/4 px-5">
                 <LibAudioPlayer />
             </div>
         </div>
     );
 }
-
-// {metaDetails: {…}, currentOwner: '4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF'}
-// currentOwner
-// :
-// "4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF"
-// metaDetails
-// :
-// animation_url
-// :
-// "https://storage.googleapis.com/sw-test-2023/sounds/2023-10-11T13:21:39.188Z_file_example_WAV_5MG.wav"
-// attributes
-// :
-// (2) [{…}, {…}]
-// description
-// :
-// "real ones know this"
-// image
-// :
-// "https://storage.googleapis.com/sw-test-2023/images/2023-10-11T13:21:38.799Z_BocchiRunner2049.jpeg"
-// properties
-// :
-// {category: 'audio', files: Array(2)}
-// symbol
-// :
-// ""
-// title
-// :
-// "bocchi"

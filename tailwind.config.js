@@ -7,19 +7,30 @@ module.exports = {
     ],
     theme: {
         extend: {
+            borderColor: {
+                boda: {
+                    a: "linear-gradient(to right, #FF5733, #6C5B7B)"
+                }
+            },
+            backgroundImage: {
+                "btn-bg":
+                    "linear-gradient(90deg, rgba(0, 145, 215, 0.4), rgba(0, 145, 215, 1), rgba(254, 15, 212, 1))"
+            },
             backgroundColor: {
                 "aduio-bg": "#21232C",
-                "btn-bg": "#0091D7",
-                "btn-bg1": "#FE0FD4",
                 "detail-bg": "#03061B"
             },
             width: {
-                234.27: "234.27px"
+                "nft-w": "234.27px",
+                "nft-card-w": "258.582px"
             },
             height: {
-                208.85: "208.85px"
+                "nft-h": "208.85px",
+                "nft-card-h": "355.826px",
+                76: "76px"
             }
         }
     },
-    plugins: []
+
+    plugins: [require("tailwindcss-gradients")]
 };

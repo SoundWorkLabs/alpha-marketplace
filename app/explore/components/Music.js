@@ -5,7 +5,7 @@ function Music({ currentTrack, audioRef, setDuration, progressBarRef }) {
         progressBarRef.current.max = seconds;
     };
     return (
-        <div>
+        <div className="p-2">
             <audio
                 src={currentTrack.audioUrl}
                 ref={audioRef}

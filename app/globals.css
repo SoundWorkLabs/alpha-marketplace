@@ -9,14 +9,19 @@
     border-image-source: linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%);
     border-image-slice: 1;
 }
-/* tr:nth-child(odd) {
-    background-color: #f2f2f2;
+  tr:nth-child(even):not(:first-child)   {
+    background-color: #060A24;
   }
-  tr:nth-child(even) {
-    background-color: #dddddd;
+  /* tr:nth-child(even)  {
+    background-color: #060A24;
   } */
-  tr .columns{
+  tr td{
+    padding: 15px;
+  }
+
+  tr .columns {
     border-bottom: 1px solid rgb(255, 255, 255);
+    padding: 15px;
   }
 
   .bg-sw-bg {

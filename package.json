@@ -25,13 +25,13 @@
         "@solana/web3.js": "^1.78.5",
         "@tabler/icons-react": "^2.34.0",
         "bs58": "^5.0.0",
-        "cors": "^2.8.5",
         "install": "^0.13.0",
         "next": "13.4.4",
         "pnpm": "^8.8.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
-        "react-hot-toast": "^2.4.1"
+        "react-hot-toast": "^2.4.1",
+        "tailwindcss-gradients": "^3.0.0"
     },
     "devDependencies": {
         "@types/node": "20.2.5",

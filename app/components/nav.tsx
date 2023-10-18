@@ -10,9 +10,9 @@ import {
     IconHelp
 } from "@tabler/icons-react";
 
-// import { ThemeToggle } from "./themeToggle";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+// import { ThemeToggle } from "./themeToggle";
+import { usePathname } from "next/navigation";
 
 import SoundWorkLogo from "./icon";
 

@@ -1,8 +1,11 @@
+"use client";
 import { Text } from "@mantine/core";
 import { IconHeartFilled, IconHeart } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchNftData } from "../explore/data/tracks";
 import Link from "next/link";
+// import NextImage from "next/image";
+import Image from "next/image";
 
 interface NftSchema {
     nft_address: string;
@@ -36,7 +39,6 @@ export default function NftCard() {
                         as={`/nft/${nft.nft_address}`}
                         passHref
                         key={nft.nft_address}
-                        shallow
                     >
                         <span className="nft-cards">
                             <Card nft={nft} />
@@ -64,12 +66,19 @@ const Card: React.FC<{
     };
     const [like, setLike] = useState(true);
     return (
-        <div className="nft-cards p-5">
-            <div className=" custom-border p-4">
-                <img
+        <div className="nft-cards p-5 w-nft-card-w h-nft-card-h">
+            <div className=" custom-border p-4 w-full h-full">
+                <Image
+                    priority={true}
                     src={nft.image_url}
                     alt="nft image"
-                    className="rounded-lg mb-5 w-234.27 h-208.85"
+                    className="rounded-lg mb-5"
+                    width={234.27}
+                    height={208.85}
+                    // sizes="100vw"
+                    style={{
+                        objectFit: "fill"
+                    }}
                 />
                 <Text fw={500}>{nft.title}</Text>
                 <Text size="sm">{nft.current_owner.slice(0, 10)}</Text>

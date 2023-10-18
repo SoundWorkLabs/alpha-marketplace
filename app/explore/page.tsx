@@ -15,8 +15,8 @@ export default function Explore() {
     return (
         <div className="p-5">
             {/* Header Section */}
-            <Box className="p-5">
-                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent">
+            <Box className="p-5 ">
+                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent w-full h-76">
                     <Text size="xl">Explore</Text>
                     <div className="ml-auto">
                         {" "}
@@ -33,7 +33,7 @@ export default function Explore() {
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-5 p-5 bg-aduio-bg rounded-full">
+            <Box className="my-5 p-2 bg-aduio-bg rounded-full w-full h-76">
                 <AudioPlayer />
                 {/* {audioUrl && (
                     <AudioPlayer
@@ -47,7 +47,7 @@ export default function Explore() {
             {/* Collections */}
 
             {/* this will be derived from the collection component once the data is being feed from the backend */}
-            <Box className="my-8 p-5">
+            <Box className="mt-5 p-5">
                 <div className="text-xl font-semibold mb-4">Collections</div>
                 <Box className="flex flex-wrap">
                     <Cards />
@@ -57,7 +57,7 @@ export default function Explore() {
                 </Box>
             </Box>
             {/* Sounds */}
-            <Box className="my-8 p-5">
+            <Box className="mt-0 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
                 <Box className="flex flex-wrap">
                     <NftCard />

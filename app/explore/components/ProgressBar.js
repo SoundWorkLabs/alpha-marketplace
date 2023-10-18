@@ -16,7 +16,7 @@ function ProgressBar({ progressBarRef, audioRef, timeProgress, duration }) {
         return "00:00";
     };
     return (
-        <div className="progress">
+        <div className="progress p-2">
             {/* time Procession */}
             {/* <span className="time current">{formatTime(timeProgress)}</span> */}
             <input

@@ -42,17 +42,17 @@ function Controls({ audioRef, progressBarRef, duration, setTimeProgress }) {
     return (
         <div className="controls-wrapper">
             <div className="controls">
-                <button className="p-5 mx-4 rounded-full bg-gray-500">
+                <button className="p-2 mx-4 rounded-full bg-gray-500">
                     <IconPlayerSkipBackFilled />
                 </button>
 
                 <button
-                    className="p-5 mx-4 rounded-full bg-gray-500"
+                    className="p-2 mx-4 rounded-full bg-gray-500"
                     onClick={togglePlayPause}
                 >
                     {isPlaying ? <IconPlayerPause /> : <IconPlayerPlayFilled />}
                 </button>
-                <button className="p-5 mx-4 rounded-full bg-gray-500">
+                <button className="p-2 mx-4 rounded-full bg-gray-500">
                     <IconPlayerSkipForwardFilled />
                 </button>
                 {/* <button className="p-5">
