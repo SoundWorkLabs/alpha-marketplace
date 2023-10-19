@@ -3,14 +3,13 @@
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
 import React, { useEffect, useState } from "react";
-import { Box, CopyButton, ActionIcon, rem } from "@mantine/core";
+import { Box, CopyButton, ActionIcon, rem, Pill } from "@mantine/core";
 import Image from "next/image";
 import { IconCopy, IconCheck } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { encode, decode } from "bs58";
 
 export default function Page() {
     // const currentURL = window.location.href;
@@ -52,6 +51,13 @@ export default function Page() {
     const description = metaDetails?.description;
     const image = metaDetails?.image;
     const title = metaDetails?.title;
+
+    const atrr = metaDetails?.attributes;
+    // const category = metaDetails?.properties.category;
+    // const files = metaDetails?.properties.files;
+
+    // console.log("cat", category);
+    console.log("atrr", atrr);
 
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -114,16 +120,33 @@ export default function Page() {
                                     : "Make Offer"}
                             </button>
                         </div>
-                        <table className="w-full">
+                        <table className="w-full table-auto overflow-y-auto">
                             <thead>
-                                <tr className=" mx-5 ">
+                                <tr className=" mx-0 ">
                                     <th className="columns">Files</th>
                                     <th className="columns">Type</th>
                                     <th className="columns">Format</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="">
                                 <tr>
+                                    {/* <td>
+                                        {files
+                                            ? files.map((file) => {
+                                                  console.log(file);
+                                                  return `we need name for files`;
+                                              })
+                                            : ""}
+                                    </td>
+                                    <td>{category ? category : ""}</td>
+
+                                    {files
+                                        ? files.map((file) => {
+                                              console.log(file.type);
+                                              const fileName = file.type;
+                                              return <td>{fileName}</td>;
+                                          })
+                                        : ""} */}
                                     <td>Row 2, Column 1</td>
                                     <td>Row 2, Column 2</td>
                                     <td>Row 2, Column 3</td>
@@ -144,6 +167,32 @@ export default function Page() {
             </div>
             <div className="my-5">
                 <p className="text-3xl my-3">Properties</p>
+                {
+                    atrr
+                        ? atrr.map((attributes) => {
+                              console.log(attributes);
+                              return (
+                                  <div>
+                                      {Object.entries(attributes).map(
+                                          ([key, value]) => (
+                                              // <div key={key}>
+                                              //   <strong>{key}:</strong> {value}
+                                              // </div>
+                                              <Pill>
+                                                  <span className="bg-audio-bg">
+                                                      {key}:
+                                                  </span>
+                                                  <span className="bg-transparent">
+                                                      {value}
+                                                  </span>
+                                              </Pill>
+                                          )
+                                      )}
+                                  </div>
+                              );
+                          })
+                        : null // Use null if you don't want to render anything when atrr is falsy
+                }
             </div>
             <div className="my-5">
                 <p className="text-3xl my-3">Price History</p>
