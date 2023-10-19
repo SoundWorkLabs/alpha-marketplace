@@ -5,7 +5,7 @@ import ConnectWallet from "./components/connect";
 import { Wallet } from "./components/Wallet";
 import CustomPill from "./components/pill";
 
-import { resolver, theme } from "../theme";
+// import { resolver, theme } from "../theme";
 import { SideNav } from "./components/nav";
 
 import "./globals.css";
@@ -28,7 +28,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <head>
-                <ColorSchemeScript />
+                {/* <ColorSchemeScript /> */}
                 <link rel="shortcut icon" href="/favicon.svg" />
                 <meta
                     name="viewport"
@@ -36,9 +36,9 @@ export default function RootLayout({
                 />
             </head>
             <body className="bg-sw-bg">
-                <MantineProvider theme={theme} cssVariablesResolver={resolver}>
+                <MantineProvider>
                     <Wallet>
-                        <div className="flex">
+                        <div className="flex text-white">
                             <nav>
                                 <SideNav />
                             </nav>

@@ -3,6 +3,20 @@
 @tailwind utilities;
 
 
+.create .drop-down{
+  background-color: #21232CCC;
+  color: #FE0FD4;
+
+}
+.create input {
+  background-color: #21232CCC;
+  color: #0091D7;
+}
+.create textarea {
+  background-color: #21232CCC;
+  color: #0091D7;
+
+}
 .mini-logo svg{
   width: 35px;
   height: auto;

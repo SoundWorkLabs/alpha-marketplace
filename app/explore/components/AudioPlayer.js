@@ -32,7 +32,7 @@ function LibAudioPlayer() {
                 <button className="p-2">
                     <IconVolume />
                 </button>
-                <button classNanme="p-2">
+                <button className="p-2">
                     <IconArrowsShuffle2 />
                 </button>
             </div>
