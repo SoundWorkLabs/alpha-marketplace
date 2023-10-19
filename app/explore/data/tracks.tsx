@@ -45,7 +45,7 @@ export async function nftData(target: string) {
         if (response.status !== 200) {
             throw new Error("Network response was not ok");
         }
-
+        console.log(response);
         const data = response.data;
 
         const item = data.find(

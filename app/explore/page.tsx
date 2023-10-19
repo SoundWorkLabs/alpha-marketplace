@@ -13,16 +13,17 @@ export default function Explore() {
     const track = tracks;
     // console.log(track);
     return (
-        <div className="p-5">
+        <div className="p-5 scroll-smooth">
             {/* Header Section */}
             <Box className="p-5 ">
-                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent w-full h-76">
+                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent h-76">
                     <Text size="xl">Explore</Text>
                     <div className="ml-auto">
                         {" "}
                         <TextInput
+                            w={600}
                             radius={20}
-                            className="w-80 p-2"
+                            className="search w-[100px] p-2 "
                             placeholder="Search by collection, music, or creators..."
                         />
                     </div>

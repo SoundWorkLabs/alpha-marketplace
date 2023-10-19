@@ -52,7 +52,7 @@ export default function RootLayout({
                                             />
                                         </Link>
                                         <CustomPill
-                                            label="SOL"
+                                            label="sol"
                                             color="transparent"
                                         />
                                         <CustomPill color="transparent">

@@ -5,11 +5,17 @@ export const resolver: CSSVariablesResolver = (theme) => ({
     variables: {},
     light: {
         "--soundwork-hover-one": "rgb(241 245 249 / 1)",
-        "--soundwork-hover-gradient": ""
+        "--soundwork-hover-gradient": "",
+        "--mantine-color-text": "#FFFFFF"
+        // "--mantine-font-family": "#Lexend"
     },
     dark: {
         "--soundwork-hover-one": "#34354a",
-        "--soundwork-hover-gradient": ""
+        "--soundwork-hover-gradient": "",
+        "--mantine-color-text": "#FFFFFF"
+        // "--mantine-font-family": "#Lexend"
+        // "--mantine-color-body":
+        //     "linear-gradient(90deg, rgba(0, 145, 215, 1), rgba(254, 15, 212, 1))"
     }
 });
 
@@ -26,6 +32,8 @@ export const theme = createTheme({
                             "--button-bd": "none",
                             "--button-bg":
                                 "linear-gradient(90deg, rgba(0, 145, 215, 1), rgba(254, 15, 212, 1))"
+                            // "--button-fz": "16px",
+                            // fontFamily: "Inter"
                             // "--button-hover": "2px solid white"
                         }
                     };

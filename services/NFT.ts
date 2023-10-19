@@ -1,4 +1,6 @@
 import { API_BASE_URL } from "../utils/config";
+import { NftSchemma, MetaSchemma } from "../app/components/types";
+import axios from "axios";
 
 /** generate uris and mint tx to be signed on the frontend */
 /*  returns a serialized transaction we need to sign */
@@ -54,5 +56,38 @@ async function fetchSoundworkNfts() {
         return response;
     } catch (error) {
         throw error;
+    }
+}
+
+export async function nftData(target: string) {
+    try {
+        // Make the initial request to fetch the data
+        const response = await axios.get(`${API_BASE_URL}/nfts/soundwork`);
+
+        if (response.status !== 200) {
+            throw new Error("Please check your connection 🔗");
+        }
+
+        const data = response.data;
+
+        const item = data.find(
+            (item: NftSchemma) => item.nft_address === target
+        );
+
+        if (item) {
+            const mData = item.metadata_uri;
+            const metaResponse = await axios.get(mData);
+            const metaDetails: MetaSchemma = metaResponse.data;
+
+            const nftDetails: NftSchemma = item;
+            console.log("meta", metaDetails);
+            return { metaDetails, nftDetails };
+        } else {
+            console.log("meta data not found 😥");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        return null;
     }
 }

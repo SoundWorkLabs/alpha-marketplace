@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 
+.mini-logo svg{
+  width: 35px;
+  height: auto;
+  
+}
+
 .custom-border {
     border-width: 2px;
     /* border-style: solid; */
@@ -39,4 +45,9 @@
   .title-box{
     height: 
     352px;
+    overflow: hidden;
   }
+.search input{
+  background: #21232CCC;
+  color: #ffffff;
+}
