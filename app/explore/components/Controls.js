@@ -8,11 +8,18 @@ import {
     IconPlaylist
 } from "@tabler/icons-react";
 
-function Controls({ audioRef, progressBarRef, duration, setTimeProgress }) {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const togglePlayPause = () => {
-        setIsPlaying((prev) => !prev);
-    };
+function Controls({
+    audioRef,
+    progressBarRef,
+    duration,
+    setTimeProgress,
+    isPlaying,
+    togglePlayPause
+}) {
+    // const [isPlaying, setIsPlaying] = useState(false);
+    // const togglePlayPause = () => {
+    //     setIsPlaying((prev) => !prev);
+    // };
 
     //   animation
     const playAnimationRef = useRef();

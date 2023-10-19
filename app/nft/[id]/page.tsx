@@ -2,19 +2,28 @@
 
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box, CopyButton, ActionIcon, rem, Pill } from "@mantine/core";
 import Image from "next/image";
-import { IconCopy, IconCheck } from "@tabler/icons-react";
+import {
+    IconCopy,
+    IconCheck,
+    IconPlayerPlayFilled,
+    IconPlayerPause
+} from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
 import { useWallet } from "@solana/wallet-adapter-react";
 
+import { useAudio } from "../../explore/components/audioPlayerContext";
+
 export default function Page() {
     // const currentURL = window.location.href;
     const nftAddress = useParams();
     const { publicKey } = useWallet();
+    const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
+        useAudio();
 
     const pubkey = publicKey ? publicKey?.toBase58() : "";
     console.log(pubkey);
@@ -22,6 +31,11 @@ export default function Page() {
     const [metaDetails, setMetaDetails] = useState<MetaSchemma>();
     const [currentOwner, setCurrentOwner] = useState<string>();
     const [isLoading, setIsLoading] = useState(true);
+    // const [isPlaying, setIsPlaying] = useState(false);
+    // const togglePlayPause = () => {
+    //     setIsPlaying((prev) => !prev);
+    // };
+    const playPauseRef = useRef();
 
     useEffect(() => {
         nftData(nftAddress.id)
@@ -58,18 +72,33 @@ export default function Page() {
 
     // console.log("cat", category);
     console.log("atrr", atrr);
-
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap">
-                <Image
-                    priority
-                    src={image}
-                    alt="nft imaga"
-                    className="rounded-md dynamic-image"
-                    height={600}
-                    width={600}
-                />
+                <div>
+                    <Image
+                        priority
+                        src={image}
+                        alt="nft imaga"
+                        className="rounded-md dynamic-image"
+                        height={600}
+                        width={600}
+                    />
+                    <div
+                        onClick={() => {
+                            setCurrentTrack(animation_url);
+                            togglePlayPause();
+                            console.log("should play", animation_url);
+                        }}
+                    >
+                        {isPlaying ? (
+                            <IconPlayerPause />
+                        ) : (
+                            <IconPlayerPlayFilled />
+                        )}
+                    </div>
+                </div>
+
                 <Box className="mx-6 flex-1 ">
                     <div className="flex flex-wrap my-5">
                         <span className="text-[#E6E6E6]">Owner By: </span>
@@ -199,7 +228,11 @@ export default function Page() {
             </div>
             <div>animation_url: {animation_url}</div>
             <div className="fixed bg-aduio-bg  bottom-4 rounded-full w-3/4 px-5">
-                <LibAudioPlayer />
+                <LibAudioPlayer
+                    isPlaying={isPlaying}
+                    togglePlayPause={togglePlayPause}
+                    currentTrack={currentTrack}
+                />
             </div>
         </div>
     );

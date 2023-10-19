@@ -3,12 +3,21 @@ import { Box, TextInput, Text } from "@mantine/core";
 import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
 
-import AudioPlayer from "./components/AudioPlayer";
+import LibAudioPlayer from "./components/AudioPlayer";
 import { tracks } from "./data/tracks";
 import { useState } from "react";
 
+import { useAudio } from "./components/audioPlayerContext";
+
 export default function Explore() {
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    // const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const {
+        isPlaying,
+        setIsPlaying,
+        currentTrack,
+        setCurrentTrack,
+        togglePlayPause
+    } = useAudio();
 
     const track = tracks;
     // console.log(track);
@@ -35,7 +44,11 @@ export default function Explore() {
 
             {/* Audio Player */}
             <Box className="my-5 p-2 bg-aduio-bg rounded-full w-full h-76">
-                <AudioPlayer />
+                <LibAudioPlayer
+                    isPlaying={isPlaying}
+                    togglePlayPause={togglePlayPause}
+                    currentTrack={currentTrack}
+                />
                 {/* {audioUrl && (
                     <AudioPlayer
                         src={audioUrl}

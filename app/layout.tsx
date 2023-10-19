@@ -15,6 +15,8 @@ import Link from "next/link";
 import Footer from "./components/footer";
 import { Toaster } from "react-hot-toast";
 
+import { AudioProvider } from "./explore/components/audioPlayerContext";
+
 export const metadata = {
     title: "Soundwork",
     description: "soundwork web app!"
@@ -62,7 +64,7 @@ export default function RootLayout({
                                         </CustomPill>
                                     </Group>
                                 </div>
-                                {children}
+                                <AudioProvider>{children}</AudioProvider>
                                 <Toaster position="bottom-center" />
                             </main>
                         </div>

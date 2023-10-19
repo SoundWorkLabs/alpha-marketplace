@@ -7,7 +7,7 @@ function Music({ currentTrack, audioRef, setDuration, progressBarRef }) {
     return (
         <div className="p-2">
             <audio
-                src={currentTrack.audioUrl}
+                src={currentTrack}
                 ref={audioRef}
                 onLoadedMetadata={onLoadedMetadata}
                 autoPlay={true}
