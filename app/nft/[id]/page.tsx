@@ -71,7 +71,7 @@ export default function Page() {
                     width={600}
                 />
                 <Box className="mx-6 flex-1 ">
-                    <div className="flex flex-wrap  my-5">
+                    <div className="flex flex-wrap my-5">
                         <span className="text-[#E6E6E6]">Owner By: </span>
                         <CopyButton
                             value={currentOwner ? (currentOwner as string) : ""}
@@ -169,16 +169,16 @@ export default function Page() {
                 <p className="text-3xl my-3">Properties</p>
                 {
                     atrr
-                        ? atrr.map((attributes) => {
+                        ? atrr.map((attributes, index) => {
                               console.log(attributes);
                               return (
-                                  <div>
+                                  <div key={index}>
                                       {Object.entries(attributes).map(
                                           ([key, value]) => (
                                               // <div key={key}>
                                               //   <strong>{key}:</strong> {value}
                                               // </div>
-                                              <Pill>
+                                              <Pill key={key}>
                                                   <span className="bg-audio-bg">
                                                       {key}:
                                                   </span>
