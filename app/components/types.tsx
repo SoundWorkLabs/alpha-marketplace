@@ -20,3 +20,7 @@ export interface MetaSchemma {
     symbol: string;
     title: string;
 }
+
+export interface NftCardProps {
+    nft: NftSchemma;
+}

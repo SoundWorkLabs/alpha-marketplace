@@ -14,12 +14,12 @@ import Link from "next/link";
 // import { ThemeToggle } from "./themeToggle";
 import { usePathname } from "next/navigation";
 
-import SoundWorkLogo from "./icon";
+import SoundWorkLogo, { SoundWorkHeadPhone } from "./icon";
 
 const data = [
     { link: "/", label: "Explore", icon: IconCategory },
     { link: "/profile", label: "Profile", icon: IconUserCircle },
-    { link: "/sounds", label: "Sounds", icon: IconHeadphones }, // todo: use figma svg
+    { link: "/sounds", label: "Sounds", icon: SoundWorkHeadPhone }, // todo: use figma svg
     { link: "/music", label: "Music Maker", icon: IconAdjustmentsHorizontal },
     { link: "/help", label: "Help", icon: IconHelp }
 ];
@@ -30,9 +30,9 @@ export function SideNav() {
 
     const links = data.map((item) => (
         <Link
-            className={`flex p-2 bg-${
+            className={`nav-btn flex p-2 bg-${
                 pathname === item.link ? "slate-600" : "pink"
-            } hover:cursor-pointer hover:bg-[var(--soundwork-hover-one)]`}
+            } hover:cursor-pointer`}
             href={item.link}
             key={item.label}
         >
@@ -42,7 +42,7 @@ export function SideNav() {
     ));
 
     return (
-        <nav className="w-max border-r-2 h-[100%]">
+        <nav className="w-max border-r-2 h-[100%] bg-[#121426]">
             <div className="flex flex-col justify-between p-5 h-screen">
                 <div className="flex flex-col gap-5">
                     <Group className="mt-10 mb-10" justify="center">

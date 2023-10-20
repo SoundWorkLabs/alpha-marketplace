@@ -49,7 +49,7 @@ export async function saveMinted(nftMint: string) {
     }
 }
 
-async function fetchSoundworkNfts() {
+export async function fetchSoundworkNfts() {
     //nfts/soundwork
     try {
         const response = await fetch(`${API_BASE_URL}/nfts/soundwork`);

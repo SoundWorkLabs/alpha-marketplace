@@ -21,12 +21,9 @@ import { useAudio } from "../../explore/components/audioPlayerContext";
 export default function Page() {
     // const currentURL = window.location.href;
     const nftAddress = useParams();
-    const { publicKey } = useWallet();
+    const pubkey = useWallet().publicKey?.toBase58();
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
         useAudio();
-
-    const pubkey = publicKey ? publicKey?.toBase58() : "";
-    console.log(pubkey);
 
     const [metaDetails, setMetaDetails] = useState<MetaSchemma>();
     const [currentOwner, setCurrentOwner] = useState<string>();
@@ -70,7 +67,8 @@ export default function Page() {
     // const category = metaDetails?.properties.category;
     // const files = metaDetails?.properties.files;
 
-    // console.log("cat", category);
+    // test pubkey
+    // const target = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
     console.log("atrr", atrr);
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -233,7 +231,6 @@ export default function Page() {
             <div className="my-5">
                 <p className="text-3xl my-3">Price History</p>
             </div>
-            <div>animation_url: {animation_url}</div>
             <div className="fixed bg-aduio-bg  bottom-4 rounded-full w-3/4 px-5">
                 <LibAudioPlayer
                     isPlaying={isPlaying}

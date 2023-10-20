@@ -1,3 +1,91 @@
+"use client";
+import { Box } from "@mantine/core";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { fetchNftData } from "../explore/data/tracks";
+import { NftSchemma } from "../components/types";
+import { useEffect, useState } from "react";
+import NftCard from "../components/NftCard";
+
 export default function Sounds() {
-    return <div>sounds page</div>;
+    const { publicKey, connected } = useWallet();
+    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+    const pubkey = publicKey?.toBase58();
+
+    const [isEmpty, setIsEmpty] = useState(false);
+
+    console.log("let there be pubkey 🫳", publicKey);
+    console.log("vola 🎉", connected);
+
+    useEffect(() => {
+        if (!connected) {
+            return;
+        }
+        fetchNftData()
+            .then((res) => {
+                if (res && res.data) {
+                    // test pubkey
+                    // const target =
+                    //     "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
+                    const data = res.data;
+
+                    const ownedNfts = data.filter(
+                        (nft: NftSchemma) => nft.current_owner === pubkey
+                    );
+
+                    if (ownedNfts.length > 0) {
+                        setNfts(ownedNfts);
+                    } else {
+                        // If there are no matching NFTs
+                        setIsEmpty(true);
+                        console.log("You have zero NFTs");
+                    }
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+            });
+    }, [connected]);
+
+    return (
+        <div className="p-5 my-2 mx-5 scroll-smooth">
+            <Box className="flex items-center justify-center space-x-7 my-4">
+                <button>My Sound</button>
+                <button>Offer Received</button>
+                <button>Offers Made By Me</button>
+            </Box>
+            <Box className="flex items-center justify-between bg-[#D9D9D90A] backdrop-blur-md rounded-md m-4 h-[76px] p-5 border border-[#A4A4A9] text-base">
+                <div className="flex flex-wrap items-center space-x-3">
+                    <input
+                        placeholder="Search by music..."
+                        className="rounded-full bg-[#0204164F] border border-[#A4A4A9] p-2 m-2 w-[382px]"
+                    />
+                    <div className="font-light">result</div>
+                </div>
+
+                <div className="flex">
+                    <button className="rounded-full bg-[#0204164F] p-2 m-2 hover:bg-[#020416a4]">
+                        Sort by
+                    </button>
+                    <button className="rounded-full bg-[#0204164F] p-2 m-2 hover:bg-[#020416a4]">
+                        Filter
+                    </button>
+                </div>
+            </Box>
+            {!connected ? (
+                <>connect your wallet</>
+            ) : isEmpty ? (
+                <>You dont have any minted sound works</>
+            ) : (
+                <Box className="flex flex-wrap">
+                    {nfts.length > 0 ? (
+                        nfts.map((nft) => (
+                            <NftCard key={nft.nft_address} nft={nft} />
+                        ))
+                    ) : (
+                        <div>Loading...</div>
+                    )}
+                </Box>
+            )}
+        </div>
+    );
 }

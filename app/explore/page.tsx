@@ -2,15 +2,15 @@
 import { Box, TextInput, Text } from "@mantine/core";
 import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
-
 import LibAudioPlayer from "./components/AudioPlayer";
-import { tracks } from "./data/tracks";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { useAudio } from "./components/audioPlayerContext";
+import { fetchNftData } from "./data/tracks";
+import { NftSchemma } from "../components/types";
 
 export default function Explore() {
-    // const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+
     const {
         isPlaying,
         setIsPlaying,
@@ -18,9 +18,18 @@ export default function Explore() {
         setCurrentTrack,
         togglePlayPause
     } = useAudio();
+    useEffect(() => {
+        fetchNftData()
+            .then((res) => {
+                if (res && res.data) {
+                    setNfts(res.data);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+            });
+    }, []);
 
-    const track = tracks;
-    // console.log(track);
     return (
         <div className="p-5 scroll-smooth">
             {/* Header Section */}
@@ -49,13 +58,6 @@ export default function Explore() {
                     togglePlayPause={togglePlayPause}
                     currentTrack={currentTrack}
                 />
-                {/* {audioUrl && (
-                    <AudioPlayer
-                        src={audioUrl}
-                        autoPlay={true}
-                        customControls={true}
-                    />
-                )} */}
             </Box>
 
             {/* Collections */}
@@ -74,7 +76,13 @@ export default function Explore() {
             <Box className="mt-0 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
                 <Box className="flex flex-wrap">
-                    <NftCard />
+                    {nfts && nfts.length > 0 ? (
+                        nfts.map((nft) => (
+                            <NftCard key={nft.nft_address} nft={nft} />
+                        ))
+                    ) : (
+                        <div>Loading...</div>
+                    )}
                 </Box>
             </Box>
         </div>

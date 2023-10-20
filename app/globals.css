@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-
+.nav-btn:hover {
+  opacity: 0.5;
+  background: var(--1, linear-gradient(90deg, #0091D7 0%, #FE0FD4 100%));
+  border-radius: 20px;
+}
 
 .mini-logo svg{
   width: 35px;
@@ -23,7 +27,7 @@
     background-color: #060A24;
   } */
   tr td{
-    padding: 15px;
+    padding: 10px;
   }
 
   tr .columns {
@@ -40,12 +44,12 @@
   }
 
   .dynamic-image {
-    width: 500px; 
-    height: 500px; 
+    width: 400px; 
+    height: 400px; 
     object-fit: cover;
   }
   .title-box{
-    height: 432px;
+    height: 328px;
     overflow: hidden;
   }
 .search input{
@@ -74,7 +78,7 @@
 
 .player-button,
 .pause-button {
-  color: rgba(217, 217, 217, 0.14); 
+  color: rgba(217, 217, 217, 0.351); 
   background-color: rgba(0, 0, 0, 0.2); 
   border-radius: 50%; 
   padding: 10px; 
@@ -85,4 +89,5 @@
 .player-button:hover,
 .pause-button:hover {
   background-color: rgba(217, 217, 217, .17); 
+  color: rgba(248, 248, 248, 0.721);
 }
