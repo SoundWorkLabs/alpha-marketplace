@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 
+
 .mini-logo svg{
   width: 35px;
   height: auto;
@@ -39,16 +40,49 @@
   }
 
   .dynamic-image {
-    width: 422px; 
-    height: 422px; 
+    width: 500px; 
+    height: 500px; 
     object-fit: cover;
   }
   .title-box{
-    height: 
-    352px;
+    height: 432px;
     overflow: hidden;
   }
 .search input{
   background: #21232CCC;
   color: #ffffff;
+}
+
+.image-container {
+  position: relative;
+}
+
+.play-pause-container {
+  width: 142px;
+  height: 142px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(217, 217, 217, 0.14);
+  border-radius:50%;
+  backdrop-filter: blur(2.5759637355804443px);
+
+}
+
+.player-button,
+.pause-button {
+  color: rgba(217, 217, 217, 0.14); 
+  background-color: rgba(0, 0, 0, 0.2); 
+  border-radius: 50%; 
+  padding: 10px; 
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out; 
+}
+
+.player-button:hover,
+.pause-button:hover {
+  background-color: rgba(217, 217, 217, .20); 
 }

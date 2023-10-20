@@ -75,7 +75,7 @@ export default function Page() {
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap">
-                <div>
+                <div className="image-container">
                     <Image
                         priority
                         src={image}
@@ -85,6 +85,7 @@ export default function Page() {
                         width={600}
                     />
                     <div
+                        className="play-pause-container"
                         onClick={() => {
                             setCurrentTrack(animation_url);
                             togglePlayPause();
@@ -92,9 +93,15 @@ export default function Page() {
                         }}
                     >
                         {isPlaying ? (
-                            <IconPlayerPause />
+                            <IconPlayerPause
+                                className="pause-button"
+                                size={142}
+                            />
                         ) : (
-                            <IconPlayerPlayFilled />
+                            <IconPlayerPlayFilled
+                                className="player-button"
+                                size={142}
+                            />
                         )}
                     </div>
                 </div>

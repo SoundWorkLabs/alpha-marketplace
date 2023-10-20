@@ -40,7 +40,7 @@ export default function RootLayout({
             <body className="bg-sw-bg">
                 <MantineProvider>
                     <Wallet>
-                        <div className="flex text-white">
+                        <div className="flex text-white p-0 m-0">
                             <nav>
                                 <SideNav />
                             </nav>
@@ -68,7 +68,7 @@ export default function RootLayout({
                                 <Toaster position="bottom-center" />
                             </main>
                         </div>
-                        <footer>
+                        <footer className="text-white">
                             <Footer />
                         </footer>
                     </Wallet>
