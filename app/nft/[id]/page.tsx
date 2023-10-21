@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
-import React, { useEffect, useState, useRef } from "react";
 import { Box, CopyButton, ActionIcon, rem, Pill } from "@mantine/core";
 import Image from "next/image";
 import {
@@ -15,20 +15,33 @@ import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
 import { useWallet } from "@solana/wallet-adapter-react";
-
 import { useAudio } from "../../explore/components/audioPlayerContext";
+import { Modal, Button, TextInput } from "@mantine/core";
+// import { useDisclosure } from "@mantine/hooks";
 
 export default function Page() {
     // const currentURL = window.location.href;
     const nftAddress = useParams();
+
     const pubkey = useWallet().publicKey?.toBase58();
+    // test pubkey
+    // const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
+    // const pubkey = "4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF";
+
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
         useAudio();
 
     const [metaDetails, setMetaDetails] = useState<MetaSchemma>();
     const [currentOwner, setCurrentOwner] = useState<string>();
     const [isLoading, setIsLoading] = useState(true);
-    // const [isPlaying, setIsPlaying] = useState(false);
+    const [isNotOwner, setOwner] = useState(true);
+    // const [opened, { open, close }] = useDisclosure(false);
+
+    const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+    const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+
+    console.log("is not owner 🤔", isNotOwner);
+
     // const togglePlayPause = () => {
     //     setIsPlaying((prev) => !prev);
     // };
@@ -40,6 +53,10 @@ export default function Page() {
                 if (res) {
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
+                    if (res.nftDetails.current_owner === pubkey) {
+                        setOwner(false);
+                        console.log("is not owner?😥", isNotOwner);
+                    }
                 }
             })
             .catch((error) => {
@@ -64,11 +81,11 @@ export default function Page() {
     const title = metaDetails?.title;
 
     const atrr = metaDetails?.attributes;
+
+    // TO DO
     // const category = metaDetails?.properties.category;
     // const files = metaDetails?.properties.files;
 
-    // test pubkey
-    // const target = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
     console.log("atrr", atrr);
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -144,15 +161,91 @@ export default function Page() {
 
                         <div className=" mx-5 my-5">
                             <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
-                                {currentOwner === pubkey
-                                    ? "Download"
-                                    : "Buy Now"}
+                                <a
+                                    href={
+                                        !isNotOwner
+                                            ? `${animation_url}`
+                                            : "buy-now-link"
+                                    }
+                                    download={
+                                        !isNotOwner ? `${animation_url}` : ""
+                                    }
+                                >
+                                    {!isNotOwner ? "Download" : "Buy Now"}
+                                </a>
                             </button>
-                            <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
-                                {currentOwner === pubkey
-                                    ? "Sell"
-                                    : "Make Offer"}
+
+                            <button
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
+                                onClick={() => {
+                                    // setOwner(true); for testing during dev
+                                    if (!isNotOwner) {
+                                        setIsSellModalOpen(true);
+                                    } else {
+                                        setIsOfferModalOpen(true);
+                                    }
+                                }}
+                            >
+                                {!isNotOwner ? "Sell" : "Make Offer"}
+                                {/* <SellModal {{isOpen={isOpen}}} /> */}
                             </button>
+                            {/* will be moved to components/Modal  */}
+                            {/* Sell Modal */}
+
+                            <Modal
+                                opened={isSellModalOpen}
+                                onClose={() => setIsSellModalOpen(false)}
+                                radius={17.681}
+                                top={200}
+                                withCloseButton={false}
+                                closeOnClickOutside={true}
+                                closeOnEscape={true}
+                                size={652}
+                            >
+                                <div className="mx-5">
+                                    <div className="text-xl font-bold">
+                                        Set Price
+                                    </div>
+                                    <div className="flex flex-wrap justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <TextInput
+                                                // label="Amount"
+                                                required={true}
+                                                withAsterisk
+                                                className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                            />
+                                            <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
+                                                SOL
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="rounded-full bg-btn-bg w-nft-w"
+                                            // onClick={''}
+                                        >
+                                            List for Sale
+                                        </button>
+                                    </div>
+                                </div>
+                            </Modal>
+
+                            {/* Offer Modal */}
+                            {/* <Modal
+                                opened={isOfferModalOpen}
+                                onClose={() => setIsOfferModalOpen(false)}
+                                title="Make an offer"
+                                className="z-20"
+                            >
+                                <TextInput
+                                    label="First input"
+                                    placeholder="First input"
+                                />
+                                <TextInput
+                                    data-autofocus
+                                    label="Input with initial focus"
+                                    placeholder="It has data-autofocus attribute"
+                                    mt="md"
+                                />
+                            </Modal> */}
                         </div>
                         <table className="w-full table-auto overflow-y-auto">
                             <thead>
