@@ -1,3 +1,4 @@
+import React from "react";
 export interface NftSchemma {
     nft_address: string;
     collection_address: string | null;
