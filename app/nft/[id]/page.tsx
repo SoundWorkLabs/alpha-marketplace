@@ -15,7 +15,7 @@ import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useAudio } from "../../explore/components/audioPlayerContext";
+import { useAudio } from "../../context/audioPlayerContext";
 import { Modal, Button, TextInput } from "@mantine/core";
 // import { useDisclosure } from "@mantine/hooks";
 

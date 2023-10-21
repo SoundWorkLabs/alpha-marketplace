@@ -4,7 +4,7 @@ import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
 import LibAudioPlayer from "./components/AudioPlayer";
 import { useState, useEffect } from "react";
-import { useAudio } from "./components/audioPlayerContext";
+import { useAudio } from "../context/audioPlayerContext";
 import { fetchNftData } from "./data/tracks";
 import { NftSchemma } from "../components/types";
 

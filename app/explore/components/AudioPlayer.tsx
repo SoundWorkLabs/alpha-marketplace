@@ -15,13 +15,7 @@ function LibAudioPlayer({
     togglePlayPause,
     currentTrack
 }: LibAudioPlayerProps) {
-    // const [currentTrack, setCurrentTrack] = useState<string>("");
-    // useEffect(() => {
-    //     setCurrentTrack(track);
-    //     console.log(currentTrack);
-    // }, [track]);
-
-    const progressBarRef = useRef<HTMLDivElement | null>(null);
+    const progressBarRef = useRef<HTMLInputElement | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const [timeProgress, setTimeProgress] = useState<number>(0);

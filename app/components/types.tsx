@@ -24,3 +24,12 @@ export interface MetaSchemma {
 export interface NftCardProps {
     nft: NftSchemma;
 }
+
+export interface ControlsProps {
+    audioRef: React.RefObject<HTMLAudioElement>;
+    progressBarRef: React.RefObject<HTMLInputElement>;
+    duration: number;
+    setTimeProgress: (time: number) => void;
+    isPlaying: boolean;
+    togglePlayPause: () => void;
+}
