@@ -16,6 +16,7 @@ import Footer from "./components/footer";
 import { Toaster } from "react-hot-toast";
 
 import { AudioProvider } from "./explore/components/audioPlayerContext";
+import { WalletContextProvider } from "./context/WalletContextProvider";
 
 export const metadata = {
     title: "Soundwork",
@@ -71,6 +72,39 @@ export default function RootLayout({
                         <footer className="text-white">
                             <Footer />
                         </footer>
+                        <WalletContextProvider>
+                            <div className="flex">
+                                <nav>
+                                    <SideNav />
+                                </nav>
+                                <main className="w-screen">
+                                    <div className="flex justify-end p-5 ">
+                                        <Group>
+                                            <Link href="/create" passHref>
+                                                <CustomPill
+                                                    label="Create"
+                                                    color="transparent"
+                                                />
+                                            </Link>
+                                            <CustomPill
+                                                label="SOL"
+                                                color="transparent"
+                                            />
+                                            <CustomPill color="transparent">
+                                                {" "}
+                                                {/* // todo: enable user to change network settings here */}
+                                                <ConnectWallet />
+                                            </CustomPill>
+                                        </Group>
+                                    </div>
+                                    {children}
+                                    <Toaster position="bottom-center" />
+                                </main>
+                            </div>
+                            <footer>
+                                <Footer />
+                            </footer>
+                        </WalletContextProvider>
                     </Wallet>
                 </MantineProvider>
             </body>
