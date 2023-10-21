@@ -14,9 +14,9 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import Link from "next/link";
 import Footer from "./components/footer";
 import { Toaster } from "react-hot-toast";
+import { WalletContextProvider } from "./context/WalletContextProvider";
 
 import { AudioProvider } from "./context/audioPlayerContext";
-import { WalletContextProvider } from "./context/WalletContextProvider";
 
 export const metadata = {
     title: "Soundwork",
