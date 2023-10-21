@@ -1,22 +1,22 @@
-import { useDisclosure } from "@mantine/hooks";
-import { Modal, Button, TextInput } from "@mantine/core";
+// import { useDisclosure } from "@mantine/hooks";
+// import { Modal, Button, TextInput } from "@mantine/core";
 
-function offerModal() {
-    const [opened, { open, close }] = useDisclosure(false);
+// export function offerModal() {
+//     const [opened, { open, close }] = useDisclosure(false);
 
-    return (
-        <>
-            <Modal opened={opened} onClose={close} title="Focus demo">
-                <TextInput label="First input" placeholder="First input" />
-                <TextInput
-                    data-autofocus
-                    label="Input with initial focus"
-                    placeholder="It has data-autofocus attribute"
-                    mt="md"
-                />
-            </Modal>
+//     return (
+//         <>
+//             <Modal opened={opened} onClose={close} title="Focus demo">
+//                 <TextInput label="First input" placeholder="First input" />
+//                 <TextInput
+//                     data-autofocus
+//                     label="Input with initial focus"
+//                     placeholder="It has data-autofocus attribute"
+//                     mt="md"
+//                 />
+//             </Modal>
 
-            <Button onClick={open}>Open modal</Button>
-        </>
-    );
-}
+//             <Button onClick={open}>Open modal</Button>
+//         </>
+//     );
+// }
