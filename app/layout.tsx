@@ -14,6 +14,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import Link from "next/link";
 import Footer from "./components/footer";
 import { Toaster } from "react-hot-toast";
+import { WalletContextProvider } from "./context/WalletContextProvider";
 
 export const metadata = {
     title: "Soundwork",
@@ -38,37 +39,39 @@ export default function RootLayout({
             <body>
                 <MantineProvider theme={theme} cssVariablesResolver={resolver}>
                     <Wallet>
-                        <div className="flex">
-                            <nav>
-                                <SideNav />
-                            </nav>
-                            <main className="w-screen">
-                                <div className="flex justify-end p-5 ">
-                                    <Group>
-                                        <Link href="/create" passHref>
+                        <WalletContextProvider>
+                            <div className="flex">
+                                <nav>
+                                    <SideNav />
+                                </nav>
+                                <main className="w-screen">
+                                    <div className="flex justify-end p-5 ">
+                                        <Group>
+                                            <Link href="/create" passHref>
+                                                <CustomPill
+                                                    label="Create"
+                                                    color="transparent"
+                                                />
+                                            </Link>
                                             <CustomPill
-                                                label="Create"
+                                                label="SOL"
                                                 color="transparent"
                                             />
-                                        </Link>
-                                        <CustomPill
-                                            label="SOL"
-                                            color="transparent"
-                                        />
-                                        <CustomPill color="transparent">
-                                            {" "}
-                                            {/* // todo: enable user to change network settings here */}
-                                            <ConnectWallet />
-                                        </CustomPill>
-                                    </Group>
-                                </div>
-                                {children}
-                                <Toaster position="bottom-center" />
-                            </main>
-                        </div>
-                        <footer>
-                            <Footer />
-                        </footer>
+                                            <CustomPill color="transparent">
+                                                {" "}
+                                                {/* // todo: enable user to change network settings here */}
+                                                <ConnectWallet />
+                                            </CustomPill>
+                                        </Group>
+                                    </div>
+                                    {children}
+                                    <Toaster position="bottom-center" />
+                                </main>
+                            </div>
+                            <footer>
+                                <Footer />
+                            </footer>
+                        </WalletContextProvider>
                     </Wallet>
                 </MantineProvider>
             </body>
