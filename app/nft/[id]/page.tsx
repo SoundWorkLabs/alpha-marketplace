@@ -14,18 +14,27 @@ import {
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { useAudio } from "../../context/audioPlayerContext";
 import { Modal, Button, TextInput } from "@mantine/core";
+import ListingNft from "../../components/modals/ListingNft";
 // import { useDisclosure } from "@mantine/hooks";
 
 export default function Page() {
     // const currentURL = window.location.href;
-    const nftAddress = useParams();
+    const nftAddress = useParams().id;
+    console.log("addy", nftAddress);
 
-    const pubkey = useWallet().publicKey?.toBase58();
+    // const user = useWallet();
+    const user = useAnchorWallet();
+    // const wallet = user.wallet;
+    // if (!user) {
+    //     return "payer not found";
+    // }
+
+    // const pubkey = user.publicKey?.toBase58();
     // test pubkey
-    // const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
+    const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
     // const pubkey = "4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF";
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
@@ -35,12 +44,33 @@ export default function Page() {
     const [currentOwner, setCurrentOwner] = useState<string>();
     const [isLoading, setIsLoading] = useState(true);
     const [isNotOwner, setOwner] = useState(true);
+
     // const [opened, { open, close }] = useDisclosure(false);
 
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+    const [value, setValue] = useState("");
 
-    console.log("is not owner 🤔", isNotOwner);
+    const handleListClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        // const [isClickDisabled, setIsClickDisabled] = useState(false);
+        // if (isClickDisabled) {
+        //     return;
+        // }
+        const inputValue = parseFloat(value);
+        if (!isNaN(inputValue) && inputValue <= 10000) {
+            console.log("Input Value:", inputValue);
+            // setIsClickDisabled(true);
+            // return <ListNft amount={inputValue} />;
+            // setIsSellModalOpen(false);
+            // return ListingNft(inputValue);
+            // return <ListingNft price={inputValue}/>;
+        } else {
+            console.log("bruuuuuuuuuuuuuuuh 😂");
+        }
+    };
+    console.log("is not owner st 🤔", isNotOwner);
 
     // const togglePlayPause = () => {
     //     setIsPlaying((prev) => !prev);
@@ -48,7 +78,7 @@ export default function Page() {
     const playPauseRef = useRef();
 
     useEffect(() => {
-        nftData(nftAddress.id)
+        nftData(nftAddress)
             .then((res) => {
                 if (res) {
                     setMetaDetails(res.metaDetails);
@@ -57,6 +87,9 @@ export default function Page() {
                         setOwner(false);
                         console.log("is not owner?😥", isNotOwner);
                     }
+
+                    // for dev testing
+                    setOwner(false);
                 }
             })
             .catch((error) => {
@@ -65,7 +98,7 @@ export default function Page() {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [nftAddress.id]);
+    }, [nftAddress]);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -86,7 +119,6 @@ export default function Page() {
     // const category = metaDetails?.properties.category;
     // const files = metaDetails?.properties.files;
 
-    console.log("atrr", atrr);
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap">
@@ -210,9 +242,15 @@ export default function Page() {
                                         <div className="flex items-center space-x-2">
                                             <TextInput
                                                 // label="Amount"
-                                                required={true}
-                                                withAsterisk
                                                 className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                                withAsterisk
+                                                type="number"
+                                                value={value}
+                                                onChange={(e) => {
+                                                    setValue(
+                                                        e.currentTarget.value
+                                                    );
+                                                }}
                                             />
                                             <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
                                                 SOL
@@ -220,11 +258,20 @@ export default function Page() {
                                         </div>
                                         <button
                                             className="rounded-full bg-btn-bg w-nft-w"
-                                            // onClick={''}
+                                            onClick={handleListClick}
+                                            // disabled={isClickDisabled}
                                         >
                                             List for Sale
                                         </button>
                                     </div>
+                                </div>
+                                <div>
+                                    {isSellModalOpen && (
+                                        <ListingNft
+                                            price={parseFloat(value)}
+                                            nftAddress={nftAddress}
+                                        />
+                                    )}
                                 </div>
                             </Modal>
 

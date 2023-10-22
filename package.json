@@ -2,7 +2,9 @@
     "name": "mantine-minimal-next-template",
     "version": "0.1.0",
     "private": true,
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/*"
+    ],
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -19,6 +21,8 @@
         "@metaplex-foundation/umi": "^0.8.9",
         "@metaplex-foundation/umi-bundle-defaults": "^0.8.9",
         "@metaplex-foundation/umi-web3js-adapters": "^0.8.9",
+        "@project-serum/anchor": "^0.26.0",
+        "@project-serum/sol-wallet-adapter": "^0.2.6",
         "@solana/wallet-adapter-base": "^0.9.23",
         "@solana/wallet-adapter-react": "^0.15.35",
         "@solana/wallet-adapter-react-ui": "^0.9.34",
