@@ -14,19 +14,33 @@ import {
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
-import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
+import {
+    useAnchorWallet,
+    useConnection,
+    useWallet
+} from "@solana/wallet-adapter-react";
 import { useAudio } from "../../context/audioPlayerContext";
 import { Modal, Button, TextInput } from "@mantine/core";
 import ListingNft from "../../components/modals/ListingNft";
+import { AnchorProvider, Wallet } from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
 // import { useDisclosure } from "@mantine/hooks";
 
 export default function Page() {
-    // const currentURL = window.location.href;
-    const nftAddress = useParams().id;
+    const { id: nftAddress } = useParams();
+    const { connection } = useConnection();
+    const { publicKey } = useWallet();
+
     console.log("addy", nftAddress);
 
-    // const user = useWallet();
-    const user = useAnchorWallet();
+    const dummyWallet = new Wallet(Keypair.generate());
+    const provider = new AnchorProvider(connection, dummyWallet, {
+        skipPreflight: false,
+        commitment: "confirmed"
+    });
+
+    // const user = useAnchorWallet();
+
     // const wallet = user.wallet;
     // if (!user) {
     //     return "payer not found";
@@ -34,7 +48,7 @@ export default function Page() {
 
     // const pubkey = user.publicKey?.toBase58();
     // test pubkey
-    const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
+    // const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
     // const pubkey = "4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF";
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
@@ -83,7 +97,9 @@ export default function Page() {
                 if (res) {
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
-                    if (res.nftDetails.current_owner === pubkey) {
+                    if (
+                        res.nftDetails.current_owner === publicKey?.toBase58()
+                    ) {
                         setOwner(false);
                         console.log("is not owner?😥", isNotOwner);
                     }
