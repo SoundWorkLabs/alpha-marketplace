@@ -27,7 +27,7 @@ export interface MetaSchemma {
     attributes: string[];
     description: string;
     image: string;
-    properties: { category: "audio"; files: string[] };
+    properties: {};
     symbol: string;
     title: string;
 }

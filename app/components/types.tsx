@@ -1,3 +1,8 @@
+import { AnchorProvider, Provider } from "@coral-xyz/anchor";
+import {
+    AnchorWallet,
+    ConnectionContextState
+} from "@solana/wallet-adapter-react";
 import React from "react";
 export interface NftSchemma {
     nft_address: string;
@@ -34,3 +39,11 @@ export interface ControlsProps {
     isPlaying: boolean;
     togglePlayPause: () => void;
 }
+
+// export interface propsForListingNft {
+//     price: number;
+//     nftAddress: string;
+//     connection: ConnectionContextState; // Provide the connection object
+//     provider: AnchorProvider | Provider; // Provide the provider object
+//     wallet: AnchorWallet; // Provide the wallet object
+// }

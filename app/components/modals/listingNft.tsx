@@ -1,52 +1,91 @@
-import React, { useState, useEffect } from "react";
-import { SoundworkSDK } from "@jimii/soundwork-sdk";
 import {
-    useConnection,
-    useAnchorWallet,
-    useWallet,
-    AnchorWallet
-} from "@solana/wallet-adapter-react";
-import {
-    AnchorProvider,
-    Wallet,
-    setProvider,
-    Program
-} from "@project-serum/anchor";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+    Connection,
+    LAMPORTS_PER_SOL,
+    PublicKey,
+    Transaction,
+    TransactionInstruction,
+    sendAndConfirmTransaction
+} from "@solana/web3.js";
 import { createListing } from "../../../services/listing";
-
+import { SoundworkSDK } from "@jimii/soundwork-sdk";
+import { AnchorProvider, Provider } from "@coral-xyz/anchor";
+import { useEffect, useState } from "react";
+import {
+    AnchorWallet,
+    useConnection,
+    useWallet
+} from "@solana/wallet-adapter-react";
+useConnection;
 export default function ListingNft(props: {
     price: number;
     nftAddress: string;
+    connection: Connection;
+    provider: Provider;
 }) {
-    // export default function ListingNft(price: number,wallet:AnchorWallet,connection:Connection) {
-    console.log("in listing");
-    const wallet = useAnchorWallet();
-    const { connection } = useConnection();
-    // const program = Program(sdk.)
+    const { connection, price, nftAddress, provider } = props;
+    console.log("connecting to sdk 😊");
+    const [sdk, setSdk] = useState<SoundworkSDK>();
+    const [mint, setMint] = useState<PublicKey>();
+    const [sol, setSol] = useState<number>();
+    const [ix, setIX] = useState<TransactionInstruction>();
 
-    // console.log(nftAddress);
-    const mint = new PublicKey(props.nftAddress);
-    const price = props.price * LAMPORTS_PER_SOL;
+    useEffect(() => {
+        const initializeSDK = async () => {
+            const sdk = await new SoundworkSDK(provider, connection);
+            setSdk(sdk);
+            // You can now use 'sdk' for further operations
+        };
+        console.log("creating soundwork mint pubkey");
+        const mint = new PublicKey(nftAddress);
+        console.log("mint pubkey created", mint);
+        setMint(mint);
 
-    if (!wallet) {
-        return <>wallet not found</>;
+        const toSol = price * LAMPORTS_PER_SOL;
+        console.log("price in sol", toSol);
+        setSol(toSol);
+
+        initializeSDK();
+    }, [provider, connection, sdk, mint, sol]);
+
+    if (!sdk) {
+        console.log("could not connect to sound work rpc server");
+        return <>could not connect to sound work rpc server</>;
     }
-    const provider = new AnchorProvider(connection, wallet, {});
+    if (!mint) {
+        console.log("this should not happen 😐");
+        return <>invalid mint</>;
+    }
+    if (!sol) {
+        console.log("this should not happen 😐");
+        return <>solana is dead 😭</>;
+    }
 
-    const sdk = new SoundworkSDK(provider, connection);
-
-    try {
-        sdk.createListing(mint, price)
+    useEffect(() => {
+        console.log("generating ix 🗒️");
+        sdk.createListing(mint, sol)
             .then((txhash) => {
-                console.log("listed 🫱🏾‍🫲🏾:", txhash);
+                console.log("txhash #️⃣", txhash);
+                setIX(txhash);
             })
-            .finally(() => {
-                // listing(())
+            .catch((err) => {
+                console.log("caught error:", err);
             });
-    } catch (e) {
-        console.log("something aint right", e);
+    }, [sdk, sol, mint, connection]);
+
+    if (!ix) {
+        console.log("ix error");
+        return <>ix failed to generate</>;
     }
 
-    return <div>Listing NFT</div>;
+    const tx = new Transaction().add(ix);
+    const wallet = useWallet();
+    if (!wallet) {
+        return <>tx failed </>;
+    }
+
+    // shoudld send tx
+
+    return <>an error occured while listing</>;
+
+    // return <>you are about to list your sound work</>;
 }
