@@ -8,7 +8,6 @@ import {
     Group,
     Select,
     Switch,
-    TagsInput,
     Text,
     Textarea,
     TextInput,
@@ -56,6 +55,7 @@ export default function Create() {
     >([]);
 
     // todo: create a hook for this
+    // todo (Jimi): sepaarate serialization and signing
     const handleSignTx = useCallback(
         async (serializedTx: string): Promise<Transaction> => {
             if (!publicKey) throw new WalletNotConnectedError();
@@ -179,8 +179,8 @@ export default function Create() {
     }
 
     return (
-        <Box className="create">
-            <Box mx={100} mb={20}>
+        <Flex justify="center">
+            <Box mx={0} mb={20}>
                 <Box>
                     <Title order={3}>Create New Sound NFT</Title>
                 </Box>
@@ -418,6 +418,7 @@ export default function Create() {
                                 </Flex>
                             </Group>
 
+                            {/* // todo: Jimii(don;t show it type is single sound)  */}
                             <Group>
                                 <TextInputField
                                     label="Supply"
@@ -443,7 +444,7 @@ export default function Create() {
                     </form>
                 </Box>
             </Box>
-        </Box>
+        </Flex>
     );
 }
 
