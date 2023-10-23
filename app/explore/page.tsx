@@ -63,7 +63,7 @@ export default function Explore() {
             {/* Collections */}
 
             {/* this will be derived from the collection component once the data is being feed from the backend */}
-            <Box className="mt-5 p-5">
+            {/* <Box className="mt-5 p-5">
                 <div className="text-xl font-semibold mb-4">Collections</div>
                 <Box className="flex flex-wrap">
                     <Cards />
@@ -71,7 +71,7 @@ export default function Explore() {
                     <Cards />
                     <Cards />
                 </Box>
-            </Box>
+            </Box> */}
             {/* Sounds */}
             <Box className="mt-0 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>

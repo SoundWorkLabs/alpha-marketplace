@@ -1,12 +1,28 @@
 "use client";
 import { Text } from "@mantine/core";
 import { IconHeartFilled, IconHeart } from "@tabler/icons-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { NftCardProps } from "./types";
+import { MetaSchemma, NftCardProps } from "./types";
+import { useAudio } from "../context/audioPlayerContext";
+import { nftData } from "../../services/NFT";
 
 const NftCard: React.FC<NftCardProps> = ({ nft }) => {
+    const [metaDetails, setMetaDetails] = useState<MetaSchemma | undefined>();
+    const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
+        useAudio();
+
+    useEffect(() => {
+        nftData(nft.nft_address).then((res) => {
+            if (res) {
+                console.log("nft data:", res);
+
+                setMetaDetails(res.metaDetails);
+            }
+        });
+    }, []);
+
     const handleLike = () => {
         if (!like == true) {
             setLike(true);
@@ -18,6 +34,15 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     };
 
     const [like, setLike] = useState(true);
+
+    // function setCurrentTrack(animation_url: any) {
+    //     throw new Error("Function not implemented.");
+    // }
+
+    // function togglePlayPause() {
+    //     throw new Error("Function not implemented.");
+    // }
+    const animation_url = metaDetails?.animation_url;
 
     return (
         <div className="nft-cards p-5 w-nft-card-w h-nft-card-h">
@@ -42,13 +67,27 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                 </Link>
                 <Text fw={500}>{nft.title}</Text>
                 <Text size="sm">{nft.current_owner.slice(0, 10)}</Text>
-                <button onClick={handleLike} className="flex text-right">
-                    {!like ? (
-                        <IconHeartFilled className="text-red-500" />
-                    ) : (
-                        <IconHeart />
-                    )}
-                </button>
+                <div className="flex flex-wrap justify-between mt-3">
+                    <button onClick={handleLike} className="flex text-right">
+                        {!like ? (
+                            <IconHeartFilled className="text-red-500" />
+                        ) : (
+                            <IconHeart />
+                        )}
+                    </button>
+                    <button
+                        className="bg-slate-800 rounded-full px-3"
+                        onClick={() => {
+                            if (animation_url) {
+                                setCurrentTrack(animation_url);
+                                togglePlayPause();
+                                console.log("should play", animation_url);
+                            }
+                        }}
+                    >
+                        preview
+                    </button>
+                </div>
             </div>
         </div>
     );
