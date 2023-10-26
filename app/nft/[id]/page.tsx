@@ -46,9 +46,6 @@ export default function Page() {
     const pubkey = wallet?.publicKey.toBase58();
 
     useEffect(() => {
-        if (!pubkey) {
-        }
-
         nftData(nftAddress)
             .then((res) => {
                 if (res) {
