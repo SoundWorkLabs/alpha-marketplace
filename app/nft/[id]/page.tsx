@@ -1,9 +1,16 @@
 "use client";
-
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
-import { Box, CopyButton, ActionIcon, rem, Pill } from "@mantine/core";
+import {
+    Box,
+    CopyButton,
+    ActionIcon,
+    rem,
+    Pill,
+    Modal,
+    TextInput
+} from "@mantine/core";
 import Image from "next/image";
 import {
     IconCopy,
@@ -14,48 +21,48 @@ import {
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useAudio } from "../../context/audioPlayerContext";
-import { Modal, Button, TextInput } from "@mantine/core";
-// import { useDisclosure } from "@mantine/hooks";
+
+import ListingNft from "../../components/modals/ListingNft";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 export default function Page() {
-    // const currentURL = window.location.href;
-    const nftAddress = useParams();
+    const { id: nftAddress } = useParams();
 
-    const pubkey = useWallet().publicKey?.toBase58();
-    // test pubkey
-    // const pubkey = "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
-    // const pubkey = "4kg8oh3jdNtn7j2wcS7TrUua31AgbLzDVkBZgTAe44aF";
+    const wallet = useAnchorWallet();
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
         useAudio();
-
-    const [metaDetails, setMetaDetails] = useState<MetaSchemma>();
-    const [currentOwner, setCurrentOwner] = useState<string>();
+    const [metaDetails, setMetaDetails] = useState<MetaSchemma | undefined>();
+    const [currentOwner, setCurrentOwner] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
-    const [isNotOwner, setOwner] = useState(true);
-    // const [opened, { open, close }] = useDisclosure(false);
-
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+    const [value, setValue] = useState("");
+    const [isPrice, setIsPrice] = useState<number>(0);
+    const playPauseRef = useRef(null);
+    const [isListing, setIsListing] = useState(false);
 
-    console.log("is not owner 🤔", isNotOwner);
-
-    // const togglePlayPause = () => {
-    //     setIsPlaying((prev) => !prev);
-    // };
-    const playPauseRef = useRef();
+    const pubkey = wallet?.publicKey.toBase58();
 
     useEffect(() => {
-        nftData(nftAddress.id)
+        if (!pubkey) {
+            console.log("wallet not found");
+        }
+        console.log(`wallet connected: ${pubkey} 🔗`);
+
+        nftData(nftAddress)
             .then((res) => {
                 if (res) {
+                    console.log("nft data:", res);
+
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
                     if (res.nftDetails.current_owner === pubkey) {
-                        setOwner(false);
-                        console.log("is not owner?😥", isNotOwner);
+                        console.log(
+                            "is owner 😊",
+                            res.nftDetails.current_owner === pubkey
+                        );
                     }
                 }
             })
@@ -65,7 +72,7 @@ export default function Page() {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [nftAddress.id]);
+    }, [nftAddress]);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -79,14 +86,8 @@ export default function Page() {
     const description = metaDetails?.description;
     const image = metaDetails?.image;
     const title = metaDetails?.title;
-
     const atrr = metaDetails?.attributes;
 
-    // TO DO
-    // const category = metaDetails?.properties.category;
-    // const files = metaDetails?.properties.files;
-
-    console.log("atrr", atrr);
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap">
@@ -94,7 +95,7 @@ export default function Page() {
                     <Image
                         priority
                         src={image}
-                        alt="nft imaga"
+                        alt="nft image"
                         className="rounded-md dynamic-image"
                         height={600}
                         width={600}
@@ -121,7 +122,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <Box className="mx-6 flex-1 ">
+                <Box className="mx-6 flex-1">
                     <div className="flex flex-wrap my-5">
                         <span className="text-[#E6E6E6]">Owner By: </span>
                         <CopyButton
@@ -131,7 +132,6 @@ export default function Page() {
                             {({ copied, copy }) => (
                                 <div
                                     onClick={copy}
-                                    // color={copied ? "blue" : "gray"}
                                     className="flex flex-wrap mx-3 cursor-pointer "
                                 >
                                     {currentOwner?.slice(0, 10)}
@@ -159,94 +159,101 @@ export default function Page() {
                             <p className="text-3xl mx-5">{title}</p>
                         </div>
 
-                        <div className=" mx-5 my-5">
+                        <div className="mx-5 my-5">
                             <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
                                 <a
                                     href={
-                                        !isNotOwner
+                                        currentOwner === pubkey
                                             ? `${animation_url}`
                                             : "buy-now-link"
                                     }
                                     download={
-                                        !isNotOwner ? `${animation_url}` : ""
+                                        currentOwner === pubkey
+                                            ? `${animation_url}`
+                                            : ""
                                     }
                                 >
-                                    {!isNotOwner ? "Download" : "Buy Now"}
+                                    {currentOwner === pubkey
+                                        ? "Download"
+                                        : "Buy Now"}
                                 </a>
                             </button>
 
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
                                 onClick={() => {
-                                    // setOwner(true); for testing during dev
-                                    if (!isNotOwner) {
+                                    if (currentOwner === pubkey) {
                                         setIsSellModalOpen(true);
                                     } else {
                                         setIsOfferModalOpen(true);
                                     }
                                 }}
                             >
-                                {!isNotOwner ? "Sell" : "Make Offer"}
-                                {/* <SellModal {{isOpen={isOpen}}} /> */}
+                                {currentOwner === pubkey
+                                    ? "Sell"
+                                    : "Make Offer"}
                             </button>
-                            {/* will be moved to components/Modal  */}
-                            {/* Sell Modal */}
+                        </div>
 
-                            <Modal
-                                opened={isSellModalOpen}
-                                onClose={() => setIsSellModalOpen(false)}
-                                radius={17.681}
-                                top={200}
-                                withCloseButton={false}
-                                closeOnClickOutside={true}
-                                closeOnEscape={true}
-                                size={652}
-                            >
-                                <div className="mx-5">
-                                    <div className="text-xl font-bold">
-                                        Set Price
-                                    </div>
-                                    <div className="flex flex-wrap justify-between">
-                                        <div className="flex items-center space-x-2">
-                                            <TextInput
-                                                // label="Amount"
-                                                required={true}
-                                                withAsterisk
-                                                className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
-                                            />
-                                            <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
-                                                SOL
-                                            </div>
+                        <Modal
+                            opened={isSellModalOpen}
+                            onClose={() => setIsSellModalOpen(false)}
+                            radius={17.681}
+                            top={200}
+                            withCloseButton={false}
+                            closeOnClickOutside={true}
+                            closeOnEscape={true}
+                            size={652}
+                        >
+                            <div className="mx-5">
+                                <div className="text-xl font-bold">
+                                    Set Price
+                                </div>
+                                <div className="flex flex-wrap justify-between">
+                                    <div className="flex items-center space-x-2">
+                                        <TextInput
+                                            className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                            withAsterisk
+                                            type="number"
+                                            value={value}
+                                            onChange={(e) => {
+                                                setValue(e.currentTarget.value);
+                                            }}
+                                        />
+                                        <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
+                                            SOL
                                         </div>
-                                        <button
-                                            className="rounded-full bg-btn-bg w-nft-w"
-                                            // onClick={''}
-                                        >
-                                            List for Sale
-                                        </button>
+                                    </div>
+                                    <button
+                                        className="rounded-full bg-btn-bg w-nft-w"
+                                        onClick={() => {
+                                            const price = parseFloat(value);
+                                            setIsPrice(price);
+                                            setIsListing(true);
+                                        }}
+                                    >
+                                        List for Sale
+                                    </button>
+                                    <div>
+                                        {isListing && (
+                                            <ListingNft
+                                                price={isPrice}
+                                                nftAddress={nftAddress}
+                                                closeModal={() => {
+                                                    console.log(
+                                                        "Closing modal"
+                                                    );
+                                                    setValue("");
+
+                                                    setIsSellModalOpen(false);
+                                                    setIsListing(false);
+                                                }}
+                                            />
+                                        )}
                                     </div>
                                 </div>
-                            </Modal>
-
-                            {/* Offer Modal */}
-                            {/* <Modal
-                                opened={isOfferModalOpen}
-                                onClose={() => setIsOfferModalOpen(false)}
-                                title="Make an offer"
-                                className="z-20"
-                            >
-                                <TextInput
-                                    label="First input"
-                                    placeholder="First input"
-                                />
-                                <TextInput
-                                    data-autofocus
-                                    label="Input with initial focus"
-                                    placeholder="It has data-autofocus attribute"
-                                    mt="md"
-                                />
-                            </Modal> */}
-                        </div>
+                            </div>
+                        </Modal>
                         <table className="w-full table-auto overflow-y-auto">
                             <thead>
                                 <tr className=" mx-0 ">
@@ -289,42 +296,37 @@ export default function Page() {
                 </Box>
             </Box>
             <div className="my-3">
-                <p className="text-3xl my-3">Description </p>
+                <p className="text-3xl my-3">Description</p>
                 <p>{description}</p>
             </div>
             <div className="my-5">
                 <p className="text-3xl my-3">Properties</p>
-                {
-                    atrr
-                        ? atrr.map((attributes, index) => {
-                              console.log(attributes);
-                              return (
-                                  <div key={index}>
-                                      {Object.entries(attributes).map(
-                                          ([key, value]) => (
-                                              // <div key={key}>
-                                              //   <strong>{key}:</strong> {value}
-                                              // </div>
-                                              <Pill key={key}>
-                                                  <span className="bg-audio-bg">
-                                                      {key}:
-                                                  </span>
-                                                  <span className="bg-transparent">
-                                                      {value}
-                                                  </span>
-                                              </Pill>
-                                          )
-                                      )}
-                                  </div>
-                              );
-                          })
-                        : null // Use null if you don't want to render anything when atrr is falsy
-                }
+                {atrr
+                    ? atrr.map((attributes, index) => {
+                          console.log(attributes);
+                          return (
+                              <div key={index}>
+                                  {Object.entries(attributes).map(
+                                      ([key, value]) => (
+                                          <Pill key={key}>
+                                              <span className="bg-audio-bg">
+                                                  {key}:
+                                              </span>
+                                              <span className="bg-transparent">
+                                                  {value}
+                                              </span>
+                                          </Pill>
+                                      )
+                                  )}
+                              </div>
+                          );
+                      })
+                    : null}
             </div>
             <div className="my-5">
                 <p className="text-3xl my-3">Price History</p>
             </div>
-            <div className="fixed bg-aduio-bg  bottom-4 rounded-full w-3/4 px-5">
+            <div className="fixed bg-audio-bg bottom-4 rounded-full w-3/4 px-5">
                 <LibAudioPlayer
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}

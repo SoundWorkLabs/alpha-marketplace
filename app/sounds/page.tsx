@@ -78,9 +78,12 @@ export default function Sounds() {
             ) : (
                 <Box className="flex flex-wrap">
                     {nfts.length > 0 ? (
-                        nfts.map((nft) => (
-                            <NftCard key={nft.nft_address} nft={nft} />
-                        ))
+                        nfts
+                            .slice()
+                            .reverse()
+                            .map((nft) => (
+                                <NftCard key={nft.nft_address} nft={nft} />
+                            ))
                     ) : (
                         <div>Loading...</div>
                     )}
