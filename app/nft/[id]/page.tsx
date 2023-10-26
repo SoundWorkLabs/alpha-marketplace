@@ -326,7 +326,7 @@ export default function Page() {
             <div className="my-5">
                 <p className="text-3xl my-3">Price History</p>
             </div>
-            <div className="fixed bg-audio-bg bottom-4 rounded-full w-3/4 px-5">
+            <div className="fixed bg-aduio-bg bottom-4 rounded-full w-3/4 px-5">
                 <LibAudioPlayer
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}

@@ -5,7 +5,7 @@ import { AnchorProvider } from "@coral-xyz/anchor";
 import { useEffect, useState } from "react";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 export default function ListingNft(props: {
     price: number;
