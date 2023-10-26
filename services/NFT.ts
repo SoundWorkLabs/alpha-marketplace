@@ -80,10 +80,8 @@ export async function nftData(target: string) {
             const metaDetails: MetaSchemma = metaResponse.data;
 
             const nftDetails: NftSchemma = item;
-            console.log("meta", metaDetails);
             return { metaDetails, nftDetails };
         } else {
-            console.log("meta data not found 😥");
             return null;
         }
     } catch (error) {

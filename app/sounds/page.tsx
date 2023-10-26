@@ -13,9 +13,6 @@ export default function Sounds() {
 
     const [isEmpty, setIsEmpty] = useState(false);
 
-    console.log("let there be pubkey 🫳", publicKey);
-    console.log("vola 🎉", connected);
-
     useEffect(() => {
         if (!connected) {
             return;
@@ -37,12 +34,11 @@ export default function Sounds() {
                     } else {
                         // If there are no matching NFTs
                         setIsEmpty(true);
-                        console.log("You have zero NFTs");
                     }
                 }
             })
             .catch((err) => {
-                console.error("Error fetching data:", err);
+                throw new Error(err);
             });
     }, [connected]);
 

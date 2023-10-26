@@ -16,8 +16,6 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     useEffect(() => {
         nftData(nft.nft_address).then((res) => {
             if (res) {
-                console.log("nft data:", res);
-
                 setMetaDetails(res.metaDetails);
             }
         });
@@ -81,7 +79,6 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                             if (animation_url) {
                                 setCurrentTrack(animation_url);
                                 togglePlayPause();
-                                console.log("should play", animation_url);
                             }
                         }}
                     >

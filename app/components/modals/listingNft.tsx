@@ -29,20 +29,16 @@ export default function ListingNft(props: {
                     {}
                 );
                 setProvider(provider);
-                console.log("provider🤞", provider);
                 const sdk = new SoundworkSDK(provider, connection);
                 await setSdk(sdk);
 
                 const ix = await sdk.createListing(mint, price).then((ix) => {
-                    console.log("ix 📝: ", ix);
-                    console.log("to sale at: ", price);
                     return ix;
                 });
                 const tx = new Transaction().add(ix);
                 const txSigHash = await provider
                     .sendAndConfirm(tx, [])
                     .then((sig) => {
-                        console.log(`https://explorer.solana.com/tx/${sig}`);
                         closeModal();
                         toast.success("NFT Listed 🎉🎉", {
                             duration: 3000,
@@ -63,7 +59,6 @@ export default function ListingNft(props: {
                     })
                     .catch((err) => {
                         closeModal();
-                        console.log("transaction failed", err);
                         return toast.error("Failed to List", {
                             duration: 3000,
                             position: "top-left",
@@ -75,8 +70,6 @@ export default function ListingNft(props: {
                             }
                         });
                     });
-                console.log("txsh", txSigHash);
-
                 return txSigHash;
             }
         };

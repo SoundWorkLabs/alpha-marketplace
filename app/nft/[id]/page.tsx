@@ -47,27 +47,17 @@ export default function Page() {
 
     useEffect(() => {
         if (!pubkey) {
-            console.log("wallet not found");
         }
-        console.log(`wallet connected: ${pubkey} 🔗`);
 
         nftData(nftAddress)
             .then((res) => {
                 if (res) {
-                    console.log("nft data:", res);
-
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
-                    if (res.nftDetails.current_owner === pubkey) {
-                        console.log(
-                            "is owner 😊",
-                            res.nftDetails.current_owner === pubkey
-                        );
-                    }
                 }
             })
-            .catch((error) => {
-                console.error(error);
+            .catch((err) => {
+                throw new Error("server data search failed ", err);
             })
             .finally(() => {
                 setIsLoading(false);
@@ -105,7 +95,6 @@ export default function Page() {
                         onClick={() => {
                             setCurrentTrack(animation_url);
                             togglePlayPause();
-                            console.log("should play", animation_url);
                         }}
                     >
                         {isPlaying ? (
@@ -240,11 +229,7 @@ export default function Page() {
                                                 price={isPrice}
                                                 nftAddress={nftAddress}
                                                 closeModal={() => {
-                                                    console.log(
-                                                        "Closing modal"
-                                                    );
                                                     setValue("");
-
                                                     setIsSellModalOpen(false);
                                                     setIsListing(false);
                                                 }}
@@ -303,7 +288,6 @@ export default function Page() {
                 <p className="text-3xl my-3">Properties</p>
                 {atrr
                     ? atrr.map((attributes, index) => {
-                          console.log(attributes);
                           return (
                               <div key={index}>
                                   {Object.entries(attributes).map(
