@@ -19,7 +19,7 @@ import {
     IconPlayerPause
 } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
-import { MetaSchemma } from "../../explore/data/tracks";
+import { MetaSchemma } from "../../components/types";
 import SoundWorkLogo from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 

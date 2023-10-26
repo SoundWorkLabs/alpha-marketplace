@@ -1,7 +1,7 @@
 "use client";
 import { Box } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { fetchNftData } from "../explore/data/tracks";
+import { fetchNftData } from "../../services/NFT";
 import { NftSchemma } from "../components/types";
 import { useEffect, useState } from "react";
 import NftCard from "../components/NftCard";

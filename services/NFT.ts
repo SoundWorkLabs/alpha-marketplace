@@ -91,3 +91,8 @@ export async function nftData(target: string) {
         return null;
     }
 }
+
+export async function fetchNftData() {
+    const response = await axios.get(`${API_BASE_URL}/nfts/soundwork`);
+    return response;
+}
