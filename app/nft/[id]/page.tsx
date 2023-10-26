@@ -57,7 +57,7 @@ export default function Page() {
                 }
             })
             .catch((err) => {
-                throw new Error("server data search failed ", err);
+                console.error(err);
             })
             .finally(() => {
                 setIsLoading(false);

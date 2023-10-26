@@ -38,7 +38,7 @@ export default function Sounds() {
                 }
             })
             .catch((err) => {
-                throw new Error(err);
+                console.error("Error fetching data:", err);
             });
     }, [connected]);
 
