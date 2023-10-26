@@ -23,7 +23,7 @@ import { MetaSchemma } from "../../explore/data/tracks";
 import SoundWorkLogo from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
-import ListingNft from "../../components/modals/ListingNft";
+import ListingNft from "../../components/modals/listingNft";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 export default function Page() {
