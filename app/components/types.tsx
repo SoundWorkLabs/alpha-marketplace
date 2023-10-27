@@ -1,5 +1,5 @@
 import React from "react";
-export interface NftSchemma {
+export interface NftSchema {
     nft_address: string;
     collection_address: string | null;
     title: string;
@@ -12,7 +12,7 @@ export interface NftSchemma {
     is_confirmed: boolean;
     available_for_lease: boolean;
 }
-export interface MetaSchemma {
+export interface MetaSchema {
     animation_url: string;
     attributes: string[];
     description: string;
@@ -23,7 +23,7 @@ export interface MetaSchemma {
 }
 
 export interface NftCardProps {
-    nft: NftSchemma;
+    nft: NftSchema;
 }
 
 export interface ControlsProps {

@@ -2,19 +2,19 @@ import { API_BASE_URL } from "../utils/config";
 
 import { PublicKey } from "@solana/web3.js";
 
-// fetch all listing
-export async function getListings() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/nfts/listing`);
-        if (response.ok) {
-            return await response.json();
-        } else {
-            console.error("Error fetching listings:", response.statusText);
-        }
-    } catch (err) {
-        console.error("Error fetching listings:", err);
-    }
-}
+// fetch all nfts listed on our marketplace
+// export async function getListings() {
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/listings`);
+//         if (response.ok) {
+//             return await response.json();
+//         } else {
+//             console.error("Error fetching listings:", response.statusText);
+//         }
+//     } catch (err) {
+//         console.error("Error fetching listings:", err);
+//     }
+// }
 
 export async function createListing(
     id: string,
@@ -27,12 +27,11 @@ export async function createListing(
         sellerAddress,
         mint,
         price,
-        data: new Date(),
         isActive: true // get this from the tx, if it fails false, else true
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/nfts/create/listing`, {
+        const response = await fetch(`${API_BASE_URL}/listings/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -54,7 +53,7 @@ export async function createListing(
 // ! not implemented
 async function deleteListing(id: string) {
     try {
-        const response = await fetch(`${API_BASE_URL}/nfts/listing${id}`, {
+        const response = await fetch(`${API_BASE_URL}/nfts/listings/${id}`, {
             method: "DELETE"
         });
 

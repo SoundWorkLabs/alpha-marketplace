@@ -4,12 +4,12 @@ import { IconHeartFilled, IconHeart } from "@tabler/icons-react";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MetaSchemma, NftCardProps } from "./types";
+import { MetaSchema, NftCardProps } from "./types";
 import { useAudio } from "../context/audioPlayerContext";
 import { nftData } from "../../services/NFT";
 
 const NftCard: React.FC<NftCardProps> = ({ nft }) => {
-    const [metaDetails, setMetaDetails] = useState<MetaSchemma | undefined>();
+    const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
         useAudio();
 

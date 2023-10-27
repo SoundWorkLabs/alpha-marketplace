@@ -19,7 +19,7 @@ import {
     IconPlayerPause
 } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
-import { MetaSchemma } from "../../components/types";
+import { MetaSchema } from "../../components/types";
 import SoundWorkLogo from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
@@ -33,7 +33,7 @@ export default function Page() {
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
         useAudio();
-    const [metaDetails, setMetaDetails] = useState<MetaSchemma | undefined>();
+    const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
     const [currentOwner, setCurrentOwner] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
@@ -45,6 +45,7 @@ export default function Page() {
 
     const pubkey = wallet?.publicKey.toBase58();
 
+    // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
         nftData(nftAddress)
             .then((res) => {

@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../utils/config";
-import { NftSchemma, MetaSchemma } from "../app/components/types";
+import { NftSchema, MetaSchema } from "../app/components/types";
 import axios from "axios";
+import { PublicKey } from "@solana/web3.js";
 
 /** generate uris and mint tx to be signed on the frontend */
 /*  returns a serialized transaction we need to sign */
@@ -49,13 +50,61 @@ export async function saveMinted(nftMint: string) {
     }
 }
 
-export async function fetchSoundworkNfts() {
-    //nfts/soundwork
+export async function fetchAllNfts() {
     try {
-        const response = await fetch(`${API_BASE_URL}/nfts/soundwork`);
+        const response = await (
+            await fetch(`${API_BASE_URL}/nfts/soundwork`)
+        ).json();
         return response;
-    } catch (error) {
-        throw error;
+    } catch (err) {
+        console.log("error fetching all nfts", err);
+    }
+}
+
+export async function fetchListedNfts() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/nfts/marketplace`);
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.error("Error fetching listings:", response.statusText);
+        }
+    } catch (err) {
+        console.error("Error fetching listings:", err);
+    }
+}
+
+export async function fetchUserNfts() {
+    try {
+        const response = await (
+            await fetch(`${API_BASE_URL}/nfts/soundwork`)
+        ).json();
+
+        return response;
+    } catch (err) {
+        console.log("error fetching all nfts", err);
+    }
+}
+
+// todo (JIMI) correct types for array
+export async function populateNftMetadata(nfts: Array<any> | any) {
+    if (Array.isArray(nfts)) {
+        // Handle the array of NFTs
+        nfts.map((nft) => console.log(nft));
+    } else {
+        // Handle a single NFT
+    }
+}
+
+// fetch a single nft
+export async function fetchNftByMint(mint: PublicKey) {
+    try {
+        const response = await await fetch(
+            `${API_BASE_URL}/nfts/${mint.toBase58()}`
+        );
+        console.log("response", response);
+    } catch (err) {
+        console.error("error fetching requested NFT", err);
     }
 }
 
@@ -71,15 +120,15 @@ export async function nftData(target: string) {
         const data = response.data;
 
         const item = data.find(
-            (item: NftSchemma) => item.nft_address === target
+            (item: NftSchema) => item.nft_address === target
         );
 
         if (item) {
             const mData = item.metadata_uri;
             const metaResponse = await axios.get(mData);
-            const metaDetails: MetaSchemma = metaResponse.data;
+            const metaDetails: MetaSchema = metaResponse.data;
 
-            const nftDetails: NftSchemma = item;
+            const nftDetails: NftSchema = item;
             return { metaDetails, nftDetails };
         } else {
             return null;

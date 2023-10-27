@@ -6,10 +6,10 @@ import LibAudioPlayer from "./components/AudioPlayer";
 import { useState, useEffect } from "react";
 import { useAudio } from "../context/audioPlayerContext";
 import { fetchNftData } from "../../services/NFT";
-import { NftSchemma } from "../components/types";
+import { NftSchema } from "../components/types";
 
 export default function Explore() {
-    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+    const [nfts, setNfts] = useState<NftSchema[]>([]);
 
     const {
         isPlaying,
@@ -18,6 +18,7 @@ export default function Explore() {
         setCurrentTrack,
         togglePlayPause
     } = useAudio();
+
     useEffect(() => {
         fetchNftData()
             .then((res) => {

@@ -8,7 +8,6 @@ import {
     Group,
     Select,
     Switch,
-    TagsInput,
     Text,
     Textarea,
     TextInput,
