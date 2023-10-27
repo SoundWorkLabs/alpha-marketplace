@@ -17,20 +17,24 @@ function LibAudioPlayer({
 
     return (
         <div className="flex justify-between items-center">
-            <Controls
-                audioRef={audioRef}
-                progressBarRef={progressBarRef}
-                duration={duration}
-                setTimeProgress={setTimeProgress}
-                isPlaying={isPlaying}
-                togglePlayPause={togglePlayPause}
-            />
-            <Music
-                currentTrack={currentTrack}
-                audioRef={audioRef}
-                setDuration={setDuration}
-                progressBarRef={progressBarRef}
-            />
+            <div className="">
+                <div className="space-x-5 flex flex-wrap items-center">
+                    <Controls
+                        audioRef={audioRef}
+                        progressBarRef={progressBarRef}
+                        duration={duration}
+                        setTimeProgress={setTimeProgress}
+                        isPlaying={isPlaying}
+                        togglePlayPause={togglePlayPause}
+                    />
+                    <Music
+                        currentTrack={currentTrack}
+                        audioRef={audioRef}
+                        setDuration={setDuration}
+                        progressBarRef={progressBarRef}
+                    />
+                </div>
+            </div>
             <div>
                 <div className="w-[437.22px]">
                     <ProgressBar
