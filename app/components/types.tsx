@@ -34,3 +34,24 @@ export interface ControlsProps {
     isPlaying: boolean;
     togglePlayPause: () => void;
 }
+export interface AudioContextData {
+    isPlaying: boolean;
+    togglePlayPause: () => void;
+    setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+    // currentTrack: string;
+    currentTrack:
+        | {
+              track: string | undefined;
+              author: string | undefined;
+              title: string | undefined;
+          }
+        | undefined;
+    setCurrentTrack: React.Dispatch<
+        React.SetStateAction<AudioContextData["currentTrack"] | undefined>
+    >;
+}
+export interface LibAudioPlayerProps {
+    isPlaying: boolean;
+    togglePlayPause: () => void;
+    currentTrack: AudioContextData["currentTrack"];
+}

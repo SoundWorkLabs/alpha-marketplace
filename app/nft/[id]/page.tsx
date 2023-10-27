@@ -90,7 +90,11 @@ export default function Page() {
                     <div
                         className="play-pause-container"
                         onClick={() => {
-                            setCurrentTrack(animation_url);
+                            setCurrentTrack({
+                                track: animation_url,
+                                title: title,
+                                author: currentOwner.slice(0, 10)
+                            });
                             togglePlayPause();
                         }}
                     >

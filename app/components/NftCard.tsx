@@ -33,14 +33,9 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
 
     const [like, setLike] = useState(true);
 
-    // function setCurrentTrack(animation_url: any) {
-    //     throw new Error("Function not implemented.");
-    // }
-
-    // function togglePlayPause() {
-    //     throw new Error("Function not implemented.");
-    // }
     const animation_url = metaDetails?.animation_url;
+    const title = metaDetails?.title;
+    const author = nft?.current_owner.slice(0, 10);
 
     return (
         <div className="nft-cards p-5 w-nft-card-w h-nft-card-h">
@@ -77,7 +72,11 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                         className="bg-slate-800 rounded-full px-3"
                         onClick={() => {
                             if (animation_url) {
-                                setCurrentTrack(animation_url);
+                                setCurrentTrack({
+                                    author: author,
+                                    title: title,
+                                    track: animation_url
+                                });
                                 togglePlayPause();
                             }
                         }}

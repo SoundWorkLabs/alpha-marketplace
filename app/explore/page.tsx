@@ -52,7 +52,7 @@ export default function Explore() {
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-5 p-2 bg-aduio-bg rounded-full w-full h-76">
+            <Box className="my-5 px-7 bg-aduio-bg rounded-full w-full h-76">
                 <LibAudioPlayer
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}
