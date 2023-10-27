@@ -2,13 +2,13 @@
 import { Box } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { fetchNftData } from "../../services/NFT";
-import { NftSchemma } from "../components/types";
+import { NftSchema } from "../components/types";
 import { useEffect, useState } from "react";
 import NftCard from "../components/NftCard";
 
 export default function Sounds() {
     const { publicKey, connected } = useWallet();
-    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+    const [nfts, setNfts] = useState<NftSchema[]>([]);
     const pubkey = publicKey?.toBase58();
 
     const [isEmpty, setIsEmpty] = useState(false);
@@ -26,7 +26,7 @@ export default function Sounds() {
                     const data = res.data;
 
                     const ownedNfts = data.filter(
-                        (nft: NftSchemma) => nft.current_owner === pubkey
+                        (nft: NftSchema) => nft.current_owner === pubkey
                     );
 
                     if (ownedNfts.length > 0) {
