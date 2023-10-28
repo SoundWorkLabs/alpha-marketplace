@@ -2,10 +2,11 @@ import { API_BASE_URL } from "../utils/config";
 import { NftSchema, MetaSchema } from "../app/components/types";
 import axios from "axios";
 import { PublicKey } from "@solana/web3.js";
+import { MintSingleResp } from "../types";
 
 /** generate uris and mint tx to be signed on the frontend */
 /*  returns a serialized transaction we need to sign */
-export async function mintSingle(postData: FormData) {
+export async function mintSingle(postData: FormData): Promise<MintSingleResp> {
     const opts = {
         method: "POST",
         body: postData
@@ -21,7 +22,13 @@ export async function mintSingle(postData: FormData) {
         const resp = await response.json();
         return resp;
     } catch (err: unknown) {
-        return err;
+        const errResponse = {
+            tx: "", // Provide default or empty values
+            mint: "",
+            error: err
+        };
+
+        return errResponse;
     }
 }
 
