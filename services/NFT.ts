@@ -1,6 +1,5 @@
 import { API_BASE_URL } from "../utils/config";
 import { NftSchema, MetaSchema } from "../app/components/types";
-import axios from "axios";
 import { PublicKey } from "@solana/web3.js";
 
 /** generate uris and mint tx to be signed on the frontend */
@@ -52,9 +51,7 @@ export async function saveMinted(nftMint: string) {
 
 export async function fetchAllNfts() {
     try {
-        const response = await (
-            await fetch(`${API_BASE_URL}/nfts/soundwork`)
-        ).json();
+        const response = await (await fetch(`${API_BASE_URL}/nfts/all`)).json();
         return response;
     } catch (err) {
         console.log("error fetching all nfts", err);
@@ -76,9 +73,7 @@ export async function fetchListedNfts() {
 
 export async function fetchUserNfts() {
     try {
-        const response = await (
-            await fetch(`${API_BASE_URL}/nfts/soundwork`)
-        ).json();
+        const response = await (await fetch(`${API_BASE_URL}/nfts/all`)).json();
 
         return response;
     } catch (err) {
@@ -111,22 +106,20 @@ export async function fetchNftByMint(mint: PublicKey) {
 export async function nftData(target: string) {
     try {
         // Make the initial request to fetch the data
-        const response = await axios.get(`${API_BASE_URL}/nfts/soundwork`);
-
+        const response = await fetch(`${API_BASE_URL}/nfts/all`);
         if (response.status !== 200) {
             throw new Error("Please check your connection 🔗");
         }
 
-        const data = response.data;
+        const data = await response.json();
 
-        const item = data.find(
+        const item = data?.find(
             (item: NftSchema) => item.nft_address === target
         );
 
         if (item) {
-            const mData = item.metadata_uri;
-            const metaResponse = await axios.get(mData);
-            const metaDetails: MetaSchema = metaResponse.data;
+            const metaResponse = await fetch(item.metadata_uri);
+            const metaDetails: MetaSchema = await metaResponse.json();
 
             const nftDetails: NftSchema = item;
             return { metaDetails, nftDetails };
@@ -139,7 +132,7 @@ export async function nftData(target: string) {
     }
 }
 
-export async function fetchNftData() {
-    const response = await axios.get(`${API_BASE_URL}/nfts/soundwork`);
-    return response;
-}
+// export async function fetchNftData() {
+//     const response = await axios.get(`${API_BASE_URL}/nfts/all`);
+//     return response;
+// }

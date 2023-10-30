@@ -1,7 +1,7 @@
 "use client";
 import { Box } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { fetchNftData } from "../../services/NFT";
+import { fetchUserNfts } from "../../services/NFT";
 import { NftSchema } from "../components/types";
 import { useEffect, useState } from "react";
 import NftCard from "../components/NftCard";
@@ -17,15 +17,14 @@ export default function Sounds() {
         if (!connected) {
             return;
         }
-        fetchNftData()
+        fetchUserNfts()
             .then((res) => {
-                if (res && res.data) {
+                if (res) {
                     // test pubkey
                     // const target =
                     //     "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
-                    const data = res.data;
 
-                    const ownedNfts = data.filter(
+                    const ownedNfts = res.filter(
                         (nft: NftSchema) => nft.current_owner === pubkey
                     );
 

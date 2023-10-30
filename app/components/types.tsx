@@ -2,6 +2,13 @@ import React from "react";
 export interface NftSchema {
     nft_address: string;
     collection_address: string | null;
+    listings: [
+        {
+            id: string;
+            list_price: string;
+            nft_address: string;
+        }
+    ];
     title: string;
     token_standard: string | null;
     current_owner: string;

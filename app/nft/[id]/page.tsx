@@ -144,7 +144,7 @@ export default function Page() {
                             )}
                         </CopyButton>
                     </div>
-                    <Box className="border custom-border p-4 whitespace-pre-wrap justify-stretch bg-detail-bg title-box">
+                    <Box className="custom-border1 p-4 justify-stretch title-box">
                         <div className="mini-logo flex flex-wrap">
                             <SoundWorkLogo />
                             <p className="text-3xl mx-5">{title}</p>
@@ -312,11 +312,11 @@ export default function Page() {
             <div className="my-5">
                 <p className="text-3xl my-3">Price History</p>
             </div>
-            <div className="fixed bg-aduio-bg bottom-4 rounded-full w-3/4 px-5">
+            <div className="fixed bg-aduio-bg bottom-4 rounded-full w-3/4 h-76 px-7">
                 <LibAudioPlayer
-                    isPlaying={isPlaying}
-                    togglePlayPause={togglePlayPause}
-                    currentTrack={currentTrack}
+                // isPlaying={isPlaying}
+                // togglePlayPause={togglePlayPause}
+                // currentTrack={currentTrack}
                 />
             </div>
         </div>
