@@ -151,23 +151,22 @@ export default function Page() {
                         </div>
 
                         <div className="mx-5 my-5">
-                            <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
-                                <a
-                                    href={
-                                        currentOwner === pubkey
-                                            ? `${animation_url}`
-                                            : "buy-now-link"
+                            <button
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
+                                onClick={() => {
+                                    if (currentOwner === pubkey) {
+                                        const a = document.createElement("a");
+                                        a.href = animation_url;
+                                        a.download = title;
+                                        a.click();
+                                    } else {
+                                        console.log("should open wallet");
                                     }
-                                    download={
-                                        currentOwner === pubkey
-                                            ? `${animation_url}`
-                                            : ""
-                                    }
-                                >
-                                    {currentOwner === pubkey
-                                        ? "Download"
-                                        : "Buy Now"}
-                                </a>
+                                }}
+                            >
+                                {currentOwner === pubkey
+                                    ? "Download"
+                                    : "Buy Now"}
                             </button>
 
                             <button
