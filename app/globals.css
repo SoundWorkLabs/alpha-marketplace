@@ -13,19 +13,36 @@
   height: auto;
   
 }
-
 .custom-border {
-    border-width: 2px;
-    /* border-style: solid; */
-    border-image-source: linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%);
-    border-image-slice: 1;
+  position: relative;
 }
+.custom-border::before{
+  z-index: -1;
+  content: "";
+  position: absolute;
+  inset: 0; 
+  border-radius: 17.681px;
+  border: 2px solid transparent;
+  background: linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%)border-box;
+  -webkit-mask:
+     linear-gradient(#fff 0 0) padding-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+.custom-border1 {
+  border:2px solid #0000;
+  border-radius:17.681px;
+  background:
+  /* #03061B padding-box, */
+  linear-gradient(#03061B,#03061B) padding-box,
+  linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%) border-box;
+}
+
   tr:nth-child(even):not(:first-child)   {
     background-color: #060A24;
   }
-  /* tr:nth-child(even)  {
-    background-color: #060A24;
-  } */
+  
   tr td{
     padding: 10px;
   }
@@ -92,24 +109,24 @@
   color: rgba(248, 248, 248, 0.721);
 }
 
-/* sell modal */
-/* #sellModal{
-  background-color:blue !important;
 
-} */
-/* .modal-input {
-  padding: 8px;
-  width: 208px;
-  height: 43px;
-}
-.modal-input input {
-  background-color: #121426;
-  color: #ffff;
-  padding: 20px;
-  border-radius:20px;
+.play-pause-nft {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(217, 217, 217, 0.14);
+  border-radius:50%;
+  backdrop-filter: blur(2.5759637355804443px);
 
 }
-
-.sol-label{
-  background-color: red;
-} */
+.player-button-nft,
+.pause-button-nft {
+  color: rgba(217, 217, 217, 0.516); 
+  border-radius: 50%; 
+  padding: 10px; 
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out; 
+}

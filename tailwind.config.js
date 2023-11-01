@@ -26,7 +26,7 @@ module.exports = {
             },
             height: {
                 "nft-h": "208.85px",
-                "nft-card-h": "355.826px",
+                "nft-card-h": "370.826px",
                 76: "76px"
             }
         }

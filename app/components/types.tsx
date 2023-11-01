@@ -1,7 +1,14 @@
 import React from "react";
-export interface NftSchemma {
+export interface NftSchema {
     nft_address: string;
     collection_address: string | null;
+    listings: [
+        {
+            id: string;
+            list_price: string;
+            nft_address: string;
+        }
+    ];
     title: string;
     token_standard: string | null;
     current_owner: string;
@@ -12,7 +19,7 @@ export interface NftSchemma {
     is_confirmed: boolean;
     available_for_lease: boolean;
 }
-export interface MetaSchemma {
+export interface MetaSchema {
     animation_url: string;
     attributes: string[];
     description: string;
@@ -23,7 +30,7 @@ export interface MetaSchemma {
 }
 
 export interface NftCardProps {
-    nft: NftSchemma;
+    nft: NftSchema;
 }
 
 export interface ControlsProps {
@@ -33,4 +40,25 @@ export interface ControlsProps {
     setTimeProgress: (time: number) => void;
     isPlaying: boolean;
     togglePlayPause: () => void;
+}
+export interface AudioContextData {
+    isPlaying: boolean;
+    togglePlayPause: () => void;
+    setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+    // currentTrack: string;
+    currentTrack:
+        | {
+              track: string | undefined;
+              author: string | undefined;
+              title: string | undefined;
+          }
+        | undefined;
+    setCurrentTrack: React.Dispatch<
+        React.SetStateAction<AudioContextData["currentTrack"] | undefined>
+    >;
+}
+export interface LibAudioPlayerProps {
+    isPlaying: boolean;
+    togglePlayPause: () => void;
+    currentTrack: AudioContextData["currentTrack"];
 }
