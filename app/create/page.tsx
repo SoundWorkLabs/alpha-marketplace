@@ -8,7 +8,6 @@ import {
     Group,
     Select,
     Switch,
-    TagsInput,
     Text,
     Textarea,
     TextInput,
@@ -179,7 +178,7 @@ export default function Create() {
     }
 
     return (
-        <Box>
+        <Box className="create">
             <Box mx={100} mb={20}>
                 <Box>
                     <Title order={3}>Create New Sound NFT</Title>
@@ -213,7 +212,7 @@ export default function Create() {
                                         setCollapseType(!collapseType)
                                     }
                                 >
-                                    <Box>
+                                    <Box className="drop-down">
                                         <Select
                                             placeholder="Pick sound type you want to mint"
                                             data={[
@@ -241,7 +240,7 @@ export default function Create() {
                                 </CollapsibleField>
                             </Group>
 
-                            <Group>
+                            <Group className="test">
                                 <TextInputField
                                     label="Name"
                                     placeholder="Kobeni Higashiyama"

@@ -5,7 +5,7 @@ import ConnectWallet from "./components/connect";
 import { Wallet } from "./components/Wallet";
 import CustomPill from "./components/pill";
 
-import { resolver, theme } from "../theme";
+// import { resolver, theme } from "../theme";
 import { SideNav } from "./components/nav";
 
 import "./globals.css";
@@ -15,6 +15,8 @@ import Link from "next/link";
 import Footer from "./components/footer";
 import { Toaster } from "react-hot-toast";
 import { WalletContextProvider } from "./context/WalletContextProvider";
+
+import { AudioProvider } from "./context/audioPlayerContext";
 
 export const metadata = {
     title: "Soundwork",
@@ -29,18 +31,18 @@ export default function RootLayout({
     return (
         <html lang="en">
             <head>
-                <ColorSchemeScript />
+                {/* <ColorSchemeScript /> */}
                 <link rel="shortcut icon" href="/favicon.svg" />
                 <meta
                     name="viewport"
                     content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
                 />
             </head>
-            <body>
-                <MantineProvider theme={theme} cssVariablesResolver={resolver}>
+            <body className="bg-sw-bg">
+                <MantineProvider>
                     <Wallet>
                         <WalletContextProvider>
-                            <div className="flex">
+                            <div className="flex text-white p-0 m-0">
                                 <nav>
                                     <SideNav />
                                 </nav>
@@ -54,7 +56,7 @@ export default function RootLayout({
                                                 />
                                             </Link>
                                             <CustomPill
-                                                label="SOL"
+                                                label="sol"
                                                 color="transparent"
                                             />
                                             <CustomPill color="transparent">
@@ -64,11 +66,11 @@ export default function RootLayout({
                                             </CustomPill>
                                         </Group>
                                     </div>
-                                    {children}
+                                    <AudioProvider>{children}</AudioProvider>
                                     <Toaster position="bottom-center" />
                                 </main>
                             </div>
-                            <footer>
+                            <footer className="text-white">
                                 <Footer />
                             </footer>
                         </WalletContextProvider>

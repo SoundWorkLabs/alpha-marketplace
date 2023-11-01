@@ -21,7 +21,7 @@ export default function Footer() {
         }
     ];
     return (
-        <Box className="border-t-2 py-3">
+        <Box className="border-t-2 py-3 bg-[#121426]">
             <Box className="flex justify-center wrap">
                 {footerLinks.map((data, index) => (
                     <Link

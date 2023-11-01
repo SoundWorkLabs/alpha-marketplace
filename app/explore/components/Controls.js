@@ -8,11 +8,18 @@ import {
     IconPlaylist
 } from "@tabler/icons-react";
 
-function Controls({ audioRef, progressBarRef, duration, setTimeProgress }) {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const togglePlayPause = () => {
-        setIsPlaying((prev) => !prev);
-    };
+function Controls({
+    audioRef,
+    progressBarRef,
+    duration,
+    setTimeProgress,
+    isPlaying,
+    togglePlayPause
+}) {
+    // const [isPlaying, setIsPlaying] = useState(false);
+    // const togglePlayPause = () => {
+    //     setIsPlaying((prev) => !prev);
+    // };
 
     //   animation
     const playAnimationRef = useRef();
@@ -42,19 +49,22 @@ function Controls({ audioRef, progressBarRef, duration, setTimeProgress }) {
     return (
         <div className="controls-wrapper">
             <div className="controls">
-                <button className="p-5">
+                <button className="p-2 mr-4 rounded-full bg-gray-500">
                     <IconPlayerSkipBackFilled />
                 </button>
 
-                <button className="p-5" onClick={togglePlayPause}>
+                <button
+                    className="p-2 mx-4 rounded-full bg-gray-500"
+                    onClick={togglePlayPause}
+                >
                     {isPlaying ? <IconPlayerPause /> : <IconPlayerPlayFilled />}
                 </button>
-                <button className="p-5">
+                <button className="p-2 mx-4 rounded-full bg-gray-500">
                     <IconPlayerSkipForwardFilled />
                 </button>
-                <button className="p-5">
+                {/* <button className="p-5">
                     <IconPlaylist />
-                </button>
+                </button> */}
             </div>
         </div>
     );

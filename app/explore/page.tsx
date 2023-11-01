@@ -1,57 +1,91 @@
 "use client";
 import { Box, TextInput, Text } from "@mantine/core";
-import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
-
-import AudioPlayer from "./components/AudioPlayer";
-// import AudioPlayer from "./components/LocalAudioPlayer";
+import LibAudioPlayer from "./components/AudioPlayer";
+import { useState, useEffect } from "react";
+// import { useAudio } from "../context/audioPlayerContext";
+import { fetchListedNfts } from "../../services/NFT";
+import { NftSchema } from "../components/types";
 
 export default function Explore() {
-    const audioUrl = "/sunella.mp3"; // To be adjust to call the URL based on the Netlify function route
+    const [nfts, setNfts] = useState<NftSchema[]>([]);
+
+    // const {
+    //     isPlaying,
+    //     setIsPlaying,
+    //     currentTrack,
+    //     setCurrentTrack,
+    //     togglePlayPause
+    // } = useAudio();
+
+    useEffect(() => {
+        fetchListedNfts()
+            .then((res) => {
+                if (res) {
+                    setNfts(res);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+            });
+    }, []);
 
     return (
-        <div className="my-8 p-5">
+        <div className="p-5 scroll-smooth">
             {/* Header Section */}
-            <Box className="p-5">
-                <div className="flex justify-between items-center">
-                    <Text className="text-lg font-semibold">Explore</Text>
-                    <div className="flex-1 ml-8">
+            <Box className="p-5 ">
+                <div className="p-5 flex justify-between items-center border rounded-xl bg-transparent h-76">
+                    <Text size="xl">Explore</Text>
+                    <div className="ml-auto">
+                        {" "}
                         <TextInput
-                            className="w-full p-2 rounded-md border border-gray-300"
+                            w={600}
+                            radius={20}
+                            className="search w-[100px] p-2 "
                             placeholder="Search by collection, music, or creators..."
                         />
                     </div>
-                    <Box className="ml-4">Sort by</Box>
+                    <button className="ml-4 bg-aduio-bg rounded-full p-4">
+                        Sort by
+                    </button>{" "}
                 </div>
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-8 p-5">
-                {/* <AudioPlayer audioUrl={audioUrl} /> */}
-                <AudioPlayer />
+            <Box className="my-5 px-7 bg-aduio-bg rounded-full w-full h-76">
+                <LibAudioPlayer
+                // isPlaying={isPlaying}
+                // togglePlayPause={togglePlayPause}
+                // currentTrack={currentTrack}
+                />
             </Box>
 
             {/* Collections */}
 
             {/* this will be derived from the collection component once the data is being feed from the backend */}
-            <Box className="my-8 p-5">
+            {/* <Box className="mt-5 p-5">
                 <div className="text-xl font-semibold mb-4">Collections</div>
-                <Box className="flex w-full">
+                <Box className="flex flex-wrap">
                     <Cards />
                     <Cards />
                     <Cards />
                     <Cards />
                 </Box>
-            </Box>
+            </Box> */}
             {/* Sounds */}
-            {/* this will be derived from the nft component once the data is being feed from the backend */}
-            <Box className="my-8 p-5">
+            <Box className="mt-0 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
-                <Box className="flex">
-                    <NftCard />
-                    <NftCard />
-                    <NftCard />
-                    <NftCard />
+                <Box className="flex flex-wrap">
+                    {nfts && nfts.length > 0 ? (
+                        nfts
+                            .slice()
+                            .reverse()
+                            .map((nft) => (
+                                <NftCard key={nft.nft_address} nft={nft} />
+                            ))
+                    ) : (
+                        <div>Loading...</div>
+                    )}
                 </Box>
             </Box>
         </div>
