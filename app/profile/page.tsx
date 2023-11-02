@@ -13,7 +13,13 @@ const dummyItemValObj = {
 
 export default function Profile() {
     const { publicKey } = useWallet();
+    if (!publicKey) {
+        const connectBtn = document.querySelector(
+            ".connectBtn"
+        ) as HTMLButtonElement;
 
+        return connectBtn?.click();
+    }
     return (
         <Box className="mx-10">
             <Flex gap="lg" className="p-5" wrap="wrap">

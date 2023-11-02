@@ -28,7 +28,6 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 export default function Page() {
     const { id: nftAddress } = useParams();
-
     const wallet = useAnchorWallet();
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
@@ -42,7 +41,7 @@ export default function Page() {
     const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
     const [isListing, setIsListing] = useState(false);
-
+    const [isBuying, setIsBuying] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
 
     // TODO: this data should be passed in from the page we are navigating from
@@ -159,8 +158,13 @@ export default function Page() {
                                         a.href = animation_url;
                                         a.download = title;
                                         a.click();
-                                    } else {
-                                        console.log("should open wallet");
+                                    } else if (!pubkey) {
+                                        const connectBtn =
+                                            document.querySelector(
+                                                ".connectBtn"
+                                            ) as HTMLButtonElement;
+
+                                        connectBtn?.click();
                                     }
                                 }}
                             >
@@ -184,7 +188,6 @@ export default function Page() {
                                     : "Make Offer"}
                             </button>
                         </div>
-
                         <Modal
                             opened={isSellModalOpen}
                             onClose={() => setIsSellModalOpen(false)}

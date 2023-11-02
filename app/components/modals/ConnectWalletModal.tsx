@@ -88,7 +88,11 @@ export default function ConnectWalletModal() {
                 </Box>
             </Modal>
 
-            <Button style={{ background: "none" }} onClick={open}>
+            <Button
+                className="connectBtn"
+                style={{ background: "none" }}
+                onClick={open}
+            >
                 Connect
             </Button>
         </>

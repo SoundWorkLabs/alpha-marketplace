@@ -15,7 +15,11 @@ export default function Sounds() {
 
     useEffect(() => {
         if (!connected) {
-            return;
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            return connectBtn?.click();
         }
         fetchUserNfts()
             .then((res) => {
@@ -66,9 +70,10 @@ export default function Sounds() {
                     </button>
                 </div>
             </Box>
-            {!connected ? (
+            {/* {!connected ? (
                 <>connect your wallet</>
-            ) : isEmpty ? (
+            ) :  */}
+            {isEmpty ? (
                 <>You dont have any minted sound works</>
             ) : (
                 <Box className="flex flex-wrap">

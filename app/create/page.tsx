@@ -213,7 +213,14 @@ export default function Create() {
         [publicKey, createFormData, handleSuccess]
     );
 
-    if (!publicKey) return <>Please connect your wallet to mint an NFT</>;
+    // if (!publicKey) return <>Please connect your wallet to mint an NFT</>;
+    if (!publicKey) {
+        const connectBtn = document.querySelector(
+            ".connectBtn"
+        ) as HTMLButtonElement;
+
+        return connectBtn?.click();
+    }
 
     return (
         <Box className="create">
