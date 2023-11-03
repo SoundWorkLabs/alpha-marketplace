@@ -1,5 +1,4 @@
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { createListing } from "../../../services/listing";
 import { SoundworkSDK } from "@jimii/soundwork-sdk";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { useEffect, useState } from "react";
@@ -7,21 +6,20 @@ import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import toast from "react-hot-toast";
 
-export default function ListingNft(props: {
-    price: number;
+export default function BuyNow(props: {
     nftAddress: string;
-    closeModal: () => void;
+    onBuyNow: () => void;
 }) {
     const { connection } = useConnection();
     const wallet = useAnchorWallet();
-    const { price, nftAddress, closeModal } = props;
+    const { nftAddress, onBuyNow } = props;
     const [provider, setProvider] = useState<AnchorProvider>();
     const [sdk, setSdk] = useState<SoundworkSDK>();
     const mint = new PublicKey(nftAddress);
 
     useEffect(() => {
         if (!wallet) throw new WalletNotConnectedError();
-        const initialize = async () => {
+        const initiaclizeBuy = async () => {
             if (!provider && !sdk) {
                 const provider = await new AnchorProvider(
                     connection,
@@ -32,19 +30,14 @@ export default function ListingNft(props: {
                 const sdk = new SoundworkSDK(provider, connection);
                 await setSdk(sdk);
 
-                // const dix = await sdk.deleteListing(mint);
-                // const dtx = new Transaction().add(dix);
-                // await provider.sendAndConfirm(dtx, []);
+                const ix = await sdk.buyListing(mint);
 
-                const ix = await sdk.createListing(mint, price).then((ix) => {
-                    return ix;
-                });
                 const tx = new Transaction().add(ix);
-                const txSigHash = await provider
+                await provider
                     .sendAndConfirm(tx, [])
                     .then((sig) => {
-                        closeModal();
-                        toast.success("NFT Listed 🎉🎉", {
+                        console.log(`https://explore,solana.com/tx/${sig}`);
+                        toast.success("NFT bought 🎉🎉", {
                             duration: 3000,
                             position: "top-center",
                             style: {
@@ -54,16 +47,12 @@ export default function ListingNft(props: {
                                 color: "white"
                             }
                         });
-                        createListing(
-                            sig,
-                            wallet.publicKey?.toBase58(),
-                            mint,
-                            price
-                        );
+                        onBuyNow();
                     })
+
                     .catch((err) => {
-                        closeModal();
-                        return toast.error("Failed to List", {
+                        onBuyNow();
+                        return toast.error("Failed to buy", {
                             duration: 3000,
                             position: "top-left",
                             style: {
@@ -74,11 +63,10 @@ export default function ListingNft(props: {
                             }
                         });
                     });
-                return txSigHash;
             }
         };
+        initiaclizeBuy();
+    }, []);
 
-        initialize();
-    }, [wallet, connection, provider, sdk]);
     return <></>;
 }

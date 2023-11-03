@@ -25,6 +25,7 @@ import { useAudio } from "../../context/audioPlayerContext";
 
 import ListingNft from "../../components/modals/listingNft";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import BuyNow from "../../components/BuyNow";
 
 export default function Page() {
     const { id: nftAddress } = useParams();
@@ -41,7 +42,7 @@ export default function Page() {
     const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
     const [isListing, setIsListing] = useState(false);
-    const [isBuying, setIsBuying] = useState(false);
+    const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
 
     // TODO: this data should be passed in from the page we are navigating from
@@ -74,6 +75,23 @@ export default function Page() {
     const image = metaDetails?.image;
     const title = metaDetails?.title;
     const atrr = metaDetails?.attributes;
+
+    const handleClick = () => {
+        if (!pubkey) {
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            connectBtn?.click();
+        } else if (currentOwner === pubkey) {
+            const a = document.createElement("a");
+            a.href = animation_url;
+            a.download = title;
+            a.click();
+        } else {
+            setIsBuyNowOpen(!isBuyNowOpen);
+        }
+    };
 
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -152,31 +170,32 @@ export default function Page() {
                         <div className="mx-5 my-5">
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
-                                onClick={() => {
-                                    if (currentOwner === pubkey) {
-                                        const a = document.createElement("a");
-                                        a.href = animation_url;
-                                        a.download = title;
-                                        a.click();
-                                    } else if (!pubkey) {
-                                        const connectBtn =
-                                            document.querySelector(
-                                                ".connectBtn"
-                                            ) as HTMLButtonElement;
-
-                                        connectBtn?.click();
-                                    }
-                                }}
+                                onClick={handleClick}
                             >
                                 {currentOwner === pubkey
                                     ? "Download"
                                     : "Buy Now"}
                             </button>
-
+                            <>
+                                {isBuyNowOpen && (
+                                    <BuyNow
+                                        nftAddress={nftAddress}
+                                        onBuyNow={() => {
+                                            setIsBuyNowOpen(!isBuyNowOpen);
+                                        }}
+                                    />
+                                )}
+                            </>
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
                                 onClick={() => {
-                                    if (currentOwner === pubkey) {
+                                    if (!pubkey) {
+                                        const connectBtn =
+                                            document.querySelector(
+                                                ".connectBtn"
+                                            ) as HTMLButtonElement;
+                                        connectBtn?.click();
+                                    } else if (currentOwner === pubkey) {
                                         setIsSellModalOpen(true);
                                     } else {
                                         setIsOfferModalOpen(true);
