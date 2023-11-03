@@ -25,7 +25,8 @@ import { mintSingle, saveMinted } from "../../services/NFT";
 
 import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
-import { Transaction } from "@solana/web3.js";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import { MintSingleResp } from "../../types";
 
 export default function Create() {
     const { publicKey } = useWallet();
@@ -43,9 +44,9 @@ export default function Create() {
     const [audioFile, setAudioFile] = useState<FileWithPath>();
     const [name, setName] = useState<string>("");
     const [symbol, setSymbol] = useState<string>("");
-    const [externalLink, setExternalLink] = useState<string>("");
+    const [externalUrl, setExternalUrl] = useState<string>("");
     const [description, setDescription] = useState<string>("");
-    const [NotoMint, setNoToMint] = useState<number>();
+    const [numtoMint, setNumToMint] = useState<number>();
     const [allowDownload, setAllowDownload] = useState(false);
     // attributes
     const [attributeKey, setAttributeKey] = useState<string>("");
@@ -54,10 +55,10 @@ export default function Create() {
         { [traitKey: string]: string }[]
     >([]);
 
-    // todo: create a hook for this
-    // todo (Jimi): sepaarate serialization and signing
-    const handleSignTx = useCallback(
-        async (serializedTx: string): Promise<Transaction> => {
+    console.log("attributes", attributes);
+
+    const deserializeUmiTx = useCallback(
+        async (serializedTx: string): Promise<VersionedTransaction> => {
             if (!publicKey) throw new WalletNotConnectedError();
 
             // deserialize the tx
@@ -67,6 +68,14 @@ export default function Create() {
             );
             const web3jsTx = toWeb3JsTransaction(deserializedTx);
 
+            return web3jsTx;
+        },
+        [connection, publicKey]
+    );
+
+    // todo: user anchor provider
+    const handleSignTx = useCallback(
+        async (deserializedTx: VersionedTransaction): Promise<Transaction> => {
             // determine the provider and sign
             // the tx ourselves
             const { backpack }: any = window; // backpack
@@ -79,19 +88,19 @@ export default function Create() {
             let tx;
             if (backpack?.isConnected) {
                 console.log("backpack 👌");
-                tx = await backpack.sendAndConfirm(web3jsTx);
+                tx = await backpack.sendAndConfirm(deserializedTx);
             } else if (phantomProvider?.isConnected) {
                 console.log("phantom 👌");
-                tx = await phantomProvider.signAndSendTransaction(web3jsTx);
-                // return txHash;
+                tx =
+                    await phantomProvider.signAndSendTransaction(
+                        deserializedTx
+                    );
             } else if (glow?.isConnected) {
                 console.log("glow 👌");
-                tx = glow.signAndSendTransaction(web3jsTx);
-                // return txHash;
+                tx = glow.signAndSendTransaction(deserializedTx);
             } else if (braveSolana?.isConnected) {
                 console.log("brave 👌");
-                tx = braveSolana.signAndSendTransaction(web3jsTx);
-                // return txHash;
+                tx = braveSolana.signAndSendTransaction(deserializedTx);
             } else {
                 // todo: proper error handling
                 console.error("selected wallet not supported");
@@ -99,71 +108,35 @@ export default function Create() {
 
             return tx;
         },
-        [connection, publicKey]
+        []
     );
 
-    const handleSubmit = useCallback(
-        async (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
+    const createFormData = useCallback((): FormData => {
+        if (!publicKey) throw new WalletNotConnectedError();
 
-            if (!publicKey) throw new WalletNotConnectedError();
+        const formData = new FormData();
+        formData.append("authorityPubkey", publicKey?.toBase58());
+        formData.append("title", name);
+        formData.append("symbol", symbol);
+        formData.append("description", description);
+        formData.append("externalUrl", externalUrl);
+        formData.append("attributes", JSON.stringify(attributes));
+        formData.append("allowDownload", allowDownload.toString());
+        formData.append("audioFile", audioFile ?? "");
+        formData.append("coverImage", coverImage ?? "");
 
-            const formData = new FormData();
-            formData.append("authorityPubkey", publicKey?.toBase58());
-            formData.append("title", name);
-            formData.append("symbol", symbol);
-            formData.append("description", description);
-            formData.append("externalLink", externalLink);
-            formData.append("attributes", JSON.stringify(attributes));
-            formData.append("allowDownload", allowDownload.toString());
-            formData.append("audioFile", audioFile ?? "");
-            formData.append("coverImage", coverImage ?? "");
-
-            try {
-                let toastId = notifyLoading();
-
-                const serializedTx = await mintSingle(formData);
-                if (serializedTx instanceof Error) {
-                    console.error("An error occurred:", serializedTx.message);
-                    console.log("serialized", serializedTx);
-
-                    toast.dismiss();
-                    notifyErr(serializedTx.message);
-                    return;
-                }
-                toast.dismiss(toastId);
-
-                notifySuccess(
-                    "Success. Please sign the transaction to finish NFT mint"
-                );
-
-                let tx = await handleSignTx(serializedTx.tx); // todo: error when this fails
-                console.log("the tx", tx);
-                if (tx) {
-                    await saveMinted(serializedTx.mint);
-                    notifySuccess(
-                        `https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`
-                    ); // todo (Jimii): should be a sucess modal
-                } else {
-                    notifyErr("err signing your tx, try again");
-                }
-            } catch (err) {
-                console.error("error single mint", err);
-            }
-        },
-        [
-            name,
-            symbol,
-            description,
-            externalLink,
-            allowDownload,
-            audioFile,
-            coverImage,
-            publicKey,
-            attributes,
-            handleSignTx
-        ]
-    );
+        return formData;
+    }, [
+        name,
+        symbol,
+        description,
+        externalUrl,
+        allowDownload,
+        audioFile,
+        coverImage,
+        attributes,
+        publicKey
+    ]);
 
     function handleAddAttribute() {
         if (!attributeKey && !attributeValue) return;
@@ -176,6 +149,77 @@ export default function Create() {
         console.log("clear input");
         setAttributeKey("");
         setAttributeValue("");
+    }
+
+    const handleSuccess = useCallback(
+        async (serializedTx: MintSingleResp) => {
+            notifySuccess(
+                "Success. Please sign the transaction to finish NFT mint"
+            );
+
+            try {
+                const deserializedTx = await deserializeUmiTx(serializedTx.tx);
+                const tx = await handleSignTx(deserializedTx);
+                console.log("the tx", tx);
+                if (tx) {
+                    await saveMinted(serializedTx.mint);
+                    notifySuccess(
+                        `https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`
+                    );
+                } else {
+                    notifyErr(
+                        "Error signing your transaction, please try again."
+                    );
+                }
+            } catch (err) {
+                console.error("Error processing transaction:", err);
+            }
+        },
+        [deserializeUmiTx, handleSignTx]
+    );
+
+    const handleError = (error: Error) => {
+        console.error("An error occurred:", error.message);
+        console.log("serialized", error);
+        notifyErr(error.message);
+    };
+
+    const handleSubmit = useCallback(
+        async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+
+            if (!publicKey) throw new WalletNotConnectedError();
+
+            try {
+                let toastId = notifyLoading("uploading NFT metadata");
+                const formData = createFormData();
+                const serializedTx = await mintSingle(formData);
+
+                toast.dismiss(toastId);
+
+                console.log("serialized", serializedTx);
+
+                if (serializedTx.error) {
+                    console.log("there was an error ");
+                    // @ts-ignore
+                    handleError(serializedTx.error);
+                } else {
+                    handleSuccess(serializedTx);
+                }
+            } catch (err) {
+                console.error("Error during NFT mint:", err);
+            }
+        },
+        [publicKey, createFormData, handleSuccess]
+    );
+
+    // if (!publicKey) return <>Please connect your wallet to mint an NFT</>;
+    if (!publicKey) {
+        const connectBtn = document.querySelector(
+            ".connectBtn"
+        ) as HTMLButtonElement;
+
+        return connectBtn?.click();
     }
 
     return (
@@ -215,6 +259,7 @@ export default function Create() {
                                 >
                                     <Box className="drop-down">
                                         <Select
+                                            required // ! WHY NOT WORK?
                                             placeholder="Pick sound type you want to mint"
                                             data={[
                                                 "sound",
@@ -244,6 +289,7 @@ export default function Create() {
                             <Group className="test">
                                 <TextInputField
                                     label="Name"
+                                    required={true}
                                     placeholder="Kobeni Higashiyama"
                                     onChange={({ target: { value } }) =>
                                         setName(value)
@@ -267,7 +313,7 @@ export default function Create() {
                                     label="External Link"
                                     placeholder="https://soundwork.io/assets/csm"
                                     onChange={({ target: { value } }) =>
-                                        setExternalLink(value)
+                                        setExternalUrl(value)
                                     }
                                 />
                             </Group>
@@ -426,7 +472,7 @@ export default function Create() {
                                     placeholder="1"
                                     description="Number of copies to be minted"
                                     onChange={({ target: { value } }) =>
-                                        setNoToMint(value)
+                                        setNumToMint(value)
                                     }
                                 />
                             </Group>
@@ -452,6 +498,7 @@ interface TextInputFieldProps {
     label: string;
     placeholder?: string;
     type?: string;
+    required?: boolean;
     description?: string;
     onChange: (event: any) => void; //todo: fix type
 }
@@ -461,6 +508,7 @@ function TextInputField({
     placeholder,
     onChange,
     type,
+    required,
     description
 }: TextInputFieldProps) {
     return (
@@ -476,6 +524,7 @@ function TextInputField({
             <Box>
                 <TextInput
                     type={type}
+                    required={required}
                     onChange={(event) => onChange(event)}
                     placeholder={placeholder}
                     variant="filled"

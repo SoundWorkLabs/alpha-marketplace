@@ -1,28 +1,28 @@
 "use client";
 import { Box, TextInput, Text } from "@mantine/core";
-import Cards from "../components/Card";
 import NftCard from "../components/NftCard";
 import LibAudioPlayer from "./components/AudioPlayer";
 import { useState, useEffect } from "react";
-import { useAudio } from "../context/audioPlayerContext";
-import { fetchNftData } from "./data/tracks";
-import { NftSchemma } from "../components/types";
+// import { useAudio } from "../context/audioPlayerContext";
+import { fetchListedNfts } from "../../services/NFT";
+import { NftSchema } from "../components/types";
 
 export default function Explore() {
-    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+    const [nfts, setNfts] = useState<NftSchema[]>([]);
 
-    const {
-        isPlaying,
-        setIsPlaying,
-        currentTrack,
-        setCurrentTrack,
-        togglePlayPause
-    } = useAudio();
+    // const {
+    //     isPlaying,
+    //     setIsPlaying,
+    //     currentTrack,
+    //     setCurrentTrack,
+    //     togglePlayPause
+    // } = useAudio();
+
     useEffect(() => {
-        fetchNftData()
+        fetchListedNfts()
             .then((res) => {
-                if (res && res.data) {
-                    setNfts(res.data);
+                if (res) {
+                    setNfts(res);
                 }
             })
             .catch((err) => {
@@ -52,18 +52,18 @@ export default function Explore() {
             </Box>
 
             {/* Audio Player */}
-            <Box className="my-5 p-2 bg-aduio-bg rounded-full w-full h-76">
+            <Box className="my-5 px-7 bg-aduio-bg rounded-full w-full h-76">
                 <LibAudioPlayer
-                    isPlaying={isPlaying}
-                    togglePlayPause={togglePlayPause}
-                    currentTrack={currentTrack}
+                // isPlaying={isPlaying}
+                // togglePlayPause={togglePlayPause}
+                // currentTrack={currentTrack}
                 />
             </Box>
 
             {/* Collections */}
 
             {/* this will be derived from the collection component once the data is being feed from the backend */}
-            <Box className="mt-5 p-5">
+            {/* <Box className="mt-5 p-5">
                 <div className="text-xl font-semibold mb-4">Collections</div>
                 <Box className="flex flex-wrap">
                     <Cards />
@@ -71,15 +71,18 @@ export default function Explore() {
                     <Cards />
                     <Cards />
                 </Box>
-            </Box>
+            </Box> */}
             {/* Sounds */}
             <Box className="mt-0 p-5">
                 <div className="text-xl font-semibold mb-4">Sounds</div>
                 <Box className="flex flex-wrap">
                     {nfts && nfts.length > 0 ? (
-                        nfts.map((nft) => (
-                            <NftCard key={nft.nft_address} nft={nft} />
-                        ))
+                        nfts
+                            .slice()
+                            .reverse()
+                            .map((nft) => (
+                                <NftCard key={nft.nft_address} nft={nft} />
+                            ))
                     ) : (
                         <div>Loading...</div>
                     )}

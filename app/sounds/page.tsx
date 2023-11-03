@@ -1,35 +1,35 @@
 "use client";
 import { Box } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { fetchNftData } from "../explore/data/tracks";
-import { NftSchemma } from "../components/types";
+import { fetchUserNfts } from "../../services/NFT";
+import { NftSchema } from "../components/types";
 import { useEffect, useState } from "react";
 import NftCard from "../components/NftCard";
 
 export default function Sounds() {
     const { publicKey, connected } = useWallet();
-    const [nfts, setNfts] = useState<NftSchemma[]>([]);
+    const [nfts, setNfts] = useState<NftSchema[]>([]);
     const pubkey = publicKey?.toBase58();
 
     const [isEmpty, setIsEmpty] = useState(false);
 
-    console.log("let there be pubkey 🫳", publicKey);
-    console.log("vola 🎉", connected);
-
     useEffect(() => {
         if (!connected) {
-            return;
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            return connectBtn?.click();
         }
-        fetchNftData()
+        fetchUserNfts()
             .then((res) => {
-                if (res && res.data) {
+                if (res) {
                     // test pubkey
                     // const target =
                     //     "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
-                    const data = res.data;
 
-                    const ownedNfts = data.filter(
-                        (nft: NftSchemma) => nft.current_owner === pubkey
+                    const ownedNfts = res.filter(
+                        (nft: NftSchema) => nft.current_owner === pubkey
                     );
 
                     if (ownedNfts.length > 0) {
@@ -37,7 +37,6 @@ export default function Sounds() {
                     } else {
                         // If there are no matching NFTs
                         setIsEmpty(true);
-                        console.log("You have zero NFTs");
                     }
                 }
             })
@@ -71,16 +70,20 @@ export default function Sounds() {
                     </button>
                 </div>
             </Box>
-            {!connected ? (
+            {/* {!connected ? (
                 <>connect your wallet</>
-            ) : isEmpty ? (
+            ) :  */}
+            {isEmpty ? (
                 <>You dont have any minted sound works</>
             ) : (
                 <Box className="flex flex-wrap">
                     {nfts.length > 0 ? (
-                        nfts.map((nft) => (
-                            <NftCard key={nft.nft_address} nft={nft} />
-                        ))
+                        nfts
+                            .slice()
+                            .reverse()
+                            .map((nft) => (
+                                <NftCard key={nft.nft_address} nft={nft} />
+                            ))
                     ) : (
                         <div>Loading...</div>
                     )}

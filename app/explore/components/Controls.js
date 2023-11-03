@@ -49,7 +49,7 @@ function Controls({
     return (
         <div className="controls-wrapper">
             <div className="controls">
-                <button className="p-2 mx-4 rounded-full bg-gray-500">
+                <button className="p-2 mr-4 rounded-full bg-gray-500">
                     <IconPlayerSkipBackFilled />
                 </button>
 
