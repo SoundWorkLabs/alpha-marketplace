@@ -95,7 +95,7 @@ export default function Page() {
 
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
-            <Box className="flex flex-wrap">
+            <Box className="flex flex-wrap gap-x-10">
                 <div className="image-container">
                     <Image
                         priority
@@ -130,7 +130,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <Box className="mx-6 flex-1">
+                <Box className="flex-1 max-w-[39vw] my-auto xl:max-w-full">
                     <div className="flex flex-wrap my-5">
                         <span className="text-[#E6E6E6]">Owner By: </span>
                         <CopyButton
@@ -167,9 +167,9 @@ export default function Page() {
                             <p className="text-3xl mx-5">{title}</p>
                         </div>
 
-                        <div className="mx-5 my-5">
+                        <div className="my-5 flex justify-between">
                             <button
-                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
                                 onClick={handleClick}
                             >
                                 {currentOwner === pubkey
