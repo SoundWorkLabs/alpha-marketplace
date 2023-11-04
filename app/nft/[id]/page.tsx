@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
 import {
@@ -24,8 +24,12 @@ import SoundWorkLogo from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
 import ListingNft from "../../components/modals/listingNft";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import BuyNow from "../../components/BuyNow";
+import { SoundworkSDK } from "@jimii/soundwork-sdk";
+import { PublicKey, Transaction } from "@solana/web3.js";
+
+import { AnchorProvider } from "@coral-xyz/anchor";
 
 export default function Page() {
     const { id: nftAddress } = useParams();
@@ -45,6 +49,9 @@ export default function Page() {
     const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
 
+    const anchorWallet = useAnchorWallet();
+    const { connection } = useConnection();
+
     // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
         nftData(nftAddress)
@@ -62,14 +69,6 @@ export default function Page() {
             });
     }, [nftAddress]);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!metaDetails || !currentOwner) {
-        return <div>Data not available. Try again later.</div>;
-    }
-
     const animation_url = metaDetails?.animation_url;
     const description = metaDetails?.description;
     const image = metaDetails?.image;
@@ -85,13 +84,49 @@ export default function Page() {
             connectBtn?.click();
         } else if (currentOwner === pubkey) {
             const a = document.createElement("a");
-            a.href = animation_url;
-            a.download = title;
+            a.href = animation_url ?? ""; // todo: handle err
+            a.download = title ?? ""; // todo: handle error
             a.click();
         } else {
             setIsBuyNowOpen(!isBuyNowOpen);
         }
     };
+
+    const handleBuy = useCallback(async () => {
+        if (!anchorWallet) throw new Error("wallet not connected");
+        if (!pubkey) throw new Error("wallet not connected");
+
+        const provider = await new AnchorProvider(connection, anchorWallet, {});
+
+        const soundworkSDK = new SoundworkSDK(provider, connection);
+
+        let nftMint = new PublicKey(
+            "5BxzpdNRuGnbSXpLfrZyxDTX3jGZEELwdj1mLWhgWTv"
+        ); // ! remove me
+        let ix = await soundworkSDK.buyListing(nftMint);
+        let tx = new Transaction();
+        let blockhash = (await connection.getLatestBlockhash("finalized"))
+            .blockhash;
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = new PublicKey(pubkey);
+        tx.add(ix);
+
+        const {
+            phantom: { solana: phantomProvider }
+        }: any = window; // phantom
+        let txHash = await phantomProvider.signAndSendTransaction(tx);
+
+        // let txhash = await provider.sendAndConfirm(tx);
+        console.log("tx hash", txHash);
+    }, [anchorWallet, connection]);
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!metaDetails || !currentOwner) {
+        return <div>Data not available. Try again later.</div>;
+    }
 
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -99,7 +134,7 @@ export default function Page() {
                 <div className="image-container">
                     <Image
                         priority
-                        src={image}
+                        src={image ?? ""}
                         alt="nft image"
                         className="rounded-md dynamic-image"
                         height={600}
@@ -170,7 +205,7 @@ export default function Page() {
                         <div className="my-5 flex justify-between">
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
-                                onClick={handleClick}
+                                onClick={() => handleBuy()}
                             >
                                 {currentOwner === pubkey
                                     ? "Download"
