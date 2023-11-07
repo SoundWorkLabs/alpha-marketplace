@@ -17,7 +17,7 @@ import { FileWithPath } from "@mantine/dropzone";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { IconPlus, IconX } from "@tabler/icons-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AudioDropzone, ImageDropzone } from "../components/FileDropzone";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsTransaction } from "@metaplex-foundation/umi-web3js-adapters";
@@ -214,12 +214,15 @@ export default function Create() {
     );
 
     // if (!publicKey) return <>Please connect your wallet to mint an NFT</>;
-    if (!publicKey) {
-        const connectBtn = document.querySelector(
-            ".connectBtn"
-        ) as HTMLButtonElement;
 
-        return connectBtn?.click();
+    if (!publicKey) {
+        if (typeof window !== "undefined") {
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            return connectBtn?.click();
+        }
     }
 
     return (

@@ -3,6 +3,7 @@
 import { Avatar, Box, Button, Flex, Group, Input, Tabs } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
 import CustomPill from "../components/pill";
+import { useEffect } from "react";
 
 const dummyItemValObj = {
     Items: 34,
@@ -14,11 +15,13 @@ const dummyItemValObj = {
 export default function Profile() {
     const { publicKey } = useWallet();
     if (!publicKey) {
-        const connectBtn = document.querySelector(
-            ".connectBtn"
-        ) as HTMLButtonElement;
+        if (typeof window !== "undefined") {
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
 
-        return connectBtn?.click();
+            return connectBtn?.click();
+        }
     }
     return (
         <Box className="mx-10">

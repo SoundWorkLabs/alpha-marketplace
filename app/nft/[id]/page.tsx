@@ -77,11 +77,13 @@ export default function Page() {
 
     const handleClick = () => {
         if (!pubkey) {
-            const connectBtn = document.querySelector(
-                ".connectBtn"
-            ) as HTMLButtonElement;
+            if (typeof window !== "undefined") {
+                const connectBtn = document.querySelector(
+                    ".connectBtn"
+                ) as HTMLButtonElement;
 
-            connectBtn?.click();
+                connectBtn?.click();
+            }
         } else if (currentOwner === pubkey) {
             const a = document.createElement("a");
             a.href = animation_url ?? ""; // todo: handle err
@@ -228,7 +230,7 @@ export default function Page() {
                                 onClick={() => {
                                     if (!pubkey) {
                                         const connectBtn =
-                                            document.querySelector(
+                                            document?.querySelector(
                                                 ".connectBtn"
                                             ) as HTMLButtonElement;
                                         connectBtn?.click();
