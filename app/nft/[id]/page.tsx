@@ -88,7 +88,7 @@ export default function Page() {
             a.download = title ?? ""; // todo: handle error
             a.click();
         } else {
-            setIsBuyNowOpen(!isBuyNowOpen);
+            handleBuy();
         }
     };
 
@@ -100,9 +100,7 @@ export default function Page() {
 
         const soundworkSDK = new SoundworkSDK(provider, connection);
 
-        let nftMint = new PublicKey(
-            "5BxzpdNRuGnbSXpLfrZyxDTX3jGZEELwdj1mLWhgWTv"
-        ); // ! remove me
+        let nftMint = new PublicKey(nftAddress);
         let ix = await soundworkSDK.buyListing(nftMint);
         let tx = new Transaction();
         let blockhash = (await connection.getLatestBlockhash("finalized"))
@@ -111,13 +109,17 @@ export default function Page() {
         tx.feePayer = new PublicKey(pubkey);
         tx.add(ix);
 
-        const {
-            phantom: { solana: phantomProvider }
-        }: any = window; // phantom
-        let txHash = await phantomProvider.signAndSendTransaction(tx);
+        try {
+            const {
+                phantom: { solana: phantomProvider }
+            }: any = window; // phantom
+            let txHash = await phantomProvider.signAndSendTransaction(tx);
 
-        // let txhash = await provider.sendAndConfirm(tx);
-        console.log("tx hash", txHash);
+            // let txhash = await provider.sendAndConfirm(tx);
+            console.log("tx hash", txHash);
+        } catch (err) {
+            console.log("buying failed", err);
+        }
     }, [anchorWallet, connection, pubkey]);
 
     if (isLoading) {
@@ -205,7 +207,7 @@ export default function Page() {
                         <div className="my-5 flex justify-between">
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
-                                onClick={() => handleBuy()}
+                                onClick={() => handleClick()}
                             >
                                 {currentOwner === pubkey
                                     ? "Download"
