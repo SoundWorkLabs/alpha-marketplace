@@ -118,7 +118,7 @@ export default function Page() {
 
         // let txhash = await provider.sendAndConfirm(tx);
         console.log("tx hash", txHash);
-    }, [anchorWallet, connection]);
+    }, [anchorWallet, connection, pubkey]);
 
     if (isLoading) {
         return <div>Loading...</div>;
