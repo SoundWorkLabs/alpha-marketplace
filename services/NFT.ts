@@ -78,11 +78,15 @@ export async function fetchListedNfts() {
     }
 }
 
-export async function fetchUserNfts() {
+export async function fetchUserNfts(publicKey: string) {
     try {
         const response = await (await fetch(`${API_BASE_URL}/nfts/all`)).json();
-
-        return response;
+        const userNfts = await response.filter((nfts: NftSchema) => {
+            if (nfts.current_owner === publicKey) {
+                return nfts;
+            }
+        });
+        return userNfts;
     } catch (err) {
         console.log("error fetching all nfts", err);
     }

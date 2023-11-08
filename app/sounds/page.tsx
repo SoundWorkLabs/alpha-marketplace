@@ -21,19 +21,19 @@ export default function Sounds() {
 
             return connectBtn?.click();
         }
-        fetchUserNfts()
+        fetchUserNfts(pubkey as string)
             .then((res) => {
                 if (res) {
                     // test pubkey
                     // const target =
                     //     "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
 
-                    const ownedNfts = res.filter(
-                        (nft: NftSchema) => nft.current_owner === pubkey
-                    );
+                    // const ownedNfts = res.filter(
+                    //     (nft: NftSchema) => nft.current_owner === pubkey
+                    // );
 
-                    if (ownedNfts.length > 0) {
-                        setNfts(ownedNfts);
+                    if (res.length > 0) {
+                        setNfts(res);
                     } else {
                         // If there are no matching NFTs
                         setIsEmpty(true);

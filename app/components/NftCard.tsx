@@ -54,7 +54,7 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
         }
     };
     return (
-        <div className="nft-cards w-nft-card-w h-nft-card-h m-5">
+        <div className="nft-cards w-nft-card-w h-nft-card-h my-5 mr-5">
             <div className="custom-border p-[12px] w-full h-full">
                 {/* <div className="border-[2px] border-[linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%)] rounded-[17.681px] p-[12px] w-full h-full"> */}
 

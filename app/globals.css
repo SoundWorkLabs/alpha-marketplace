@@ -84,7 +84,9 @@ tr .columns {
     background: #21232ccc;
     color: #ffffff;
 }
-
+.search-profile input {
+    background: #0204164F;
+}
 .image-container {
     position: relative;
 }
@@ -137,4 +139,8 @@ tr .columns {
     padding: 10px;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
+}
+.profile-selected-opt{
+    border-image: linear-gradient(90deg, #0091D7 0%, #FE0FD4 100%);
+    border-image-slice: 1;
 }
