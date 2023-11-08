@@ -96,7 +96,9 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                 </div>
                 <div className="flex justify-between items-center">
                     <p className="text-[22px] font-[400] leading-relaxed">
-                        {nft.title}
+                        {nft.title.length > 9
+                            ? `${nft.title.slice(0, 9)}...`
+                            : nft.title}
                     </p>
                     <p className="text-[14.44px] text-[#47DEF2]">
                         {nft.current_owner.slice(0, 10)}
