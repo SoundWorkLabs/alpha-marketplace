@@ -30,8 +30,8 @@ export default function Profile() {
             return connectBtn?.click();
         }
         const userPubKey =
-            `${publicKey?.toBase58().substring(0, 6) ?? ""}...${
-                publicKey?.toBase58().substring(26, 32) ?? ""
+            `${publicKey?.toBase58().substring(0, 4) ?? ""}...${
+                publicKey?.toBase58().substring(28, 32) ?? ""
             }` ?? "";
         setPubkey(userPubKey);
         const userData = async () => {
@@ -40,10 +40,6 @@ export default function Profile() {
         };
         userData();
     }, [publicKey]);
-
-    const handleOptionClick = (index: number) => {
-        setSelectedOption(index);
-    };
 
     const options = [
         "In Wallet",
@@ -117,7 +113,7 @@ export default function Profile() {
                                             : ""
                                     }
                                     onClick={() => {
-                                        handleOptionClick(index);
+                                        setSelectedOption(index);
                                     }}
                                 >
                                     {option}

@@ -1,5 +1,5 @@
 "use client";
-import { Box } from "@mantine/core";
+import { Box, Flex, TextInput } from "@mantine/core";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserNfts } from "../../services/NFT";
 import { NftSchema } from "../components/types";
@@ -10,6 +10,7 @@ export default function Sounds() {
     const { publicKey, connected } = useWallet();
     const [nfts, setNfts] = useState<NftSchema[]>([]);
     const pubkey = publicKey?.toBase58();
+    const [selectedOption, setSelectedOption] = useState(0);
 
     const [isEmpty, setIsEmpty] = useState(false);
 
@@ -44,36 +45,56 @@ export default function Sounds() {
                 console.error("Error fetching data:", err);
             });
     }, [connected]);
-
+    const options = ["My Sounds", "Offers Received", "Offers made by me"];
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
-            <Box className="flex items-center justify-center space-x-7 my-4">
-                <button>My Sound</button>
-                <button>Offer Received</button>
-                <button>Offers Made By Me</button>
+            <Box className="items-center">
+                <Flex className="space-x-20 mt-16 justify-center ">
+                    {options.map((option, index) => (
+                        <button
+                            key={index}
+                            className={
+                                selectedOption === index
+                                    ? "border-b-[3px] pb-4 profile-selected-opt w-[137px]"
+                                    : ""
+                            }
+                            onClick={() => {
+                                console.log("index", index);
+                                setSelectedOption(index);
+                            }}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </Flex>
             </Box>
-            <Box className="flex items-center justify-between bg-[#D9D9D90A] backdrop-blur-md rounded-md m-4 h-[76px] p-5 border border-[#A4A4A9] text-base">
-                <div className="flex flex-wrap items-center space-x-3">
-                    <input
+            <Box className="border border-[#D7D6D633] rounded-[12px] h-76 flex flex-wrap items-center justify-between bg-[#D9D9D90A]">
+                <div className="flex flex-wrap items-center mx-2">
+                    {" "}
+                    <TextInput
+                        w={382}
+                        radius={20}
+                        className="search-profile p-2 h-[48px]"
                         placeholder="Search by music..."
-                        className="rounded-full bg-[#0204164F] border border-[#A4A4A9] p-2 m-2 w-[382px]"
                     />
-                    <div className="font-light">result</div>
+                    <div className="font-[300] text-[16px] text-[#B3B3B3]">
+                        0 results
+                    </div>
                 </div>
-
-                <div className="flex">
-                    <button className="rounded-full bg-[#0204164F] p-2 m-2 hover:bg-[#020416a4]">
+                <div className="mx-4">
+                    <button className="text-[16px] mr-4 text-[#B3B3B3]  bg-[#0204164F] rounded-full w-[137px] h-[45px]">
                         Sort by
-                    </button>
-                    <button className="rounded-full bg-[#0204164F] p-2 m-2 hover:bg-[#020416a4]">
-                        Filter
+                    </button>{" "}
+                    <button className="text-[16px] text-[#B3B3B3]  bg-[#0204164F] rounded-full w-[137px] h-[45px]">
+                        filter
                     </button>
                 </div>
             </Box>
+
             {/* {!connected ? (
                 <>connect your wallet</>
             ) :  */}
-            {isEmpty ? (
+            {/* {isEmpty ? (
                 <>You dont have any minted sound works</>
             ) : (
                 <Box className="flex flex-wrap">
@@ -88,6 +109,25 @@ export default function Sounds() {
                         <div>Loading...</div>
                     )}
                 </Box>
+            )} */}
+            {!isEmpty ? (
+                selectedOption == 0 && (
+                    <Box className="flex flex-wrap">
+                        {" "}
+                        {nfts && nfts.length > 0 ? (
+                            nfts
+                                .slice()
+                                .reverse()
+                                .map((nft) => (
+                                    <NftCard key={nft.nft_address} nft={nft} />
+                                ))
+                        ) : (
+                            <div>Loading...</div>
+                        )}
+                    </Box>
+                )
+            ) : (
+                <>You dont have any minted sound works</>
             )}
         </div>
     );
