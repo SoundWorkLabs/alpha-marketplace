@@ -94,10 +94,10 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                         )}
                     </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col overflow-hidden">
                     <p className="text-[22px] font-[400] leading-relaxed">
-                        {nft.title.length > 9
-                            ? `${nft.title.slice(0, 9)}...`
+                        {nft.title.length >= 25
+                            ? `${nft.title.slice(0, 22)}...`
                             : nft.title}
                     </p>
                     <p className="text-[14.44px] text-[#47DEF2]">
@@ -105,49 +105,31 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                     </p>
                 </div>
 
-                {nft?.listings ? (
-                    // nft?.listings[0] && (
-                    <div className="flex justify-between items-center">
-                        <div className="flex flex-wrap items-center">
-                            <SolIcon />
-                            <p className="text-[20.471px] text-[#47DEF2] ml-2 font-[500]">
-                                {nft.listings[0].list_price}
-                                {/* &copy; */}
-                            </p>
-                        </div>
-                    </div>
-                ) : (
-                    ""
-                )}
-
                 {/* <p className="text-[#FFFFFF61] text-[15.471px]">
                         we need availabilty prop
                         10 available{" "}
                     </p> */}
 
-                <div className="flex flex-wrap justify-end mt-[1.5px]">
-                    <button onClick={handleLike} className="flex text-right">
+                <div className="flex flex-wrap justify-between mt-[2px] items-center">
+                    {nft?.listings ? (
+                        // <div className="flex justify-between items-center">
+                        <div className="flex flex-wrap items-center">
+                            <SolIcon />
+                            <p className="text-[20.471px] text-[#47DEF2] ml-2 font-[500]">
+                                {nft.listings[0].list_price}
+                            </p>
+                        </div>
+                    ) : (
+                        // </div>
+                        ""
+                    )}
+                    <button onClick={handleLike} className="ml-auto">
                         {!like ? (
-                            <IconHeartFilled className="text-red-500" />
+                            <IconHeartFilled className="text-[#FE0F3A] w-[26.521px] h-[26.521px]" />
                         ) : (
-                            <IconHeart />
+                            <IconHeart className="w-[26.521px] h-[26.521px]" />
                         )}
                     </button>
-                    {/* <button
-                        className="bg-slate-800 rounded-full px-3"
-                        onClick={() => {
-                            if (animation_url) {
-                                setCurrentTrack({
-                                    author: author,
-                                    title: title,
-                                    track: animation_url
-                                });
-                                togglePlayPause();
-                            }
-                        }}
-                    >
-                        preview
-                    </button> */}
                 </div>
             </div>
         </div>
