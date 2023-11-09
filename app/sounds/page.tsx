@@ -44,7 +44,7 @@ export default function Sounds() {
             .catch((err) => {
                 console.error("Error fetching data:", err);
             });
-    }, [connected]);
+    }, [connected, publicKey]);
     const options = ["My Sounds", "Offers Received", "Offers made by me"];
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">

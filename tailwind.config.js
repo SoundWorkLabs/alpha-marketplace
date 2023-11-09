@@ -21,12 +21,12 @@ module.exports = {
                 "detail-bg": "#03061B"
             },
             width: {
-                "nft-w": "234.27px",
+                "nft-w": "234.271px",
                 "nft-card-w": "258.582px"
             },
             height: {
-                "nft-h": "208.85px",
-                "nft-card-h": "370.826px",
+                "nft-h": "208.855px",
+                "nft-card-h": "355.826px",
                 76: "76px"
             }
         }

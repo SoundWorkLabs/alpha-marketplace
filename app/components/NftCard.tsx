@@ -69,12 +69,10 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                             priority={true}
                             src={nft.image_url}
                             alt="nft image"
-                            className="rounded-[8.84px] mb-5"
+                            className="rounded-[8.84px] mb-5 h-nft-h w-nft-w"
+                            // className="rounded-[8.84px] mb-5"
                             width={234.27}
                             height={208.85}
-                            style={{
-                                objectFit: "fill"
-                            }}
                         />
                     </Link>
                     <div
@@ -110,7 +108,7 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                         10 available{" "}
                     </p> */}
 
-                <div className="flex flex-wrap justify-between mt-[2px] items-center">
+                <div className="flex flex-wrap justify-between mt-4 items-center">
                     {nft?.listings ? (
                         // <div className="flex justify-between items-center">
                         <div className="flex flex-wrap items-center">
