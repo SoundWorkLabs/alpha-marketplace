@@ -152,5 +152,8 @@ div.play-list section {
     bottom: 20px;
     right: 20px;
     width:25%;
-    height: 50%;
+    height: 30%;    
+}
+div.play-list section ::-webkit-scrollbar{
+    width: 12px;
 }

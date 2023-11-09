@@ -41,6 +41,7 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     const animation_url = metaDetails?.animation_url;
     const title = metaDetails?.title;
     const author = nft?.current_owner.slice(0, 10);
+    const coverArt = nft?.image_url;
     // console.log("list", nft?.listings[0]);
     const handlePlayPauseClick = () => {
         if (animation_url) {
@@ -49,7 +50,8 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
             setCurrentTrack({
                 track: animation_url,
                 author: author,
-                title: title
+                title: title,
+                coverArt: coverArt
             });
         }
     };

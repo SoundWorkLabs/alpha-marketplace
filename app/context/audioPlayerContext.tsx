@@ -10,6 +10,7 @@ export interface AudioContextData {
               track: string | undefined;
               author: string | undefined;
               title: string | undefined;
+              coverArt: string | undefined;
           }
         | undefined;
     setCurrentTrack: React.Dispatch<

@@ -24,6 +24,7 @@ function LibAudioPlayer() {
                         setTimeProgress={setTimeProgress}
                         isPlaying={isPlaying}
                         togglePlayPause={togglePlayPause}
+                        currentTrack={currentTrack}
                     />
                     <Music
                         currentTrack={currentTrack}

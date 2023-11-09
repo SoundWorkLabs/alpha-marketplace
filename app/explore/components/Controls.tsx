@@ -1,87 +1,5 @@
-// import { useEffect, useRef, useCallback } from "react";
-
-// import {
-//     IconPlayerPlayFilled,
-//     IconPlayerSkipBackFilled,
-//     IconPlayerPause,
-//     IconPlayerSkipForwardFilled
-// } from "@tabler/icons-react";
-// import { PlayListIcon } from "../../components/icon";
-
-// function Controls({
-//     audioRef,
-//     progressBarRef,
-//     duration,
-//     setTimeProgress,
-//     isPlaying,
-//     togglePlayPause
-// }) {
-//     // const [isPlaying, setIsPlaying] = useState(false);
-//     // const togglePlayPause = () => {
-//     //     setIsPlaying((prev) => !prev);
-//     // };
-
-//     //   animation
-//     const playAnimationRef = useRef();
-//     const [isPlayListOpen, setIsPlayListOpen] = useState(false);
-
-//     const repeat = useCallback(() => {
-//         const currentTime = audioRef.current.currentTime;
-//         setTimeProgress(currentTime);
-//         progressBarRef.current.value = currentTime;
-//         progressBarRef.current.style.setProperty(
-//             "--range-progress",
-//             `${(progressBarRef.current.value / duration) * 100}%`
-//         );
-
-//         playAnimationRef.current = requestAnimationFrame(repeat);
-//     }, [audioRef, duration, progressBarRef, setTimeProgress]);
-
-//     useEffect(() => {
-//         if (isPlaying) {
-//             audioRef.current.play();
-//             playAnimationRef.current = requestAnimationFrame(repeat);
-//         } else {
-//             audioRef.current.pause();
-//             cancelAnimationFrame(playAnimationRef.current);
-//         }
-//     }, [isPlaying, audioRef, repeat]);
-
-//     return (
-//         <div className="controls-wrapper">
-//             <div className="flex items-center">
-//                 <button className="p-2 mr-4 rounded-full bg-gray-500">
-//                     <IconPlayerSkipBackFilled />
-//                 </button>
-
-//                 <button
-//                     className="p-2 mx-4 rounded-full bg-gray-500"
-//                     onClick={togglePlayPause}
-//                 >
-//                     {isPlaying ? <IconPlayerPause /> : <IconPlayerPlayFilled />}
-//                 </button>
-//                 <button className="p-2 mx-4 rounded-full bg-gray-500">
-//                     <IconPlayerSkipForwardFilled />
-//                 </button>
-//                 <button
-//                     className="p-2 mx-4 rounded-full bg-gray-500 h-[40px] w-[40px]"
-//                     onClick={() => {
-//                         console.log("should open play list");
-//                         setIsPlayListOpen(!isPlayListOpen);
-//                     }}
-//                 >
-//                     <PlayListIcon className="" />
-//                 </button>
-//                 {isPlayListOpen && (
-//                     <Modal>{console.log("play list", isPlayListOpen)}</Modal>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default Controls;
-import React, { useEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
+import { AudioContextData } from "../../components/types";
 
 import {
     IconPlayerPlayFilled,
@@ -92,6 +10,8 @@ import {
 import { PlayListIcon } from "../../components/icon";
 import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { formatTime } from "./ProgressBar";
+import Image from "next/image";
 
 interface ControlsProps {
     audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -100,6 +20,7 @@ interface ControlsProps {
     setTimeProgress: (time: number) => void;
     isPlaying: boolean;
     togglePlayPause: () => void;
+    currentTrack: AudioContextData["currentTrack"];
 }
 
 const Controls: React.FC<ControlsProps> = ({
@@ -108,18 +29,12 @@ const Controls: React.FC<ControlsProps> = ({
     duration,
     setTimeProgress,
     isPlaying,
-    togglePlayPause
+    togglePlayPause,
+    currentTrack
 }) => {
     const playAnimationRef = useRef<number>();
     const [opened, { open, close }] = useDisclosure(false);
-    // const [isPlayListOpen, setIsPlayListOpen] = useState(false);
-
-    const modalStyles = {
-        top: "20%",
-        left: "80%",
-        width: "20%"
-    };
-
+    const coverArt = currentTrack?.coverArt;
     const repeat = useCallback(() => {
         const currentTime = audioRef.current?.currentTime || 0;
         setTimeProgress(currentTime);
@@ -164,9 +79,6 @@ const Controls: React.FC<ControlsProps> = ({
                 </button>
                 <button
                     className="p-2 mx-4 rounded-full bg-gray-500 h-[40px] w-[40px]"
-                    // onClick={() => {
-                    //     setIsPlayListOpen(!isPlayListOpen);
-                    // }}
                     onClick={open}
                 >
                     <PlayListIcon />
@@ -178,7 +90,73 @@ const Controls: React.FC<ControlsProps> = ({
                     radius="18px"
                     className="play-list"
                 >
-                    <>play list</>
+                    <div className="p-2">
+                        <div className="font-[600] text-[20px]">Queue</div>
+                        <div className="mt-2 ">
+                            <div className="font-[500] text-gray-500">
+                                Now Playing
+                            </div>
+                            <div className="pl-5 my-1  flex flex-wrap justify-between text-gray-500 items-end">
+                                <div className="flex flex-wrap ">
+                                    {coverArt ? (
+                                        <Image
+                                            src={coverArt as string}
+                                            alt="track image"
+                                            width={40}
+                                            height={40}
+                                            className="rounded-[8.84px] mr-3 w-[40px] h-[40px]"
+                                        />
+                                    ) : (
+                                        ""
+                                    )}
+
+                                    <div className="flex flex-col">
+                                        <div>
+                                            {currentTrack?.title
+                                                ? currentTrack?.title
+                                                : ""}
+                                        </div>
+                                        <div className="text-[13.336px]">
+                                            {currentTrack?.author
+                                                ? currentTrack?.author
+                                                : ""}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>{formatTime(duration)}</div>
+                            </div>
+                        </div>
+                        <div className="mt-3 ">
+                            <div className="font-[500] text-gray-500">
+                                Up Next:
+                            </div>
+                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
+                                <div className="flex flex-wrap">
+                                    <div>track img</div>
+                                    <div>track title</div>
+                                </div>
+
+                                <div>1:00</div>
+                            </div>{" "}
+                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
+                                <div className="flex flex-wrap">
+                                    <div>track img</div>
+                                    <div>track title</div>
+                                </div>
+
+                                <div>1:00</div>
+                            </div>{" "}
+                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
+                                <div className="flex flex-wrap">
+                                    <div>track img</div>
+                                    <div>track title</div>
+                                </div>
+
+                                <div>1:00</div>
+                            </div>
+                        </div>
+                    </div>
                 </Modal>
             </div>
         </div>
