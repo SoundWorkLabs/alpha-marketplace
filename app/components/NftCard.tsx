@@ -1,5 +1,4 @@
 "use client";
-import { Text } from "@mantine/core";
 import {
     IconHeartFilled,
     IconHeart,
@@ -9,16 +8,22 @@ import {
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MetaSchema, NftCardProps } from "./types";
+import { AudioContextData, MetaSchema, NftCardProps } from "./types";
 import { useAudio } from "../context/audioPlayerContext";
 import { nftData } from "../../services/NFT";
 import { SolIcon } from "./icon";
+import { usePlaylist } from "../context/playlistProviderContext";
 
 const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
-    const { togglePlayPause, setCurrentTrack, currentTrack } = useAudio();
+    // const { togglePlayPause, setCurrentTrack, currentTrack, PlayList } =
+    //     useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [like, setLike] = useState(true);
+    const { addToPlaylist, playCurrentTrack } = usePlaylist();
+    // const [trackList, setTrackList] = useState<
+    //     Array<AudioContextData["currentTrack"]>
+    // >([]);
 
     useEffect(() => {
         nftData(nft.nft_address).then((res) => {
@@ -42,19 +47,25 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     const title = metaDetails?.title;
     const author = nft?.current_owner.slice(0, 10);
     const coverArt = nft?.image_url;
-    // console.log("list", nft?.listings[0]);
     const handlePlayPauseClick = () => {
         if (animation_url) {
             setIsPlaying(!isPlaying);
-            togglePlayPause();
-            setCurrentTrack({
+            addToPlaylist({
                 track: animation_url,
                 author: author,
                 title: title,
                 coverArt: coverArt
             });
+            // setCurrentTrack({
+            //     track: animation_url,
+            //     author: author,
+            //     title: title,
+            //     coverArt: coverArt
+            // });
+            // togglePlayPause();
         }
     };
+
     return (
         <div className="nft-cards w-nft-card-w h-nft-card-h my-5 mr-5">
             <div className="custom-border p-[12px] w-full h-full">
@@ -81,17 +92,19 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                         className="play-pause-nft w-fit h-fit"
                         onClick={handlePlayPauseClick}
                     >
-                        {isPlaying ? (
+                        {/* TO DO: toggle play pause  for specify track*/}
+
+                        {/* {isPlaying ? (
                             <IconPlayerPause
                                 className="pause-button-nft hover:text-gray-300"
                                 size={64}
                             />
-                        ) : (
-                            <IconPlayerPlayFilled
-                                className="player-button-nft hover:text-gray-300"
-                                size={64}
-                            />
-                        )}
+                        ) : ( */}
+                        <IconPlayerPlayFilled
+                            className="player-button-nft hover:text-gray-300"
+                            size={64}
+                        />
+                        {/* )} */}
                     </div>
                 </div>
                 <div className="flex flex-col overflow-hidden">

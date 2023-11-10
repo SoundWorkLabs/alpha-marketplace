@@ -17,6 +17,7 @@ import { Toaster } from "react-hot-toast";
 import { WalletContextProvider } from "./context/WalletContextProvider";
 
 import { AudioProvider } from "./context/audioPlayerContext";
+import { PlaylistProvider } from "./context/playlistProviderContext";
 
 export const metadata = {
     title: "Soundwork",
@@ -66,7 +67,12 @@ export default function RootLayout({
                                             </CustomPill>
                                         </Group>
                                     </div>
-                                    <AudioProvider>{children}</AudioProvider>
+                                    <AudioProvider>
+                                        <PlaylistProvider>
+                                            {children}
+                                        </PlaylistProvider>
+                                    </AudioProvider>
+
                                     <Toaster position="bottom-center" />
                                 </main>
                             </div>

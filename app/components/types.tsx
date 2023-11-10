@@ -1,4 +1,5 @@
-import React from "react";
+import React, { ReactNode, createContext, useContext, useState } from "react";
+import { useAudio } from "../context/audioPlayerContext";
 export interface NftSchema {
     nft_address: string;
     collection_address: string | null;

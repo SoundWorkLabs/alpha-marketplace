@@ -12,6 +12,8 @@ import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { formatTime } from "./ProgressBar";
 import Image from "next/image";
+import PlaylistManager from "../../components/PlaylistManager";
+import { PlaylistProvider } from "../../context/playlistProviderContext";
 
 interface ControlsProps {
     audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -64,7 +66,12 @@ const Controls: React.FC<ControlsProps> = ({
     return (
         <div className="controls-wrapper">
             <div className="flex items-center">
-                <button className="p-2 mr-4 rounded-full bg-gray-500">
+                <button
+                    className="p-2 mr-4 rounded-full bg-gray-500"
+                    onClick={() => {
+                        console.log("should skip prev");
+                    }}
+                >
                     <IconPlayerSkipBackFilled />
                 </button>
 
@@ -74,7 +81,12 @@ const Controls: React.FC<ControlsProps> = ({
                 >
                     {isPlaying ? <IconPlayerPause /> : <IconPlayerPlayFilled />}
                 </button>
-                <button className="p-2 mx-4 rounded-full bg-gray-500">
+                <button
+                    className="p-2 mx-4 rounded-full bg-gray-500"
+                    onClick={() => {
+                        console.log("should skip next");
+                    }}
+                >
                     <IconPlayerSkipForwardFilled />
                 </button>
                 <button
@@ -90,73 +102,12 @@ const Controls: React.FC<ControlsProps> = ({
                     radius="18px"
                     className="play-list"
                 >
-                    <div className="p-2">
-                        <div className="font-[600] text-[20px]">Queue</div>
-                        <div className="mt-2 ">
-                            <div className="font-[500] text-gray-500">
-                                Now Playing
-                            </div>
-                            <div className="pl-5 my-1  flex flex-wrap justify-between text-gray-500 items-end">
-                                <div className="flex flex-wrap ">
-                                    {coverArt ? (
-                                        <Image
-                                            src={coverArt as string}
-                                            alt="track image"
-                                            width={40}
-                                            height={40}
-                                            className="rounded-[8.84px] mr-3 w-[40px] h-[40px]"
-                                        />
-                                    ) : (
-                                        ""
-                                    )}
-
-                                    <div className="flex flex-col">
-                                        <div>
-                                            {currentTrack?.title
-                                                ? currentTrack?.title
-                                                : ""}
-                                        </div>
-                                        <div className="text-[13.336px]">
-                                            {currentTrack?.author
-                                                ? currentTrack?.author
-                                                : ""}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>{formatTime(duration)}</div>
-                            </div>
-                        </div>
-                        <div className="mt-3 ">
-                            <div className="font-[500] text-gray-500">
-                                Up Next:
-                            </div>
-                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
-                                <div className="flex flex-wrap">
-                                    <div>track img</div>
-                                    <div>track title</div>
-                                </div>
-
-                                <div>1:00</div>
-                            </div>{" "}
-                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
-                                <div className="flex flex-wrap">
-                                    <div>track img</div>
-                                    <div>track title</div>
-                                </div>
-
-                                <div>1:00</div>
-                            </div>{" "}
-                            <div className="pl-5 my-1 flex flex-wrap justify-between text-gray-500">
-                                <div className="flex flex-wrap">
-                                    <div>track img</div>
-                                    <div>track title</div>
-                                </div>
-
-                                <div>1:00</div>
-                            </div>
-                        </div>
-                    </div>
+                    <PlaylistManager
+                        duration={duration}
+                        currentTrack={currentTrack}
+                        isPlaying={isPlaying}
+                        togglePlayPause={togglePlayPause}
+                    />
                 </Modal>
             </div>
         </div>
