@@ -1,5 +1,5 @@
 // PlaylistManager.js
-import React from "react";
+import React, { useEffect } from "react";
 import { usePlaylist } from "../context/playlistProviderContext";
 import Image from "next/image";
 import { formatTime } from "../explore/components/ProgressBar";
@@ -18,8 +18,9 @@ const PlaylistManager: React.FC<PlayListProps> = ({
     togglePlayPause,
     currentTrack
 }) => {
-    const { PlayList, addToPlaylist, removeFromPlaylist, playCurrentTrack } =
-        usePlaylist();
+    const { PlayList } = usePlaylist();
+
+    useEffect(() => {}, [PlayList]);
     return (
         <div className="p-2">
             <div className="font-[600] text-[20px]">Queue</div>
@@ -38,7 +39,6 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                         ) : (
                             ""
                         )}
-
                         <div className="flex flex-col">
                             <div>
                                 {currentTrack?.title ? currentTrack?.title : ""}
@@ -51,7 +51,7 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                         </div>
                     </div>
 
-                    <div>{formatTime(duration)}</div>
+                    <div>{isPlaying && formatTime(duration)}</div>
                 </div>
             </div>
             <div className="mt-3 ">
@@ -75,19 +75,13 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                             )}
 
                             <div className="flex flex-col">
-                                <div>
-                                    {currentTrack?.title
-                                        ? currentTrack?.title
-                                        : ""}
-                                </div>
+                                <div>{track?.title ? track?.title : ""}</div>
                                 <div className="text-[13.336px]">
-                                    {currentTrack?.author
-                                        ? currentTrack?.author
-                                        : ""}
+                                    {track?.author ? track?.author : ""}
                                 </div>
                             </div>
                         </div>
-                        <div>{formatTime(duration)}</div>
+                        {/* <div>{formatTime(duration)}</div> */}
                     </div>
                 ))}
             </div>

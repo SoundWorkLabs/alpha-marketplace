@@ -1,15 +1,28 @@
+import React from "react";
 import { IconVolume, IconArrowsShuffle2 } from "@tabler/icons-react";
 
-function ProgressBar({
+interface ProgressBarProps {
+    progressBarRef: React.RefObject<HTMLInputElement>;
+    audioRef: React.RefObject<HTMLAudioElement>;
+    timeProgress: number;
+    duration: number;
+    isPlaying: boolean;
+    // togglePlayPause: () => void;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = ({
     progressBarRef,
     audioRef,
     timeProgress,
-    duration
+    duration,
+    isPlaying
     // togglePlayPause
-}) {
+}) => {
     const handleProgressChange = () => {
         // console.log(progressBarRef.current.value);
-        audioRef.current.currentTime = progressBarRef.current.value;
+        audioRef.current!.currentTime = Number(
+            progressBarRef.current!.valueAsNumber
+        );
     };
     //     useEffect(())
     //  if (formatTime(timeProgress)==formatTime(duration)){
@@ -30,7 +43,7 @@ function ProgressBar({
                 overflow-hidden bg-gray-600 h-1 rounded-lg focus:outline-none range-slider"
             />
             <div className="time text-[13.336px] text-[#909090] flex items-center w-full justify-between">
-                <div>{formatTime(duration)}</div>
+                <div>{isPlaying && formatTime(duration)}</div>
                 <div className="">
                     <button className="p-2">
                         <IconVolume />
@@ -42,11 +55,11 @@ function ProgressBar({
             </div>
         </div>
     );
-}
+};
 
 export default ProgressBar;
 
-export function formatTime(time) {
+export function formatTime(time: number): string {
     if (time && !isNaN(time)) {
         const minutes = Math.floor(time / 60);
         const formatMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
