@@ -37,7 +37,7 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({
             setIsPlaying(!isPlaying);
             togglePlayPause();
         } else {
-            setPlayList([...PlayList, track]);
+            setPlayList([track, ...PlayList]);
         }
     };
 

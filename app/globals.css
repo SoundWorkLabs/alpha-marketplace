@@ -149,11 +149,28 @@ div.play-list section {
     border: 1px solid #8C8C8C;
     color:#fff;
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    top: 300px;
+    left: 500px;
     width:25%;
     height: 30%;    
 }
 div.play-list section ::-webkit-scrollbar{
     width: 12px;
+}
+.icon-dot{
+    width: 120px;
+    height: 120px;
+    stroke-width: 3; 
+}
+
+div.connect-wallet section{
+    background: #01020A;
+    border: 1px solid #8C8C8C;
+    border-radius: 18px;
+    color: #fff; 
+}
+
+div.connect-wallet section .title{
+    font-size: 28px;
+    font-weight: 400;
 }
