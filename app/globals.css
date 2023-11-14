@@ -174,3 +174,20 @@ div.connect-wallet section .title{
     font-size: 28px;
     font-weight: 400;
 }
+
+div.listing-nft-modal section {
+    background: #01020A;
+    border: 1px solid #8C8C8C;
+    border-radius: 18px;
+    color: #fff; 
+    height: 9.75rem;
+}
+div.listing-nft-modal section input{
+    border: 1px;
+    background:#121426;
+    color: #fff;
+}
+div.drop-down{
+    /* color: #fff; */
+    background:#03061B;
+}

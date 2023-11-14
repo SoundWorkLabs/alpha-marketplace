@@ -117,3 +117,23 @@ export function PlayListIcon() {
         </div>
     );
 }
+
+export function ConnectArrow() {
+    return (
+        <div>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="32"
+                viewBox="0 0 18 32"
+                fill="none"
+            >
+                <path
+                    d="M1.5 2L15.5 16L1.5 30"
+                    stroke="#626262"
+                    stroke-width="3"
+                />
+            </svg>
+        </div>
+    );
+}

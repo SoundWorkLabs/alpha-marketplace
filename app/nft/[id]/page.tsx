@@ -20,7 +20,7 @@ import {
 } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchema } from "../../components/types";
-import SoundWorkLogo from "../../components/icon";
+import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
 import ListingNft from "../../components/modals/listingNft";
@@ -256,26 +256,32 @@ export default function Page() {
                             closeOnClickOutside={true}
                             closeOnEscape={true}
                             size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
                         >
                             <div className="mx-5">
-                                <div className="text-xl font-bold">
+                                <div className="text-[2rem] font-[500] my-2">
                                     Set Price
                                 </div>
-                                <div className="flex flex-wrap justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <TextInput
-                                            className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
-                                            withAsterisk
-                                            type="number"
-                                            value={value}
-                                            onChange={(e) => {
-                                                setValue(e.currentTarget.value);
-                                            }}
-                                        />
-                                        <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
+                                <div className="flex flex-wrap justify-between my-2">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
                                             SOL
-                                        </div>
-                                    </div>
+                                        </div> */}
+                                    {/* </div> */}
                                     <button
                                         className="rounded-full bg-btn-bg w-nft-w"
                                         onClick={() => {
