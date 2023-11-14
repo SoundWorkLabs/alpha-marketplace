@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { nftData } from "../../../services/NFT";
 import {
@@ -20,15 +20,19 @@ import {
 } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchema } from "../../components/types";
-import SoundWorkLogo from "../../components/icon";
+import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
 import ListingNft from "../../components/modals/listingNft";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import BuyNow from "../../components/BuyNow";
+import { SoundworkSDK } from "@jimii/soundwork-sdk";
+import { PublicKey, Transaction } from "@solana/web3.js";
+
+import { AnchorProvider } from "@coral-xyz/anchor";
 
 export default function Page() {
     const { id: nftAddress } = useParams();
-
     const wallet = useAnchorWallet();
 
     const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
@@ -42,8 +46,11 @@ export default function Page() {
     const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
     const [isListing, setIsListing] = useState(false);
-
+    const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
+
+    const anchorWallet = useAnchorWallet();
+    const { connection } = useConnection();
 
     // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
@@ -62,6 +69,61 @@ export default function Page() {
             });
     }, [nftAddress]);
 
+    const animation_url = metaDetails?.animation_url;
+    const description = metaDetails?.description;
+    const image = metaDetails?.image;
+    const title = metaDetails?.title;
+    const atrr = metaDetails?.attributes;
+
+    const handleClick = () => {
+        if (!pubkey) {
+            if (typeof window !== "undefined") {
+                const connectBtn = document.querySelector(
+                    ".connectBtn"
+                ) as HTMLButtonElement;
+
+                connectBtn?.click();
+            }
+        } else if (currentOwner === pubkey) {
+            const a = document.createElement("a");
+            a.href = animation_url ?? ""; // todo: handle err
+            a.download = title ?? ""; // todo: handle error
+            a.click();
+        } else {
+            handleBuy();
+        }
+    };
+
+    const handleBuy = useCallback(async () => {
+        if (!anchorWallet) throw new Error("wallet not connected");
+        if (!pubkey) throw new Error("wallet not connected");
+
+        const provider = await new AnchorProvider(connection, anchorWallet, {});
+
+        const soundworkSDK = new SoundworkSDK(provider, connection);
+
+        let nftMint = new PublicKey(nftAddress);
+        let ix = await soundworkSDK.buyListing(nftMint);
+        let tx = new Transaction();
+        let blockhash = (await connection.getLatestBlockhash("finalized"))
+            .blockhash;
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = new PublicKey(pubkey);
+        tx.add(ix);
+
+        try {
+            const {
+                phantom: { solana: phantomProvider }
+            }: any = window; // phantom
+            let txHash = await phantomProvider.signAndSendTransaction(tx);
+
+            // let txhash = await provider.sendAndConfirm(tx);
+            console.log("tx hash", txHash);
+        } catch (err) {
+            console.log("buying failed", err);
+        }
+    }, [anchorWallet, connection, pubkey]);
+
     if (isLoading) {
         return <div>Loading...</div>;
     }
@@ -70,19 +132,13 @@ export default function Page() {
         return <div>Data not available. Try again later.</div>;
     }
 
-    const animation_url = metaDetails?.animation_url;
-    const description = metaDetails?.description;
-    const image = metaDetails?.image;
-    const title = metaDetails?.title;
-    const atrr = metaDetails?.attributes;
-
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
-            <Box className="flex flex-wrap">
+            <Box className="flex flex-wrap gap-x-10">
                 <div className="image-container">
                     <Image
                         priority
-                        src={image}
+                        src={image ?? ""}
                         alt="nft image"
                         className="rounded-md dynamic-image"
                         height={600}
@@ -94,7 +150,8 @@ export default function Page() {
                             setCurrentTrack({
                                 track: animation_url,
                                 title: title,
-                                author: currentOwner.slice(0, 10)
+                                author: currentOwner.slice(0, 10),
+                                coverArt: image
                             });
                             togglePlayPause();
                         }}
@@ -113,7 +170,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <Box className="mx-6 flex-1">
+                <Box className="flex-1 max-w-[39vw] my-auto xl:max-w-full">
                     <div className="flex flex-wrap my-5">
                         <span className="text-[#E6E6E6]">Owner By: </span>
                         <CopyButton
@@ -150,30 +207,35 @@ export default function Page() {
                             <p className="text-3xl mx-5">{title}</p>
                         </div>
 
-                        <div className="mx-5 my-5">
-                            <button className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w">
-                                <a
-                                    href={
-                                        currentOwner === pubkey
-                                            ? `${animation_url}`
-                                            : "buy-now-link"
-                                    }
-                                    download={
-                                        currentOwner === pubkey
-                                            ? `${animation_url}`
-                                            : ""
-                                    }
-                                >
-                                    {currentOwner === pubkey
-                                        ? "Download"
-                                        : "Buy Now"}
-                                </a>
+                        <div className="my-5 flex justify-between">
+                            <button
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
+                                onClick={() => handleClick()}
+                            >
+                                {currentOwner === pubkey
+                                    ? "Download"
+                                    : "Buy Now"}
                             </button>
-
+                            <>
+                                {isBuyNowOpen && (
+                                    <BuyNow
+                                        nftAddress={nftAddress}
+                                        onBuyNow={() => {
+                                            setIsBuyNowOpen(!isBuyNowOpen);
+                                        }}
+                                    />
+                                )}
+                            </>
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
                                 onClick={() => {
-                                    if (currentOwner === pubkey) {
+                                    if (!pubkey) {
+                                        const connectBtn =
+                                            document?.querySelector(
+                                                ".connectBtn"
+                                            ) as HTMLButtonElement;
+                                        connectBtn?.click();
+                                    } else if (currentOwner === pubkey) {
                                         setIsSellModalOpen(true);
                                     } else {
                                         setIsOfferModalOpen(true);
@@ -185,7 +247,6 @@ export default function Page() {
                                     : "Make Offer"}
                             </button>
                         </div>
-
                         <Modal
                             opened={isSellModalOpen}
                             onClose={() => setIsSellModalOpen(false)}
@@ -195,26 +256,32 @@ export default function Page() {
                             closeOnClickOutside={true}
                             closeOnEscape={true}
                             size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
                         >
                             <div className="mx-5">
-                                <div className="text-xl font-bold">
+                                <div className="text-[2rem] font-[500] my-2">
                                     Set Price
                                 </div>
-                                <div className="flex flex-wrap justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        <TextInput
-                                            className="modal-input border-[2.21px] border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
-                                            withAsterisk
-                                            type="number"
-                                            value={value}
-                                            onChange={(e) => {
-                                                setValue(e.currentTarget.value);
-                                            }}
-                                        />
-                                        <div className="sol-label px-[29px]  border border-[#0091D766] rounded-full ">
+                                <div className="flex flex-wrap justify-between my-2">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
                                             SOL
-                                        </div>
-                                    </div>
+                                        </div> */}
+                                    {/* </div> */}
                                     <button
                                         className="rounded-full bg-btn-bg w-nft-w"
                                         onClick={() => {

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { ReactNode, createContext, useContext, useState } from "react";
+import { useAudio } from "../context/audioPlayerContext";
 export interface NftSchema {
     nft_address: string;
     collection_address: string | null;
@@ -51,6 +52,7 @@ export interface AudioContextData {
               track: string | undefined;
               author: string | undefined;
               title: string | undefined;
+              coverArt: string | undefined;
           }
         | undefined;
     setCurrentTrack: React.Dispatch<

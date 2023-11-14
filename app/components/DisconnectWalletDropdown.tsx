@@ -33,7 +33,7 @@ export default function DisconnectWalletDropdown() {
                                 .substring(28, 32)}` ?? ""}
                         </Button>
                     </Menu.Target>
-                    <Menu.Dropdown>
+                    <Menu.Dropdown className="drop-down">
                         <Menu.Item
                             onClick={() => router.push("/profile")}
                             leftSection={
@@ -41,6 +41,7 @@ export default function DisconnectWalletDropdown() {
                                     style={{ width: rem(14), height: rem(14) }}
                                 />
                             }
+                            color="white"
                         >
                             Profile
                         </Menu.Item>
@@ -53,6 +54,7 @@ export default function DisconnectWalletDropdown() {
                                     style={{ width: rem(14), height: rem(14) }}
                                 />
                             }
+                            color="white"
                         >
                             {clipboard.copied ? "copied" : "Copy address"}
                         </Menu.Item>
@@ -64,6 +66,7 @@ export default function DisconnectWalletDropdown() {
                                 />
                             }
                             onClick={() => disconnect()}
+                            color="white"
                         >
                             Change wallet
                         </Menu.Item>

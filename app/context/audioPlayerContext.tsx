@@ -10,11 +10,13 @@ export interface AudioContextData {
               track: string | undefined;
               author: string | undefined;
               title: string | undefined;
+              coverArt: string | undefined;
           }
         | undefined;
     setCurrentTrack: React.Dispatch<
         React.SetStateAction<AudioContextData["currentTrack"] | undefined>
     >;
+    PlayList: Array<AudioContextData["currentTrack"]>;
 }
 
 const AudioContext = createContext<AudioContextData | undefined>(undefined);
@@ -36,6 +38,9 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     const [currentTrack, setCurrentTrack] = useState<
         AudioContextData["currentTrack"] | undefined
     >();
+    const [PlayList, setPlayList] = useState<
+        Array<AudioContextData["currentTrack"]>
+    >([]);
 
     const togglePlayPause = () => {
         setIsPlaying((prev) => !prev);
@@ -48,7 +53,8 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
                 togglePlayPause,
                 setIsPlaying,
                 currentTrack,
-                setCurrentTrack
+                setCurrentTrack,
+                PlayList
             }}
         >
             {children}
