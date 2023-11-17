@@ -4,6 +4,7 @@ import { usePlaylist } from "../context/playlistProviderContext";
 import Image from "next/image";
 import { formatTime } from "../explore/components/ProgressBar";
 import { AudioContextData } from "./types";
+import { IconClearAll } from "@tabler/icons-react";
 
 interface PlayListProps {
     duration: number;
@@ -18,7 +19,7 @@ const PlaylistManager: React.FC<PlayListProps> = ({
     togglePlayPause,
     currentTrack
 }) => {
-    const { PlayList } = usePlaylist();
+    const { PlayList, removeAllFromPlaylist } = usePlaylist();
 
     useEffect(() => {}, [PlayList]);
     return (
@@ -55,7 +56,14 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                 </div>
             </div>
             <div className="mt-3 ">
-                <div className="font-[500] text-gray-500">Up Next:</div>
+                <div className="font-[500] text-gray-500 flex justify-between">
+                    <div>Up Next:</div>
+                    {PlayList.length > 0 && (
+                        <button onClick={removeAllFromPlaylist}>
+                            <IconClearAll />
+                        </button>
+                    )}
+                </div>
                 {PlayList.map((track, index) => (
                     <div
                         className="pl-5 my-1  flex flex-wrap justify-between text-gray-500 items-end"
@@ -81,7 +89,16 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                                 </div>
                             </div>
                         </div>
-                        {/* <div>{formatTime(duration)}</div> */}
+                        <button
+                            className=""
+                            onClick={() => {
+                                if (PlayList.length > 0) {
+                                    PlayList.splice(index, 1);
+                                }
+                            }}
+                        >
+                            clear
+                        </button>
                     </div>
                 ))}
             </div>

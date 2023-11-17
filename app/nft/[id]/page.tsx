@@ -153,20 +153,17 @@ export default function Page() {
                                 author: currentOwner.slice(0, 10),
                                 coverArt: image
                             });
-                            togglePlayPause();
+                            // togglePlayPause();
                         }}
                     >
-                        {isPlaying ? (
-                            <IconPlayerPause
-                                className="pause-button"
-                                size={142}
-                            />
-                        ) : (
-                            <IconPlayerPlayFilled
-                                className="player-button"
-                                size={142}
-                            />
-                        )}
+                        {/* {isPlaying ? ( */}
+                        {/* <IconPlayerPause className="pause-button" size={142} />
+                        ) : ( */}
+                        <IconPlayerPlayFilled
+                            className="player-button"
+                            size={142}
+                        />
+                        {/* )} */}
                     </div>
                 </div>
 

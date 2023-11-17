@@ -50,7 +50,6 @@ const Music: React.FC<MusicProps> = ({
                 autoPlay={true}
                 onEnded={() => {
                     if (PlayList?.length === 0) {
-                        console.log("stopping playback no sound");
                         setCurrentTrack(undefined);
                         togglePlayPause();
                     } else {
