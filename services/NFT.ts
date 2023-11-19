@@ -106,7 +106,7 @@ export async function populateNftMetadata(nfts: Array<any> | any) {
 export async function fetchNftByMint(mint: PublicKey) {
     try {
         const response = await await fetch(
-            `${API_BASE_URL}/nfts/${mint.toBase58()}`
+            `${API_BASE_URL}/nfts/mint/${mint.toBase58()}`
         );
         console.log("response", response);
     } catch (err) {
