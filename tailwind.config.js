@@ -21,7 +21,7 @@ module.exports = {
                 "detail-bg": "#03061B"
             },
             width: {
-                "nft-w": "234.271px",
+                "nft-w": "15.0625rem",
                 "nft-card-w": "258.582px"
             },
             height: {

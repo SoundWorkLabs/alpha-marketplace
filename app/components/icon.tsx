@@ -131,7 +131,7 @@ export function ConnectArrow() {
                 <path
                     d="M1.5 2L15.5 16L1.5 30"
                     stroke="#626262"
-                    stroke-width="3"
+                    strokeWidth="3"
                 />
             </svg>
         </div>

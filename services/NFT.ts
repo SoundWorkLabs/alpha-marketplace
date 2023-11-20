@@ -143,7 +143,28 @@ export async function nftData(target: string) {
     }
 }
 
-// export async function fetchNftData() {
-//     const response = await axios.get(`${API_BASE_URL}/nfts/all`);
-//     return response;
-// }
+export async function fetchSingleListedNfts(mint: string) {
+    try {
+        const response = await (
+            await fetch(`${API_BASE_URL}/nfts/marketplace`)
+        ).json();
+        const item: NftSchema = await response?.find(
+            (item: NftSchema) => item.nft_address === mint
+        );
+        return item;
+    } catch (err) {
+        console.error("Error fetching listings:", err);
+    }
+}
+export async function fetchSolUsd() {
+    try {
+        const solUsd = await (
+            await fetch(
+                "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+            )
+        ).json();
+        return solUsd.solana.usd;
+    } catch (err) {
+        console.log("Error fetching sol price", err);
+    }
+}

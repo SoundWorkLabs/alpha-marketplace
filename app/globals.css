@@ -72,8 +72,8 @@ tr .columns {
 }
 
 .dynamic-image {
-    width: 400px;
-    height: 400px;
+    width: 26.375rem;
+    height: 26.375rem;
     object-fit: cover;
 }
 .title-box {
@@ -86,9 +86,6 @@ tr .columns {
 }
 .search-profile input {
     background: #0204164F;
-}
-.image-container {
-    position: relative;
 }
 
 .play-pause-container {
@@ -182,7 +179,7 @@ div.listing-nft-modal section {
     color: #fff; 
     height: 9.75rem;
 }
-div.listing-nft-modal section input{
+div.listing-nft-modal section input {
     border: 1px;
     background:#121426;
     color: #fff;
@@ -190,4 +187,9 @@ div.listing-nft-modal section input{
 div.drop-down{
     /* color: #fff; */
     background:#03061B;
+}
+
+.sol-icon-price svg{
+    width: 1.5625rem;
+    height: 1.5625rem;
 }

@@ -8,11 +8,13 @@ import {
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { AudioContextData, MetaSchema, NftCardProps } from "./types";
+import { AudioContextData, MetaSchema, NftCardProps, UserInfo } from "./types";
 import { useAudio } from "../context/audioPlayerContext";
 import { nftData } from "../../services/NFT";
 import { SolIcon } from "./icon";
 import { usePlaylist } from "../context/playlistProviderContext";
+import { fetchUserByAddress } from "../../services/user";
+import { Avatar } from "@mantine/core";
 
 const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
@@ -20,7 +22,8 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     //     useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [like, setLike] = useState(true);
-    const { addToPlaylist, playCurrentTrack } = usePlaylist();
+    const { addToPlaylist } = usePlaylist();
+    const [author, setAuthor] = useState<UserInfo>();
     // const [trackList, setTrackList] = useState<
     //     Array<AudioContextData["currentTrack"]>
     // >([]);
@@ -29,6 +32,9 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
         nftData(nft.nft_address).then((res) => {
             if (res) {
                 setMetaDetails(res.metaDetails);
+                fetchUserByAddress(nft.current_owner).then((res) => {
+                    setAuthor(res);
+                });
             }
         });
     }, []);
@@ -45,14 +51,14 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
 
     const animation_url = metaDetails?.animation_url;
     const title = metaDetails?.title;
-    const author = nft?.current_owner.slice(0, 10);
+    // const author = nft?.current_owner.slice(0, 10);
     const coverArt = nft?.image_url;
     const handlePlayPauseClick = () => {
         if (animation_url) {
             setIsPlaying(!isPlaying);
             addToPlaylist({
                 track: animation_url,
-                author: author,
+                author: author?.username,
                 title: title,
                 coverArt: coverArt
             });
@@ -108,13 +114,21 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                     </div>
                 </div>
                 <div className="flex flex-col overflow-hidden">
+                    <div className="flex flex-wrap items-center">
+                        <Avatar
+                            src={author?.avatar_url as string}
+                            size="1.11025rem"
+                        />
+                        <p className="text-[14.44px] text-[#47DEF2] ml-1">
+                            {/* {nft.current_owner.slice(0, 10)} */}
+                            {author?.username}
+                        </p>
+                    </div>
+
                     <p className="text-[22px] font-[400] leading-relaxed">
                         {nft.title.length >= 25
                             ? `${nft.title.slice(0, 22)}...`
                             : nft.title}
-                    </p>
-                    <p className="text-[14.44px] text-[#47DEF2]">
-                        {nft.current_owner.slice(0, 10)}
                     </p>
                 </div>
 

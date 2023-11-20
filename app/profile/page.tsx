@@ -5,7 +5,8 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserNfts } from "../../services/NFT";
 import NftCard from "../components/NftCard";
-import { NftSchema } from "../components/types";
+import { NftSchema, UserInfo } from "../components/types";
+import { fetchUserByAddress } from "../../services/user";
 
 const dummyItemValObj = {
     Items: 34,
@@ -20,6 +21,7 @@ export default function Profile() {
     const [isConnected, setConnection] = useState(false);
     const [selectedOption, setSelectedOption] = useState(0);
     const [userNfts, setUserNfts] = useState<NftSchema[]>([]);
+    const [userInfo, setUserInfo] = useState<UserInfo>();
 
     useEffect(() => {
         if (!publicKey) {
@@ -36,7 +38,8 @@ export default function Profile() {
         setPubkey(userPubKey);
         const userData = async () => {
             setConnection(true);
-            return setUserNfts(await fetchUserNfts(publicKey?.toBase58()));
+            setUserInfo(await fetchUserByAddress(publicKey?.toBase58()));
+            setUserNfts(await fetchUserNfts(publicKey?.toBase58()));
         };
         userData();
     }, [publicKey]);
@@ -58,12 +61,11 @@ export default function Profile() {
                             <Box>
                                 <Avatar
                                     size="xl"
-                                    src={null}
-                                    alt="Jimii Mutuku"
-                                    color="red"
-                                >
-                                    JM
-                                </Avatar>
+                                    src={userInfo?.avatar_url}
+                                    alt="user avatar img"
+                                    // color="red"
+                                />
+                                {/* </Avatar> */}
                             </Box>
                             <Box className="mt-4">{pubkey}</Box>
                         </Flex>

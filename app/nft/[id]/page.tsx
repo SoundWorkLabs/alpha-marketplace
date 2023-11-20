@@ -1,7 +1,17 @@
 "use client";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, {
+    useEffect,
+    useState,
+    useRef,
+    useCallback,
+    Suspense
+} from "react";
 import { useParams } from "next/navigation";
-import { nftData } from "../../../services/NFT";
+import {
+    fetchSingleListedNfts,
+    fetchSolUsd,
+    nftData
+} from "../../../services/NFT";
 import {
     Box,
     CopyButton,
@@ -9,17 +19,14 @@ import {
     rem,
     Pill,
     Modal,
-    TextInput
+    TextInput,
+    Avatar,
+    Image
 } from "@mantine/core";
-import Image from "next/image";
-import {
-    IconCopy,
-    IconCheck,
-    IconPlayerPlayFilled,
-    IconPlayerPause
-} from "@tabler/icons-react";
+// import Image from "next/image";
+import { IconCopy, IconCheck, IconPlayerPlayFilled } from "@tabler/icons-react";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
-import { MetaSchema } from "../../components/types";
+import { MetaSchema, NftSchema, UserInfo } from "../../components/types";
 import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
@@ -30,13 +37,14 @@ import { SoundworkSDK } from "@jimii/soundwork-sdk";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
 import { AnchorProvider } from "@coral-xyz/anchor";
+import { fetchUserByAddress } from "../../../services/user";
+import { deleteListing } from "../../../services/listing";
 
 export default function Page() {
     const { id: nftAddress } = useParams();
     const wallet = useAnchorWallet();
 
-    const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
-        useAudio();
+    const { setCurrentTrack } = useAudio();
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
     const [currentOwner, setCurrentOwner] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +56,9 @@ export default function Page() {
     const [isListing, setIsListing] = useState(false);
     const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
+    const [author, setAuthor] = useState<UserInfo>();
+    const [listingInfo, setListingInfo] = useState<NftSchema["listings"]>();
+    const [solUsd, setSolUsd] = useState<string>();
 
     const anchorWallet = useAnchorWallet();
     const { connection } = useConnection();
@@ -59,6 +70,22 @@ export default function Page() {
                 if (res) {
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
+                    fetchUserByAddress(res.nftDetails.current_owner).then(
+                        (res) => {
+                            setAuthor(res);
+                        }
+                    );
+
+                    fetchSingleListedNfts(nftAddress).then((res) => {
+                        if (res) {
+                            res.listings.length > 0;
+                            return setListingInfo(res.listings);
+                        }
+                    });
+
+                    fetchSolUsd().then((res) => {
+                        setSolUsd(res);
+                    });
                 }
             })
             .catch((err) => {
@@ -124,6 +151,41 @@ export default function Page() {
         }
     }, [anchorWallet, connection, pubkey]);
 
+    const handleDeleteListing = useCallback(async () => {
+        if (!anchorWallet) throw new Error("wallet not connected");
+        if (!pubkey) throw new Error("wallet not connected");
+
+        const provider = await new AnchorProvider(connection, anchorWallet, {});
+
+        const soundworkSDK = new SoundworkSDK(provider, connection);
+
+        let nftMint = new PublicKey(nftAddress);
+
+        const ix = await soundworkSDK.deleteListing(nftMint);
+        const tx = new Transaction();
+        let blockhash = (await connection.getLatestBlockhash("finalized"))
+            .blockhash;
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = new PublicKey(pubkey);
+        tx.add(ix);
+
+        try {
+            const {
+                phantom: { solana: phantomProvider }
+            }: any = window; // phantom
+            let txHash = await phantomProvider.signAndSendTransaction(tx);
+
+            // let txhash = await provider.sendAndConfirm(tx);
+            console.log("tx hash", txHash);
+
+            if (listingInfo && txHash) {
+                deleteListing(listingInfo[0].id);
+            }
+        } catch (err) {
+            console.log("deleting nft failed", err);
+        }
+    }, [anchorWallet, connection, pubkey]);
+
     if (isLoading) {
         return <div>Loading...</div>;
     }
@@ -135,14 +197,15 @@ export default function Page() {
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap gap-x-10">
-                <div className="image-container">
+                <div className="relative w-[26.375rem] h-[26.375rem]">
                     <Image
-                        priority
+                        // priority
                         src={image ?? ""}
                         alt="nft image"
-                        className="rounded-md dynamic-image"
-                        height={600}
-                        width={600}
+                        className="dynamic-image"
+                        // height="26.375rem"
+                        // width="26.375rem"
+                        radius="0.5525rem"
                     />
                     <div
                         className="play-pause-container"
@@ -168,8 +231,20 @@ export default function Page() {
                 </div>
 
                 <Box className="flex-1 max-w-[39vw] my-auto xl:max-w-full">
-                    <div className="flex flex-wrap my-5">
-                        <span className="text-[#E6E6E6]">Owner By: </span>
+                    <div className="flex flex-wrap items-center">
+                        <Avatar
+                            src={author?.avatar_url as string}
+                            size="2.41175rem"
+                        />
+                        <p className="text-[1.25rem] text-[#47DEF2] font-[500] ml-1">
+                            {/* {nft.current_owner.slice(0, 10)} */}
+                            {author?.username}
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap mt-2 mb-2">
+                        <span className="text-[#E6E6E6] text-[1rem] font-[300]">
+                            Owner By:{" "}
+                        </span>
                         <CopyButton
                             value={currentOwner ? (currentOwner as string) : ""}
                             timeout={250}
@@ -179,10 +254,12 @@ export default function Page() {
                                     onClick={copy}
                                     className="flex flex-wrap mx-3 cursor-pointer "
                                 >
-                                    {currentOwner?.slice(0, 10)}
+                                    {currentOwner === pubkey
+                                        ? "You"
+                                        : currentOwner?.slice(0, 10)}
                                     <ActionIcon
                                         color="transparent"
-                                        className="mx-2 hover:bg-transparent"
+                                        className="hover:bg-transparent"
                                     >
                                         {copied ? (
                                             <IconCheck
@@ -198,15 +275,38 @@ export default function Page() {
                             )}
                         </CopyButton>
                     </div>
-                    <Box className="custom-border1 p-4 justify-stretch title-box">
-                        <div className="mini-logo flex flex-wrap">
-                            <SoundWorkLogo />
-                            <p className="text-3xl mx-5">{title}</p>
+                    <Box className="custom-border1 p-4 justify-stretch title-box w-full h-[18.5rem]">
+                        <div className="flex flex-wrap items-center justify-between">
+                            <div className="mini-logo flex flex-wrap items-center space-x-5">
+                                <SoundWorkLogo />
+                                <p className="text-[2.25rem] font-[500]">
+                                    {title}
+                                </p>
+                            </div>
+
+                            {listingInfo && (
+                                <div className="flex flex-wrap items-center space-x-4">
+                                    <span className="sol-icon-price">
+                                        <SolIcon />
+                                    </span>
+                                    <p className="text-[2.25rem] font-[500] leading-[2.59875rem]">
+                                        {listingInfo! &&
+                                            `${listingInfo[0].list_price} ( $${(
+                                                parseFloat(
+                                                    listingInfo! &&
+                                                        listingInfo[0]
+                                                            .list_price
+                                                ) *
+                                                parseFloat(solUsd! && solUsd)
+                                            ).toFixed(2)} )`}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="my-5 flex justify-between">
+                        <div className="my-[1.12rem] flex justify-between">
                             <button
-                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300]"
                                 onClick={() => handleClick()}
                             >
                                 {currentOwner === pubkey
@@ -224,7 +324,7 @@ export default function Page() {
                                 )}
                             </>
                             <button
-                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300]"
                                 onClick={() => {
                                     if (!pubkey) {
                                         const connectBtn =
@@ -232,15 +332,26 @@ export default function Page() {
                                                 ".connectBtn"
                                             ) as HTMLButtonElement;
                                         connectBtn?.click();
-                                    } else if (currentOwner === pubkey) {
+                                    } else if (
+                                        currentOwner === pubkey &&
+                                        !listingInfo!
+                                    ) {
                                         setIsSellModalOpen(true);
+                                    } else if (
+                                        currentOwner === pubkey &&
+                                        listingInfo!
+                                    ) {
+                                        console.log("should open delete modal");
+                                        handleDeleteListing();
                                     } else {
                                         setIsOfferModalOpen(true);
                                     }
                                 }}
                             >
                                 {currentOwner === pubkey
-                                    ? "Sell"
+                                    ? listingInfo! && listingInfo[0].list_price
+                                        ? "Delete Listing"
+                                        : "Sell"
                                     : "Make Offer"}
                             </button>
                         </div>
@@ -346,16 +457,21 @@ export default function Page() {
                     </Box>
                 </Box>
             </Box>
-            <div className="my-3">
-                <p className="text-3xl my-3">Description</p>
-                <p>{description}</p>
+            <div className="my-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Description</p>
+                <p className="text-[1.25rem] font-[300] leading-[1.44375rem]">
+                    {description}
+                </p>
             </div>
-            <div className="my-5">
-                <p className="text-3xl my-3">Properties</p>
+            <div className="mb-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Properties</p>
                 {atrr
                     ? atrr.map((attributes, index) => {
                           return (
-                              <div key={index}>
+                              <div
+                                  key={index}
+                                  className="text-[1.25rem] font-[300] leading-[1.44375rem]"
+                              >
                                   {Object.entries(attributes).map(
                                       ([key, value]) => (
                                           <Pill key={key}>
@@ -373,8 +489,8 @@ export default function Page() {
                       })
                     : null}
             </div>
-            <div className="my-5">
-                <p className="text-3xl my-3">Price History</p>
+            <div className="mb-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Price History</p>
             </div>
             <div className="fixed bg-aduio-bg bottom-4 rounded-full w-3/4 h-76 px-7">
                 <LibAudioPlayer
