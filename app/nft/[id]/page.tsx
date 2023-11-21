@@ -1,11 +1,5 @@
 "use client";
-import React, {
-    useEffect,
-    useState,
-    useRef,
-    useCallback,
-    Suspense
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
     fetchSingleListedNfts,
@@ -17,7 +11,6 @@ import {
     CopyButton,
     ActionIcon,
     rem,
-    Pill,
     Modal,
     TextInput,
     Avatar,
@@ -49,6 +42,7 @@ export default function Page() {
     const [currentOwner, setCurrentOwner] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [value, setValue] = useState("");
     const [isPrice, setIsPrice] = useState<number>(0);
@@ -185,6 +179,44 @@ export default function Page() {
             console.log("deleting nft failed", err);
         }
     }, [anchorWallet, connection, pubkey]);
+
+    const handleEditListing = useCallback(
+        async (newPrice: number) => {
+            if (!anchorWallet) throw new Error("wallet not connected");
+            if (!pubkey) throw new Error("wallet not connected");
+
+            const provider = await new AnchorProvider(
+                connection,
+                anchorWallet,
+                {}
+            );
+
+            const soundworkSDK = new SoundworkSDK(provider, connection);
+
+            let nftMint = new PublicKey(nftAddress);
+
+            const ix = await soundworkSDK.editListing(nftMint, newPrice);
+            const tx = new Transaction();
+            let blockhash = (await connection.getLatestBlockhash("finalized"))
+                .blockhash;
+            tx.recentBlockhash = blockhash;
+            tx.feePayer = new PublicKey(pubkey);
+            tx.add(ix);
+
+            try {
+                const {
+                    phantom: { solana: phantomProvider }
+                }: any = window; // phantom
+                let txHash = await phantomProvider.signAndSendTransaction(tx);
+
+                // let txhash = await provider.sendAndConfirm(tx);
+                console.log("tx hash", txHash);
+            } catch (err) {
+                console.log("edit failed", err);
+            }
+        },
+        [anchorWallet, connection, pubkey]
+    );
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -341,8 +373,7 @@ export default function Page() {
                                         currentOwner === pubkey &&
                                         listingInfo!
                                     ) {
-                                        console.log("should open delete modal");
-                                        handleDeleteListing();
+                                        setIsEditModalOpen(true);
                                     } else {
                                         setIsOfferModalOpen(true);
                                     }
@@ -350,11 +381,12 @@ export default function Page() {
                             >
                                 {currentOwner === pubkey
                                     ? listingInfo! && listingInfo[0].list_price
-                                        ? "Delete Listing"
+                                        ? "Edit Listing"
                                         : "Sell"
                                     : "Make Offer"}
                             </button>
                         </div>
+                        {/* list an NFT modal */}
                         <Modal
                             opened={isSellModalOpen}
                             onClose={() => setIsSellModalOpen(false)}
@@ -416,6 +448,74 @@ export default function Page() {
                                 </div>
                             </div>
                         </Modal>
+                        {/* edit listing modal */}
+                        <Modal
+                            opened={isEditModalOpen}
+                            onClose={() => setIsEditModalOpen(false)}
+                            radius={17.681}
+                            top={200}
+                            withCloseButton={false}
+                            closeOnClickOutside={true}
+                            closeOnEscape={true}
+                            size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
+                        >
+                            <div className="mx-5">
+                                <div className="text-[2rem] font-[500] my-2">
+                                    Set Price
+                                </div>
+                                <div className="flex flex-wrap justify-between my-2 items-center">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
+                                            SOL
+                                        </div> */}
+                                    {/* </div> */}
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={() => {
+                                            const price = parseFloat(value);
+                                            handleEditListing(price);
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={handleDeleteListing}
+                                    >
+                                        Delete Listing
+                                    </button>
+                                    <div>
+                                        {isListing && (
+                                            <ListingNft
+                                                price={isPrice}
+                                                nftAddress={nftAddress}
+                                                closeModal={() => {
+                                                    setValue("");
+                                                    setIsSellModalOpen(false);
+                                                    setIsListing(false);
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </Modal>
+
                         <table className="w-full table-auto overflow-y-auto">
                             <thead>
                                 <tr className=" mx-0 ">
@@ -470,18 +570,19 @@ export default function Page() {
                           return (
                               <div
                                   key={index}
-                                  className="text-[1.25rem] font-[300] leading-[1.44375rem]"
+                                  className="text-[1.25rem] font-[300] leading-[1.44375rem] bg-[#D9D9D90A] border border-[#D7D6D633] rounded-[0.75rem] w-[10.5rem] h-[3.9375rem] overflow-hidden"
                               >
                                   {Object.entries(attributes).map(
                                       ([key, value]) => (
-                                          <Pill key={key}>
-                                              <span className="bg-audio-bg">
-                                                  {key}:
-                                              </span>
-                                              <span className="bg-transparent">
+                                          <div
+                                              key={key}
+                                              className="mx-[1.12rem] mt-[.44rem] text-[0.8125rem] font-[300]"
+                                          >
+                                              <div className="">{key}</div>
+                                              <div className="text-[1.375rem] font-[400]">
                                                   {value}
-                                              </span>
-                                          </Pill>
+                                              </div>
+                                          </div>
                                       )
                                   )}
                               </div>
