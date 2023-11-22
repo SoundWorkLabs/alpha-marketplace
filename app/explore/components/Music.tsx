@@ -68,8 +68,10 @@ const Music: React.FC<MusicProps> = ({
                     )}
                 </div> */}
                 <div className="text">
-                    <p className="title">{currentTrack?.title}</p>
-                    <p className="text-[13.336px] text-[#909090]">
+                    <p className="title text-[0.95256rem] font-[500] text-[#fff]">
+                        {currentTrack?.title}
+                    </p>
+                    <p className="text-[0.8335rem] text-[#909090] font-[400]">
                         {currentTrack?.author}
                     </p>
                 </div>
