@@ -77,22 +77,27 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
         <div className="nft-cards w-nft-card-w h-nft-card-h my-5 mr-5 overflow-hidden">
             <div className="custom-border p-[.81rem] w-full h-full">
                 {/* <div className="border-[2px] border-[linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%)] rounded-[17.681px] p-[12px] w-full h-full"> */}
-                <div>
+                <div className="h-nft-h w-nft-w mb-5">
                     <Link
                         href={`/nft/[id]?owner=${nft.current_owner}&metadata=${nft.metadata_uri}`}
                         as={`/nft/${nft.nft_address}`}
                         passHref
                         key={nft.nft_address}
                     >
-                        <Image
-                            priority={true}
-                            src={nft.image_url}
-                            alt="nft image"
-                            className="rounded-[0.5525rem] mb-5 h-nft-h w-nft-w"
-                            // className="rounded-[8.84px] mb-5"
-                            width={234.27}
-                            height={208.85}
-                        />
+                        {nft.image_url === undefined ? (
+                            <div className="rounded-[0.5525rem] mb-5 h-nft-h w-nft-w bg-[#1d1f2592] animate-pulse"></div>
+                        ) : (
+                            <img
+                                // priority={true}
+                                src={nft.image_url}
+                                alt="nft image"
+                                className="rounded-[0.5525rem] h-[100%] w-[100%]"
+                                // className="rounded-[8.84px] mb-5"
+                                // width={234.27}
+                                // height={208.85}
+                                style={{ imageRendering: "pixelated" }}
+                            />
+                        )}
                     </Link>
                     <div
                         className="play-pause-nft w-fit h-fit"
@@ -113,10 +118,10 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                         {/* )} */}
                     </div>
                 </div>
-                <div className="flex flex-col overflow-hidden space-y-[.39rem] space-x-[0.25rem]">
+                <div className="flex flex-col overflow-hidden space-y-[.39rem]">
                     {author?.avatar_url !== undefined &&
                     author?.username !== undefined ? (
-                        <div className="flex flex-wrap items-center">
+                        <div className="flex flex-wrap items-center space-x-[0.25rem]">
                             <Avatar
                                 src={author?.avatar_url as string}
                                 size="1.11025rem"
