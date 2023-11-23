@@ -13,7 +13,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { formatTime } from "./ProgressBar";
 import Image from "next/image";
 import PlaylistManager from "../../components/PlaylistManager";
-import { PlaylistProvider } from "../../context/playlistProviderContext";
+import {
+    PlaylistProvider,
+    usePlaylist
+} from "../../context/playlistProviderContext";
+import { useParams } from "next/navigation";
 
 interface ControlsProps {
     audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -36,7 +40,9 @@ const Controls: React.FC<ControlsProps> = ({
 }) => {
     const playAnimationRef = useRef<number>();
     const [opened, { open, close }] = useDisclosure(false);
-    const coverArt = currentTrack?.coverArt;
+    // left to implement in cases we need the thumbnail on the current play
+    // const coverArt = currentTrack?.coverArt;
+    const { id: nftAddress } = useParams();
     const repeat = useCallback(() => {
         const currentTime = audioRef.current?.currentTime || 0;
         setTimeProgress(currentTime);
@@ -53,6 +59,8 @@ const Controls: React.FC<ControlsProps> = ({
         playAnimationRef.current = requestAnimationFrame(repeat);
     }, [audioRef, duration, progressBarRef, setTimeProgress]);
 
+    const { skipBackward, skipForward } = usePlaylist();
+
     useEffect(() => {
         if (isPlaying) {
             audioRef.current?.play();
@@ -62,15 +70,12 @@ const Controls: React.FC<ControlsProps> = ({
             cancelAnimationFrame(playAnimationRef.current!);
         }
     }, [isPlaying, audioRef, repeat]);
-
     return (
         <div className="controls-wrapper">
             <div className="flex items-center">
                 <button
                     className="p-2 mr-4 rounded-full bg-gray-500"
-                    onClick={() => {
-                        console.log("should skip prev");
-                    }}
+                    onClick={skipBackward}
                 >
                     <IconPlayerSkipBackFilled />
                 </button>
@@ -83,18 +88,19 @@ const Controls: React.FC<ControlsProps> = ({
                 </button>
                 <button
                     className="p-2 mx-4 rounded-full bg-gray-500"
-                    onClick={() => {
-                        console.log("should skip next");
-                    }}
+                    onClick={skipForward}
                 >
                     <IconPlayerSkipForwardFilled />
                 </button>
-                <button
-                    className="p-2 mx-4 rounded-full bg-gray-500 h-[40px] w-[40px]"
-                    onClick={open}
-                >
-                    <PlayListIcon />
-                </button>
+                {!nftAddress && (
+                    <button
+                        className="p-2 mx-4 rounded-full bg-gray-500 h-[40px] w-[40px]"
+                        onClick={open}
+                    >
+                        <PlayListIcon />
+                    </button>
+                )}
+
                 <Modal
                     opened={opened}
                     onClose={close}

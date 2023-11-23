@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+*::-ms-scrollbar {
+    background: #060a24;
+    opacity: 0.5;
+    width: .5rem;
+}
+::-webkit-scrollbar {
+    background: #060a24;
+    opacity: 0.5;
+    width: .5rem;
+}
+  
+
 .nav-btn:hover {
     opacity: 0.5;
     background: var(--1, linear-gradient(90deg, #0091d7 0%, #fe0fd4 100%));
@@ -72,8 +84,8 @@ tr .columns {
 }
 
 .dynamic-image {
-    width: 400px;
-    height: 400px;
+    width: 26.375rem;
+    height: 26.375rem;
     object-fit: cover;
 }
 .title-box {
@@ -81,19 +93,19 @@ tr .columns {
     overflow: hidden;
 }
 .search input {
-    background: #21232ccc;
+    background: #0204164F;
     color: #ffffff;
+    height: 3rem;
+    padding-left: 2.8rem;
+    border: 1px solid #A4A4A9;
 }
 .search-profile input {
     background: #0204164F;
 }
-.image-container {
-    position: relative;
-}
 
 .play-pause-container {
-    width: 142px;
-    height: 142px;
+    width: 4rem;
+    height: 4rem;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -182,7 +194,7 @@ div.listing-nft-modal section {
     color: #fff; 
     height: 9.75rem;
 }
-div.listing-nft-modal section input{
+div.listing-nft-modal section input {
     border: 1px;
     background:#121426;
     color: #fff;
@@ -190,4 +202,22 @@ div.listing-nft-modal section input{
 div.drop-down{
     /* color: #fff; */
     background:#03061B;
+}
+
+.sol-icon-price svg{
+    width: 1.5625rem;
+    height: 1.5625rem;
+}
+
+.loading-icon {
+    animation: spin 2s linear infinite;
+}
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
 }
