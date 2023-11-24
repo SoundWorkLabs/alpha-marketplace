@@ -6,7 +6,8 @@ import {
     IconUpload,
     IconPhoto,
     IconX,
-    IconFileUpload
+    IconFileUpload,
+    IconActivityHeartbeat
 } from "@tabler/icons-react";
 import { useState } from "react";
 
@@ -17,12 +18,14 @@ interface FileProps {
 export function ImageDropzone({ setFileState }: FileProps) {
     const [files, setFiles] = useState<FileWithPath[]>([]);
     const imgSrc = files.length > 0 ? URL.createObjectURL(files[0]) : "";
+    const [imgIsUpload, setImgIsUploaded] = useState<boolean>(false);
 
     return (
         <Box
-            style={{
-                background: "var(--mantine-color-placeholder)"
-            }}
+        // style={{
+        //     background: "var(--mantine-color-placeholder)"
+        // }}
+        // className="rounded-[0.625rem] border border-[#7710BA] bg-[#C4C4C41A] h-[13.1875rem]"
         >
             <Dropzone
                 accept={IMAGE_MIME_TYPE}
@@ -41,22 +44,20 @@ export function ImageDropzone({ setFileState }: FileProps) {
                         <div>
                             <Flex justify="center">
                                 <Dropzone.Accept>
-                                    <div className="flex justify-center">
-                                        <IconUpload
-                                            style={{
-                                                width: rem(52),
-                                                height: rem(52),
-                                                color: "var(--mantine-color-blue-6)"
-                                            }}
-                                            stroke={1.5}
-                                        />
-                                    </div>
+                                    <IconUpload
+                                        style={{
+                                            width: rem(102),
+                                            height: rem(102),
+                                            color: "var(--mantine-color-blue-6)"
+                                        }}
+                                        stroke={1.5}
+                                    />
                                 </Dropzone.Accept>
                                 <Dropzone.Reject>
                                     <IconX
                                         style={{
-                                            width: rem(52),
-                                            height: rem(52),
+                                            width: rem(102),
+                                            height: rem(102),
                                             color: "var(--mantine-color-red-6)"
                                         }}
                                         stroke={1.5}
@@ -65,11 +66,11 @@ export function ImageDropzone({ setFileState }: FileProps) {
                                 <Dropzone.Idle>
                                     <IconPhoto
                                         style={{
-                                            width: rem(52),
-                                            height: rem(52),
-                                            color: "var(--mantine-color-dimmed)"
+                                            width: rem(102),
+                                            height: rem(102)
                                         }}
-                                        stroke={1.5}
+                                        stroke={rem(1)}
+                                        color="#D9D9D954"
                                     />
                                 </Dropzone.Idle>
                             </Flex>
@@ -77,34 +78,32 @@ export function ImageDropzone({ setFileState }: FileProps) {
                     ) : (
                         <Flex justify="center" mt={3}>
                             {files.length > 0 ? (
-                                <Flex justify="center">
-                                    <Image
-                                        h={200}
-                                        // w={"350vw"}
-                                        src={imgSrc}
-                                        onLoad={() =>
-                                            URL.revokeObjectURL(imgSrc)
-                                        }
-                                        alt="selected image for preview"
-                                    />
-                                </Flex>
+                                // <Flex justify="center">
+                                //     <Image
+                                //         h={200}
+                                //         // w={"350vw"}
+                                //         src={imgSrc}
+                                //         onLoad={() =>
+                                //             URL.revokeObjectURL(imgSrc)
+                                //         }
+                                //         alt="selected image for preview"
+                                //     />
+                                // </Flex>
+                                <img
+                                    // priority={true}
+                                    src={imgSrc}
+                                    alt="nft image"
+                                    className="rounded-[0.5525rem] h-[100%] w-[100%]"
+                                    // className="rounded-[8.84px] mb-5"
+                                    // width={234.27}
+                                    // height={208.85}
+                                    onLoad={() => URL.revokeObjectURL(imgSrc)}
+                                    style={{ imageRendering: "pixelated" }}
+                                />
                             ) : null}
                         </Flex>
                     )}
                 </Group>
-                <div
-                    style={{
-                        padding: "0px 10px 2px 10px"
-                    }}
-                >
-                    <Text size="xl" inline>
-                        Drag cover image here or click to select file
-                    </Text>
-                    <Text size="sm" c="dimmed" inline mt={7}>
-                        Supported file types include PNG, JPEG, WEBP, Max Size
-                        10MB
-                    </Text>
-                </div>
             </Dropzone>
         </Box>
     );
@@ -116,9 +115,9 @@ export function AudioDropzone({ setFileState }: FileProps) {
 
     return (
         <Box
-            style={{
-                background: "var(--mantine-color-placeholder)"
-            }}
+        // style={{
+        //     background: "var(--mantine-color-placeholder)"
+        // }}
         >
             <Dropzone
                 accept={{
@@ -143,37 +142,37 @@ export function AudioDropzone({ setFileState }: FileProps) {
                                         <div className="flex justify-center">
                                             <IconUpload
                                                 style={{
-                                                    width: rem(52),
-                                                    height: rem(52),
-                                                    color: "var(--mantine-color-blue-6)"
+                                                    width: rem(102),
+                                                    height: rem(102)
                                                 }}
-                                                stroke={1.5}
+                                                stroke={rem(1)}
+                                                color="#D9D9D954"
                                             />
                                         </div>
                                     </Dropzone.Accept>
                                     <Dropzone.Reject>
                                         <IconX
                                             style={{
-                                                width: rem(52),
-                                                height: rem(52),
-                                                color: "var(--mantine-color-red-6)"
+                                                width: rem(102),
+                                                height: rem(102)
                                             }}
-                                            stroke={1.5}
+                                            stroke={rem(1)}
+                                            color="#D9D9D954"
                                         />
                                     </Dropzone.Reject>
                                     <Dropzone.Idle>
                                         <IconFileUpload
                                             style={{
-                                                width: rem(52),
-                                                height: rem(52),
-                                                color: "var(--mantine-color-dimmed)"
+                                                width: rem(102),
+                                                height: rem(102)
                                             }}
-                                            stroke={1.5}
+                                            stroke={rem(1)}
+                                            color="#D9D9D954"
                                         />
                                     </Dropzone.Idle>
                                 </Flex>
                             </div>
-                            <div
+                            {/* <div
                                 style={{
                                     padding: "0px 10px 2px 10px"
                                 }}
@@ -185,21 +184,32 @@ export function AudioDropzone({ setFileState }: FileProps) {
                                     Supported file types include MP3, WAV, AIFF,
                                     Max Size 10MB
                                 </Text>
-                            </div>
+                            </div> */}
                         </div>
                     ) : (
-                        <Flex justify="center" mt={3}>
+                        // <Flex justify="center" mt={3}>
+                        <div>
                             {files.length > 0 ? (
                                 <Flex
-                                    justify="center"
-                                    direction="column"
-                                    className="text-center"
+                                    // justify="center"
+                                    direction="row"
+                                    // className="flex flex-wrap"
+                                    className="flex items-center"
                                 >
-                                    <Text fw="bold">upload</Text>
-                                    <Text fw="bold">{files[0].path}</Text>
+                                    {/* <Text fw="bold">upload</Text> */}
+                                    {/* <IconActivityHeartbeat
+                                        width={102}
+                                        height={102}
+                                        stroke={rem(1)}
+                                    /> */}
+                                    <div className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]">
+                                        {files[0].path}
+                                    </div>
                                 </Flex>
                             ) : null}
-                        </Flex>
+                        </div>
+
+                        // </Flex>
                     )}
                 </Group>
             </Dropzone>

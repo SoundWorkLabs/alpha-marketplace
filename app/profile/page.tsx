@@ -5,7 +5,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserNfts } from "../../services/NFT";
 import NftCard from "../components/NftCard";
-import { NftSchema } from "../components/types";
+import { NftSchema, UserInfo } from "../components/types";
+import { fetchUserByAddress } from "../../services/user";
+import NftFallback from "../components/NftFallback";
+import { SearchIcon, SortIcon, FilterIcon } from "../components/icon";
 
 const dummyItemValObj = {
     Items: 34,
@@ -20,6 +23,7 @@ export default function Profile() {
     const [isConnected, setConnection] = useState(false);
     const [selectedOption, setSelectedOption] = useState(0);
     const [userNfts, setUserNfts] = useState<NftSchema[]>([]);
+    const [userInfo, setUserInfo] = useState<UserInfo>();
 
     useEffect(() => {
         if (!publicKey) {
@@ -36,7 +40,8 @@ export default function Profile() {
         setPubkey(userPubKey);
         const userData = async () => {
             setConnection(true);
-            return setUserNfts(await fetchUserNfts(publicKey?.toBase58()));
+            setUserInfo(await fetchUserByAddress(publicKey?.toBase58()));
+            setUserNfts(await fetchUserNfts(publicKey?.toBase58()));
         };
         userData();
     }, [publicKey]);
@@ -58,12 +63,11 @@ export default function Profile() {
                             <Box>
                                 <Avatar
                                     size="xl"
-                                    src={null}
-                                    alt="Jimii Mutuku"
-                                    color="red"
-                                >
-                                    JM
-                                </Avatar>
+                                    src={userInfo?.avatar_url}
+                                    alt="user avatar img"
+                                    // color="red"
+                                />
+                                {/* </Avatar> */}
                             </Box>
                             <Box className="mt-4">{pubkey}</Box>
                         </Flex>
@@ -95,7 +99,7 @@ export default function Profile() {
                                 {/* <CustomPill color=""  label="edit profile" /> */}
                                 <button
                                     // variant="primary"
-                                    className="bg-btn-bg rounded-full p-2 w-[207px]"
+                                    className="bg-btn-bg rounded-full py-[0.6875rem] px-[1.8125rem] w-[12.9375rem] text-[1rem] font-[300] leading-[1.04rem]"
                                 >
                                     Edit Profile
                                 </button>
@@ -103,13 +107,13 @@ export default function Profile() {
                         </Flex>
                     </Flex>
                     <Box className="items-center">
-                        <Flex className="space-x-20 mt-16 justify-center ">
+                        <Flex className="space-x-20 mt-16 justify-center text-[1.25rem] font-[400] leading-1.3rem">
                             {options.map((option, index) => (
                                 <button
                                     key={index}
                                     className={
                                         selectedOption === index
-                                            ? "border-b-[3px] pb-4 profile-selected-opt w-[137px]"
+                                            ? "border-b-[0.1875rem] pb-4 profile-selected-opt w-[8.5625rem]"
                                             : ""
                                     }
                                     onClick={() => {
@@ -122,25 +126,32 @@ export default function Profile() {
                         </Flex>
                     </Box>
 
-                    <Box className="border border-[#D7D6D633] rounded-[12px] h-76 flex flex-wrap items-center justify-between bg-[#D9D9D90A]">
-                        <div className="flex flex-wrap items-center mx-2">
+                    <Box className="border border-[#D7D6D633] rounded-[0.75rem] h-[4.75rem] flex flex-wrap items-center justify-between bg-[#D9D9D90A]">
+                        <div className="flex flex-wrap items-center mx-2 space-x-[1.56rem]">
                             {" "}
                             <TextInput
-                                w={382}
-                                radius={20}
-                                className="search-profile p-2 h-[48px]"
+                                w={"25.6875rem"}
+                                radius={"3rem"}
+                                className="search items-center p-[.75] pl-[1.25rem] leading-[1.04rem]"
                                 placeholder="Search by music..."
+                                leftSection={<SearchIcon />}
                             />
-                            <div className="font-[300] text-[16px] text-[#B3B3B3]">
+                            <div className="font-[300] text-[1rem] text-[#B3B3B3]">
                                 0 results
                             </div>
                         </div>
-                        <div className="mx-4">
-                            <button className="text-[16px] mr-4 text-[#B3B3B3]  bg-[#0204164F] rounded-full w-[137px] h-[45px]">
-                                Sort by
-                            </button>{" "}
-                            <button className="text-[16px] text-[#B3B3B3]  bg-[#0204164F] rounded-full w-[137px] h-[45px]">
-                                filter
+                        <div className="mx-4 flex flex-wrap">
+                            <button className="w-[7.625rem] h-[3rem] ml-4 bg-[#0204164F] rounded-[3rem] space-x-2 flex flex-wrap items-center justify-center">
+                                <p className="text-[#B3B3B3] font-[400] leading-[1.5rem]">
+                                    Sort by
+                                </p>
+                                <SortIcon />
+                            </button>
+                            <button className="w-[7.625rem] h-[3rem] ml-4 bg-[#0204164F] rounded-[3rem] space-x-2 flex flex-wrap items-center justify-center">
+                                <p className="text-[#B3B3B3] font-[400] leading-[1.5rem]">
+                                    Filters
+                                </p>
+                                <FilterIcon />
                             </button>
                         </div>
                     </Box>
@@ -148,19 +159,19 @@ export default function Profile() {
                     {selectedOption == 0 && (
                         <Box className="flex flex-wrap">
                             {" "}
-                            {userNfts && userNfts.length > 0 ? (
-                                userNfts
-                                    .slice()
-                                    .reverse()
-                                    .map((nft) => (
-                                        <NftCard
-                                            key={nft.nft_address}
-                                            nft={nft}
-                                        />
-                                    ))
-                            ) : (
-                                <div>Loading...</div>
-                            )}
+                            {userNfts && userNfts.length > 0
+                                ? userNfts
+                                      .slice()
+                                      .reverse()
+                                      .map((nft) => (
+                                          <NftCard
+                                              key={nft.nft_address}
+                                              nft={nft}
+                                          />
+                                      ))
+                                : Array.from({ length: 10 }, (_, index) => (
+                                      <NftFallback key={index} />
+                                  ))}
                         </Box>
                     )}
                     {/* TO DO: implement other btns */}
