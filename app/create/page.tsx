@@ -250,7 +250,13 @@ export default function Create() {
                                     <div className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]">
                                         JPG, GIF, MP4, Max Size 10 MB
                                     </div>
-                                    <Box className="border-4 border-[#D9D9D954] p-5 rounded-[0.625rem]">
+                                    <Box
+                                        className={
+                                            coverImage === undefined
+                                                ? "border-4 border-[#D9D9D954] p-5 rounded-[0.625rem]"
+                                                : "p-5"
+                                        }
+                                    >
                                         <ImageDropzone
                                             setFileState={(
                                                 file: FileWithPath
