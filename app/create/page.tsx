@@ -6,6 +6,7 @@ import {
     Collapse,
     Flex,
     Group,
+    rem,
     Select,
     Switch,
     Text,
@@ -16,7 +17,12 @@ import {
 import { FileWithPath } from "@mantine/dropzone";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import {
+    IconFileUpload,
+    IconPhoto,
+    IconPlus,
+    IconX
+} from "@tabler/icons-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { AudioDropzone, ImageDropzone } from "../components/FileDropzone";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -228,25 +234,37 @@ export default function Create() {
     return (
         <Flex justify="center">
             <Box mx={0} mb={20}>
-                <Box>
-                    <Title order={3}>Create New Sound NFT</Title>
+                <Box className="my-[3.5rem]">
+                    <div className="text-[1.75rem] font-[600] leading-[2.1rem]">
+                        Create New Sound NFT
+                    </div>
                 </Box>
                 <Box>
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <Flex direction="column" gap="30">
                             <Group>
                                 <Flex direction="column" gap="3" w={"40vw"}>
-                                    <Box>
-                                        <Text fw="bold" size="lg" lh={3}>
-                                            Cover Image / Video
-                                        </Text>
-                                    </Box>
-                                    <Box>
+                                    <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                                        Cover Image / Video
+                                    </div>
+                                    <div className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]">
+                                        JPG, GIF, MP4, Max Size 10 MB
+                                    </div>
+                                    <Box className="border-4 border-[#D9D9D954] p-5 rounded-[0.625rem]">
                                         <ImageDropzone
                                             setFileState={(
                                                 file: FileWithPath
                                             ) => setCoverImage(file)}
                                         />
+                                        {coverImage === undefined && (
+                                            <div className="text-[#D9D9D954] font-[250] flex justify-center space-x-2">
+                                                <p>Drag cover image here</p>
+                                                <IconPhoto />
+                                                <p>or click</p>
+                                                <IconPhoto />
+                                                <p>to select file</p>
+                                            </div>
+                                        )}
                                     </Box>
                                 </Flex>
                             </Group>
@@ -275,28 +293,65 @@ export default function Create() {
                                             onChange={setSoundType}
                                         />
                                     </Box>
-                                    <Box>
+                                    <Box className="flex flex-col text-[1.125rem] font-[200] leading-[1.35rem]">
                                         {soundType === "sound" && (
-                                            <Box mt={20}>
+                                            <Box
+                                                mt={20}
+                                                className={
+                                                    audioFile === undefined
+                                                        ? "border-4 border-[#D9D9D954] mt-5 p-5 rounded-[0.625rem]"
+                                                        : "mt-5 p-5"
+                                                }
+                                            >
                                                 <AudioDropzone
                                                     setFileState={(
                                                         file: FileWithPath
                                                     ) => setAudioFile(file)}
                                                 />
+                                                {audioFile === undefined && (
+                                                    <div className="text-[#D9D9D954]">
+                                                        <div className="space-x-2 flex flex-wrap items-center font-400 justify-center">
+                                                            <p>
+                                                                Drag audio file
+                                                                here
+                                                            </p>
+                                                            <IconFileUpload />
+                                                            <p>or click </p>
+                                                            <IconFileUpload />
+                                                            <p>
+                                                                to select file
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="flex justify-center text-[.75rem]">
+                                                            Supported file types
+                                                            include MP3, WAV,
+                                                            AIFF, Max Size 10MB
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </Box>
                                         )}
                                     </Box>
                                 </CollapsibleField>
                             </Group>
 
-                            <Group className="test">
-                                <TextInputField
-                                    label="Name"
+                            <Group className="test flex flex-col">
+                                <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                                    Name
+                                </div>
+                                {/* <input className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]" placeholder="Kobeni Higashiyama"
+                                onChange={({ target: { value } }) =>
+                                setName(value)
+                            }/> */}
+                                <TextInput
+                                    // label="Name"
                                     required={true}
                                     placeholder="Kobeni Higashiyama"
                                     onChange={({ target: { value } }) =>
                                         setName(value)
                                     }
+                                    className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem] w-full"
                                 />
                             </Group>
                             {/* 
@@ -312,21 +367,25 @@ export default function Create() {
                             */}
 
                             <Group>
-                                <TextInputField
-                                    label="External Link"
+                                <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                                    External Link
+                                </div>
+                                <TextInput
+                                    // label="External Link"
                                     placeholder="https://soundwork.io/assets/csm"
                                     onChange={({ target: { value } }) =>
                                         setExternalUrl(value)
                                     }
+                                    className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem] w-full"
                                 />
                             </Group>
 
                             <Group>
                                 <Flex direction="column" gap="3" w={"40vw"}>
                                     <Box>
-                                        <Text fw="bold" size="lg" lh={3}>
+                                        <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
                                             Description
-                                        </Text>
+                                        </div>
                                     </Box>
                                     <Box>
                                         <Textarea
@@ -335,6 +394,7 @@ export default function Create() {
                                             onChange={({ target: { value } }) =>
                                                 setDescription(value)
                                             }
+                                            className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem] w-full"
                                         />
                                     </Box>
                                 </Flex>
@@ -355,6 +415,7 @@ export default function Create() {
                                         justify="space-between"
                                         wrap="wrap"
                                         gap={10}
+                                        align="center"
                                     >
                                         <TextInput
                                             placeholder="trait type"
@@ -362,6 +423,7 @@ export default function Create() {
                                             onChange={({ target: { value } }) =>
                                                 setAttributeKey(value)
                                             }
+                                            className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]bg-[#FE0FD4]"
                                         />
                                         <TextInput
                                             placeholder="trait value"
@@ -369,44 +431,72 @@ export default function Create() {
                                             onChange={({ target: { value } }) =>
                                                 setAttributeValue(value)
                                             }
+                                            className="text-[1.125rem] font-[500] leading-[1.35rem] my-[.5rem] "
                                         />
                                     </Flex>
-                                    <Button
-                                        variant="primary"
-                                        mt={4}
-                                        display="flex"
-                                        justify="center"
-                                        onClick={handleAddAttribute}
-                                    >
-                                        add trait
-                                    </Button>
+                                    <div className="flex justify-between">
+                                        <button
+                                            onClick={handleAddAttribute}
+                                            className="w-[10.0625rem] h-[1.5625rem] rounded-[2.9375rem] bg-btn-bg text-[1rem] font-[200] leading-[1.3rem]"
+                                        >
+                                            add trait
+                                        </button>
+                                        <button
+                                            // variant="primary"
+                                            // mt={4}
+                                            // display="flex"
+                                            // justify="center"
+                                            onClick={() => {
+                                                setAttributes([]);
+                                            }}
+                                            className="w-[10.0625rem] h-[1.5625rem] rounded-[2.9375rem] bg-btn-bg text-[1rem] font-[200] leading-[1.3rem]"
+                                        >
+                                            clear
+                                        </button>
+                                    </div>
+
                                     <Box
-                                        bg={"var(--_input-bg)"}
-                                        style={{
-                                            border: "1px solid var(--mantine-color-bright)",
-                                            padding: "10px 2px",
-                                            background: "var(--_input-bg)",
-                                            margin: "10px 0"
-                                        }}
+                                        // bg={"var(--_input-bg)"}
+                                        // style={{
+                                        //     border: "1px solid var(--mantine-color-bright)",
+                                        //     padding: "10px 2px",
+                                        //     background: "var(--_input-bg)",
+                                        //     margin: "10px 0"
+                                        // }}
+                                        className="border-4 border-[#D9D9D954] mt-5 p-5 rounded-[0.625rem]"
                                     >
                                         {attributes.length > 0 &&
                                             attributes.map(
                                                 (attribute, index) => (
-                                                    <Box key={index}>
-                                                        &nbsp; &#123;{" "}
-                                                        {
-                                                            Object.keys(
-                                                                attribute
-                                                            )[0]
+                                                    <Box
+                                                        key={index}
+                                                        className="p-2 flex flex-wrap justify-center space-x-5 text-[1.4rem] font-[300]"
+                                                    >
+                                                        {/* &nbsp; &#123;{" "}
+                                                        { */}
+                                                        <div className="text-[#0091D7]">
+                                                            {
+                                                                Object.keys(
+                                                                    attribute
+                                                                )[0]
+                                                            }
+                                                            :
+                                                        </div>
+                                                        {/*                                                             
                                                         }{" "}
                                                         {": "}
                                                         &nbsp;
-                                                        {
-                                                            Object.values(
-                                                                attribute
-                                                            )[0]
-                                                        }{" "}
-                                                        &#125;
+                                                        { */}
+                                                        <div className="text-[#FE0FD4]">
+                                                            {
+                                                                Object.values(
+                                                                    attribute
+                                                                )[0]
+                                                            }
+                                                        </div>
+
+                                                        {/* }{" "}
+                                                        &#125; */}
                                                     </Box>
                                                 )
                                             )}
@@ -417,13 +507,13 @@ export default function Create() {
                             <Group>
                                 <Flex w={"40vw"} justify="space-between">
                                     <Flex direction="column">
-                                        <Text fw="bold" size="lg">
+                                        <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
                                             Available for lease
-                                        </Text>
-                                        <Text size="xs">
+                                        </div>
+                                        <div className="text-[0.925rem] font-[200] leading-[1.95rem] my-[.5rem]">
                                             Allow users to download the file for
                                             usage without transferring ownership
-                                        </Text>
+                                        </div>
                                     </Flex>
                                     <Box>
                                         <Switch
@@ -469,25 +559,35 @@ export default function Create() {
 
                             {/* // todo: Jimii(don;t show it type is single sound)  */}
                             <Group>
-                                <TextInputField
-                                    label="Supply"
-                                    type="number"
-                                    placeholder="1"
-                                    description="Number of copies to be minted"
-                                    onChange={({ target: { value } }) =>
-                                        setNumToMint(value)
-                                    }
-                                />
+                                <Flex direction="column">
+                                    <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                                        Supply
+                                    </div>
+                                    <div className="text-[0.925rem] font-[200] leading-[1.95rem] my-[.5rem]">
+                                        Number of copies to be minted
+                                    </div>
+                                    <TextInput
+                                        // label="Supply"
+                                        type="number"
+                                        placeholder="1"
+                                        // description="Number of copies to be minted"
+                                        onChange={({ target: { value } }) => {
+                                            const supply = parseInt(value);
+                                            supply > 0 && setNumToMint(supply);
+                                        }}
+                                    />
+                                </Flex>
                             </Group>
 
-                            <Box>
-                                <Button
-                                    variant="primary"
+                            <Box className="flex justify-center my-5">
+                                <button
+                                    // variant="primary"
                                     type="submit"
                                     // onClick={() => console.log('wat up')}
+                                    className="w-[19.0625rem] h-[3.5625rem] rounded-[2.9375rem] text-[1.25rem] font-[300] leading-[1.3rem] bg-btn-bg"
                                 >
                                     Mint
-                                </Button>
+                                </button>
                             </Box>
                         </Flex>
                     </form>
@@ -553,29 +653,43 @@ const CollapsibleField = ({
 }) => {
     return (
         <Flex direction="column" gap="3" w={"40vw"}>
-            <Flex direction="row" justify="space-between">
+            {" "}
+            <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                {label}
+            </div>
+            <Flex direction="row" justify="space-between" align="center">
                 <Box>
-                    <Text fw="bold" size="lg">
-                        {label}
-                    </Text>
-                    <Text size="sm" lh={3}>
+                    <div className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]">
                         {description}
-                    </Text>
+                    </div>
                 </Box>
                 <Box
-                    className="hover:cursor-pointer"
+                    className="hover:cursor-pointer border-2 border-[#0091D766] rounded-full flex justify-items-end"
                     my="auto"
-                    style={{
-                        border: "1px solid transparent",
-                        borderImage:
-                            "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))",
-                        borderImageSlice: 1
-                    }}
+                    // style={{
+                    //     border: "1px solid transparent",
+                    //     borderImage:
+                    //         "linear-gradient(90deg, rgba(119, 16, 186, 1), rgba(230, 18, 157, 1))",
+                    //     borderImageSlice: 1,
+                    //     borderRadius: "100%"
+                    // }}
                 >
                     {opened ? (
-                        <IconX onClick={toggle} />
+                        <IconX
+                            onClick={toggle}
+                            className="m-1"
+                            size={15}
+                            color="rgba(230, 2, 147, 1)"
+                            stroke="2.9"
+                        />
                     ) : (
-                        <IconPlus onClick={toggle} />
+                        <IconPlus
+                            onClick={toggle}
+                            className="m-1"
+                            size={15}
+                            color="rgba(230, 2, 147, 1)"
+                            stroke="2.9"
+                        />
                     )}
                 </Box>
             </Flex>
