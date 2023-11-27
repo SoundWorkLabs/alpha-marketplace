@@ -49,7 +49,7 @@
 }
 .custom-border1 {
     border: 2px solid #0000;
-    border-radius: 17.681px;
+    border-radius: 1.1rem;
     background:
   /* #03061B padding-box, */
         linear-gradient(#03061b, #03061b) padding-box,
@@ -125,6 +125,8 @@ tr .columns {
     padding: 10px;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
+    width: 4rem;
+    height: 4rem;
 }
 
 .player-button:hover,

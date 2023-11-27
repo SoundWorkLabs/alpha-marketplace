@@ -14,7 +14,9 @@ import {
     Modal,
     TextInput,
     Avatar,
-    Image
+    Image,
+    Container,
+    Select
 } from "@mantine/core";
 // import Image from "next/image";
 import { IconCopy, IconCheck, IconPlayerPlayFilled } from "@tabler/icons-react";
@@ -23,15 +25,29 @@ import { MetaSchema, NftSchema, UserInfo } from "../../components/types";
 import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 
-import ListingNft from "../../components/modals/listingNft";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import BuyNow from "../../components/BuyNow";
+// import BuyNow from "../../components/BuyNow";
 import { SoundworkListSDK } from "@jimii/soundwork-sdk";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
+
+import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
 
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { fetchUserByAddress } from "../../../services/user";
-import { deleteListing } from "../../../services/listing";
+import {
+    createListing,
+    deleteListing,
+    editListing
+} from "../../../services/listing";
+import getUnixTimestampForExpiry from "../../components/unixConvertor";
+
+const ExpiryDateOptions = [
+    { value: "1", label: "1 Day" },
+    { value: "3", label: "3 Days" },
+    { value: "7", label: "7 Days" },
+    { value: "30", label: "1 Month" }
+    // { value: "custom", label: "Custom" }
+];
 
 export default function Page() {
     const { id: nftAddress } = useParams();
@@ -45,17 +61,20 @@ export default function Page() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [value, setValue] = useState("");
-    const [isPrice, setIsPrice] = useState<number>(0);
+    // const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
-    const [isListing, setIsListing] = useState(false);
+    // const [isListing, setIsListing] = useState(false);
     const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
     const pubkey = wallet?.publicKey.toBase58();
     const [author, setAuthor] = useState<UserInfo>();
     const [listingInfo, setListingInfo] = useState<NftSchema["listings"]>();
     const [solUsd, setSolUsd] = useState<string>();
+    const [expiryDate, setExpiryDate] = useState("");
 
     const anchorWallet = useAnchorWallet();
     const { connection } = useConnection();
+
+    const mint = new PublicKey(nftAddress);
 
     // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
@@ -125,10 +144,9 @@ export default function Page() {
 
         const provider = await new AnchorProvider(connection, anchorWallet, {});
 
-        const soundworkSDK = new SoundworkListSDK(provider, connection);
+        const soundworkListSDK = new SoundworkListSDK(provider, connection);
 
-        let nftMint = new PublicKey(nftAddress);
-        let ix = await soundworkSDK.buyListing(nftMint);
+        let ix = await soundworkListSDK.buyListing(mint);
         let tx = new Transaction();
         let blockhash = (await connection.getLatestBlockhash("finalized"))
             .blockhash;
@@ -149,17 +167,52 @@ export default function Page() {
         }
     }, [anchorWallet, connection, pubkey]);
 
+    const handleListing = useCallback(
+        async (price: number) => {
+            if (!anchorWallet) throw new Error("wallet not connected");
+            if (!pubkey) throw new Error("wallet not connected");
+
+            const provider = await new AnchorProvider(
+                connection,
+                anchorWallet,
+                {}
+            );
+
+            const soundworkListSDK = new SoundworkListSDK(provider, connection);
+
+            const ix = await soundworkListSDK.createListing(mint, price);
+            let tx = new Transaction();
+            let blockhash = (await connection.getLatestBlockhash("finalized"))
+                .blockhash;
+            tx.recentBlockhash = blockhash;
+            tx.feePayer = new PublicKey(pubkey);
+            tx.add(ix);
+
+            try {
+                const {
+                    phantom: { solana: phantomProvider }
+                }: any = window; // phantom
+                await phantomProvider
+                    .signAndSendTransaction(tx)
+                    .then((txHash: string) => {
+                        createListing(txHash, pubkey, mint, price);
+                    });
+            } catch (err) {
+                console.log("listing failed", err);
+            }
+        },
+        [anchorWallet, connection, pubkey]
+    );
+
     const handleDeleteListing = useCallback(async () => {
         if (!anchorWallet) throw new Error("wallet not connected");
         if (!pubkey) throw new Error("wallet not connected");
 
         const provider = await new AnchorProvider(connection, anchorWallet, {});
 
-        const soundworkSDK = new SoundworkListSDK(provider, connection);
+        const soundworkListSDK = new SoundworkListSDK(provider, connection);
 
-        let nftMint = new PublicKey(nftAddress);
-
-        const ix = await soundworkSDK.deleteListing(nftMint);
+        const ix = await soundworkListSDK.deleteListing(mint);
         const tx = new Transaction();
         let blockhash = (await connection.getLatestBlockhash("finalized"))
             .blockhash;
@@ -171,14 +224,15 @@ export default function Page() {
             const {
                 phantom: { solana: phantomProvider }
             }: any = window; // phantom
-            let txHash = await phantomProvider.signAndSendTransaction(tx);
-
-            // let txhash = await provider.sendAndConfirm(tx);
-            console.log("tx hash", txHash);
-
-            if (listingInfo && txHash) {
-                deleteListing(listingInfo[0].id);
-            }
+            await phantomProvider
+                .signAndSendTransaction(tx)
+                .then((txHash: string) => {
+                    if (listingInfo) {
+                        deleteListing(listingInfo[0].id);
+                        // let txhash = await provider.sendAndConfirm(tx);
+                        console.log("tx hash", txHash);
+                    }
+                });
         } catch (err) {
             console.log("deleting nft failed", err);
         }
@@ -194,12 +248,9 @@ export default function Page() {
                 anchorWallet,
                 {}
             );
+            const soundworkListSDK = new SoundworkListSDK(provider, connection);
 
-            const soundworkSDK = new SoundworkListSDK(provider, connection);
-
-            let nftMint = new PublicKey(nftAddress);
-
-            const ix = await soundworkSDK.editListing(nftMint, newPrice);
+            const ix = await soundworkListSDK.editListing(mint, 1);
             const tx = new Transaction();
             let blockhash = (await connection.getLatestBlockhash("finalized"))
                 .blockhash;
@@ -211,16 +262,77 @@ export default function Page() {
                 const {
                     phantom: { solana: phantomProvider }
                 }: any = window; // phantom
-                let txHash = await phantomProvider.signAndSendTransaction(tx);
-
-                // let txhash = await provider.sendAndConfirm(tx);
-                console.log("tx hash", txHash);
+                await phantomProvider
+                    .signAndSendTransaction(tx)
+                    .then((txHash: string) => {
+                        if (listingInfo) {
+                            editListing(listingInfo[0].id, mint, newPrice);
+                            // let txhash = await provider.sendAndConfirm(tx);
+                            console.log("tx hash", txHash);
+                        }
+                    });
             } catch (err) {
                 console.log("edit failed", err);
             }
         },
         [anchorWallet, connection, pubkey]
     );
+
+    const handleBid = useCallback(
+        async (offerPrice: number, expiryDate: string) => {
+            if (!anchorWallet) throw new Error("wallet not connected");
+            if (!pubkey) throw new Error("wallet not connected");
+
+            const provider = await new AnchorProvider(
+                connection,
+                anchorWallet,
+                {}
+            );
+            const soundworkBidSDK = new SoundworkBidSDK(provider, connection);
+
+            const expiryDateInUnixTimestamp =
+                getUnixTimestampForExpiry(expiryDate);
+
+            console.log("ex p", expiryDateInUnixTimestamp);
+
+            console.log("ix starts");
+            const ix = await soundworkBidSDK.placeBid(
+                mint,
+                1 * LAMPORTS_PER_SOL,
+                expiryDateInUnixTimestamp
+            );
+            console.log("ix ends");
+
+            const tx = new Transaction();
+            let blockhash = (await connection.getLatestBlockhash("finalized"))
+                .blockhash;
+            tx.recentBlockhash = blockhash;
+            tx.feePayer = new PublicKey(pubkey);
+            tx.add(ix);
+
+            try {
+                const {
+                    phantom: { solana: phantomProvider }
+                }: any = window; // phantom
+                await phantomProvider
+                    .signAndSendTransaction(tx)
+                    .then((txHash: string) => {
+                        // kasuba97 todo: post txHash to the bid route
+
+                        // let txhash = await provider.sendAndConfirm(tx);
+                        console.log("tx hash", txHash);
+                    });
+            } catch (err) {
+                console.log("edit failed", err);
+            }
+        },
+        [anchorWallet, connection, pubkey]
+    );
+
+    const handleExpiryDateChange = (value: string) => {
+        console.log("expiry date", value);
+        setExpiryDate(value);
+    };
 
     if (isLoading) {
         return (
@@ -246,6 +358,11 @@ export default function Page() {
         return <div>Data not available. Try again later.</div>;
     }
 
+    // deleteListing(
+    //     "2BafxwsSwfyuH85U853B32jyvzF8Jr1wJZwyChAxRyUNhz1x3YxEk2aCiJvbPMnDtqUVMekaxGKT56P8z4Vc9Z2a"
+    // ).then((res) => {
+    //     console.log("Success", res);
+    // });
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap gap-x-10">
@@ -365,7 +482,7 @@ export default function Page() {
                                     ? "Download"
                                     : "Buy Now"}
                             </button>
-                            <>
+                            {/* <>
                                 {isBuyNowOpen && (
                                     <BuyNow
                                         nftAddress={nftAddress}
@@ -374,7 +491,7 @@ export default function Page() {
                                         }}
                                     />
                                 )}
-                            </>
+                            </> */}
                             <button
                                 className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300]"
                                 onClick={() => {
@@ -445,26 +562,12 @@ export default function Page() {
                                     <button
                                         className="rounded-full bg-btn-bg w-nft-w"
                                         onClick={() => {
-                                            const price = parseFloat(value);
-                                            setIsPrice(price);
-                                            setIsListing(true);
+                                            const price = parseInt(value);
+                                            handleListing(price);
                                         }}
                                     >
                                         List for Sale
                                     </button>
-                                    <div>
-                                        {isListing && (
-                                            <ListingNft
-                                                price={isPrice}
-                                                nftAddress={nftAddress}
-                                                closeModal={() => {
-                                                    setValue("");
-                                                    setIsSellModalOpen(false);
-                                                    setIsListing(false);
-                                                }}
-                                            />
-                                        )}
-                                    </div>
                                 </div>
                             </div>
                         </Modal>
@@ -507,8 +610,8 @@ export default function Page() {
                                     <button
                                         className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
                                         onClick={() => {
-                                            const price = parseFloat(value);
-                                            handleEditListing(price);
+                                            const newPrice = parseInt(value);
+                                            handleEditListing(newPrice);
                                         }}
                                     >
                                         Confirm
@@ -519,19 +622,68 @@ export default function Page() {
                                     >
                                         Delete Listing
                                     </button>
+                                </div>
+                            </div>
+                        </Modal>
+                        {/* bid modal */}
+                        <Modal
+                            opened={isOfferModalOpen}
+                            onClose={() => setIsOfferModalOpen(false)}
+                            radius={17.681}
+                            top={200}
+                            withCloseButton={false}
+                            closeOnClickOutside={true}
+                            closeOnEscape={true}
+                            size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
+                        >
+                            <div className="mx-5">
+                                <div className="text-[2rem] font-[500] my-2">
+                                    Set Offer
+                                </div>
+                                <div className="flex flex-wrap justify-evenly my-2 items-center">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
+                                            SOL
+                                        </div> */}
+                                    {/* </div> */}
                                     <div>
-                                        {isListing && (
-                                            <ListingNft
-                                                price={isPrice}
-                                                nftAddress={nftAddress}
-                                                closeModal={() => {
-                                                    setValue("");
-                                                    setIsSellModalOpen(false);
-                                                    setIsListing(false);
-                                                }}
+                                        <Container className="w-[10rem]">
+                                            <Select
+                                                data={ExpiryDateOptions}
+                                                placeholder="Select Expiry Date"
+                                                value={expiryDate}
+                                                onChange={
+                                                    handleExpiryDateChange
+                                                }
+                                                id="expiryDate"
                                             />
-                                        )}
+                                        </Container>
                                     </div>
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={() => {
+                                            const price = parseInt(value);
+                                            console.log("price", price);
+                                            handleBid(price, expiryDate);
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
                                 </div>
                             </div>
                         </Modal>

@@ -210,10 +210,10 @@
   resolved "https://registry.npmjs.org/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@jimii/soundwork-sdk@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@jimii/soundwork-sdk/-/soundwork-sdk-0.0.8.tgz#f43117c1f0dda55464dae04fd1008ad391f973e0"
-  integrity sha512-kAU4kaWoM5bH13Vsyz+MbuWGfjBuSB+f1L9dYEtVbO1H11wE0j4QyqKd4nOBVBwskrwEcViBNaOcF3tckuaxjQ==
+"@jimii/soundwork-sdk@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@jimii/soundwork-sdk/-/soundwork-sdk-0.0.9.tgz#73625415cf0c3014186686606357a8f8f2b8db04"
+  integrity sha512-gxN+S19szL2YC4SwjqP0sLPxru9PYWefv2SKH+SNYzNIPVOOPZ50Noh7fSzWsrcH/okVWfrcnwxny2eYj+XhpA==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@project-serum/anchor" "^0.26.0"

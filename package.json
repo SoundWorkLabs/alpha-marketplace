@@ -14,7 +14,7 @@
         "format:staged": "prettier --write $(git diff --staged --name-only --diff-filter d | xargs)"
     },
     "dependencies": {
-        "@jimii/soundwork-sdk": "^0.0.8",
+        "@jimii/soundwork-sdk": "^0.0.9",
         "@mantine/core": "7.0.0",
         "@mantine/dropzone": "^7.0.0",
         "@mantine/form": "^7.0.0",

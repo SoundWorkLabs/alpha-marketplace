@@ -65,3 +65,28 @@ export async function deleteListing(id: string) {
         console.error("Error deleting listing:", err);
     }
 }
+
+export async function editListing(id: string, mint: PublicKey, price: number) {
+    let editListingData = {
+        id,
+        mint,
+        price
+    };
+    try {
+        const response = await fetch(`${API_BASE_URL}/nfts/listings/${id}`, {
+            method: "UPDATE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(editListingData)
+        });
+
+        if (response.ok) {
+            console.log("listing edit excuted successfully");
+        } else {
+            console.error("Error deleting listing:", response.statusText);
+        }
+    } catch (err) {
+        console.error("Error deleting listing:", err);
+    }
+}
