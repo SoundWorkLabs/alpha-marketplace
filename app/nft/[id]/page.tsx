@@ -26,7 +26,7 @@ import { useAudio } from "../../context/audioPlayerContext";
 import ListingNft from "../../components/modals/listingNft";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import BuyNow from "../../components/BuyNow";
-import { SoundworkSDK } from "@jimii/soundwork-sdk";
+import { SoundworkListSDK } from "@jimii/soundwork-sdk";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
 import { AnchorProvider } from "@coral-xyz/anchor";
@@ -107,9 +107,13 @@ export default function Page() {
             }
         } else if (currentOwner === pubkey) {
             const a = document.createElement("a");
-            a.href = animation_url ?? ""; // todo: handle err
-            a.download = title ?? ""; // todo: handle error
-            a.click();
+            a.href = animation_url ?? "";
+            a.download = title ?? "";
+            try {
+                a.click();
+            } catch (err) {
+                console.log("download failed");
+            }
         } else {
             handleBuy();
         }
@@ -121,7 +125,7 @@ export default function Page() {
 
         const provider = await new AnchorProvider(connection, anchorWallet, {});
 
-        const soundworkSDK = new SoundworkSDK(provider, connection);
+        const soundworkSDK = new SoundworkListSDK(provider, connection);
 
         let nftMint = new PublicKey(nftAddress);
         let ix = await soundworkSDK.buyListing(nftMint);
@@ -151,7 +155,7 @@ export default function Page() {
 
         const provider = await new AnchorProvider(connection, anchorWallet, {});
 
-        const soundworkSDK = new SoundworkSDK(provider, connection);
+        const soundworkSDK = new SoundworkListSDK(provider, connection);
 
         let nftMint = new PublicKey(nftAddress);
 
@@ -191,7 +195,7 @@ export default function Page() {
                 {}
             );
 
-            const soundworkSDK = new SoundworkSDK(provider, connection);
+            const soundworkSDK = new SoundworkListSDK(provider, connection);
 
             let nftMint = new PublicKey(nftAddress);
 
@@ -219,7 +223,23 @@ export default function Page() {
     );
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <>
+                <div className="p-5 my-2 mx-5 scroll-smooth animate-pulse">
+                    <Box className="flex flex-wrap gap-x-10">
+                        <div className="relative w-[26.375rem] h-[26.375rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                        <Box className="max-w-[39vw] my-auto xl:max-w-full">
+                            <div className="bg-[#1d1f2592] w-[8rem] h-[2.41175rem]"></div>
+                            <div className="mt-2 mb-2 bg-[#1d1f2592] w-[10rem] h-[2.41175rem]"></div>
+                            <Box className="p-4 flex justify-stretch title-box h-[18.5rem] bg-[#1d1f2592] rounded-[1.1rem] w-screen"></Box>
+                        </Box>
+                    </Box>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                </div>
+            </>
+        );
     }
 
     if (!metaDetails || !currentOwner) {
