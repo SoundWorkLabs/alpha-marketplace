@@ -2,11 +2,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
-    fetchSingleListedNfts,
-    fetchSolUsd,
-    nftData
-} from "../../../services/NFT";
-import {
     Box,
     CopyButton,
     ActionIcon,
@@ -18,21 +13,22 @@ import {
     Container,
     Select
 } from "@mantine/core";
-// import Image from "next/image";
 import { IconCopy, IconCheck, IconPlayerPlayFilled } from "@tabler/icons-react";
+import { SoundworkListSDK } from "@jimii/soundwork-sdk";
+import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
+import { AnchorProvider, BN } from "@coral-xyz/anchor";
+
+import {
+    fetchSingleListedNfts,
+    fetchSolUsd,
+    nftData
+} from "../../../services/NFT";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
 import { MetaSchema, NftSchema, UserInfo } from "../../components/types";
 import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
-
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-// import BuyNow from "../../components/BuyNow";
-import { SoundworkListSDK } from "@jimii/soundwork-sdk";
-import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
-
-import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
-
-import { AnchorProvider } from "@coral-xyz/anchor";
 import { fetchUserByAddress } from "../../../services/user";
 import {
     createListing,
@@ -134,38 +130,54 @@ export default function Page() {
                 console.log("download failed");
             }
         } else {
-            handleBuy();
+            if (listingInfo) {
+                handleBuy(listingInfo[0].id);
+            }
         }
     };
 
-    const handleBuy = useCallback(async () => {
-        if (!anchorWallet) throw new Error("wallet not connected");
-        if (!pubkey) throw new Error("wallet not connected");
+    const handleBuy = useCallback(
+        async (id: string) => {
+            if (!anchorWallet) throw new Error("wallet not connected");
+            if (!pubkey) throw new Error("wallet not connected");
 
-        const provider = await new AnchorProvider(connection, anchorWallet, {});
+            const provider = await new AnchorProvider(
+                connection,
+                anchorWallet,
+                {}
+            );
 
-        const soundworkListSDK = new SoundworkListSDK(provider, connection);
+            const soundworkListSDK = new SoundworkListSDK(provider, connection);
 
-        let ix = await soundworkListSDK.buyListing(mint);
-        let tx = new Transaction();
-        let blockhash = (await connection.getLatestBlockhash("finalized"))
-            .blockhash;
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = new PublicKey(pubkey);
-        tx.add(ix);
+            let ix = await soundworkListSDK.buyListing(mint);
+            let tx = new Transaction();
+            let blockhash = (await connection.getLatestBlockhash("finalized"))
+                .blockhash;
+            tx.recentBlockhash = blockhash;
+            tx.feePayer = new PublicKey(pubkey);
+            tx.add(ix);
 
-        try {
-            const {
-                phantom: { solana: phantomProvider }
-            }: any = window; // phantom
-            let txHash = await phantomProvider.signAndSendTransaction(tx);
-
-            // let txhash = await provider.sendAndConfirm(tx);
-            console.log("tx hash", txHash);
-        } catch (err) {
-            console.log("buying failed", err);
-        }
-    }, [anchorWallet, connection, pubkey]);
+            try {
+                const {
+                    phantom: { solana: phantomProvider }
+                }: any = window; // phantom
+                await phantomProvider
+                    .signAndSendTransaction(tx)
+                    .then(async (_txHash: string) => {
+                        await deleteListing(id).then((_res) => {
+                            console.log(
+                                "NFT bought and removed from the market"
+                            );
+                        });
+                    });
+                // let txhash = await provider.sendAndConfirm(tx);
+                // console.log("tx hash", txHash);
+            } catch (err) {
+                console.log("buying failed", err);
+            }
+        },
+        [anchorWallet, connection, pubkey]
+    );
 
     const handleListing = useCallback(
         async (price: number) => {
@@ -192,11 +204,16 @@ export default function Page() {
                 const {
                     phantom: { solana: phantomProvider }
                 }: any = window; // phantom
-                await phantomProvider
-                    .signAndSendTransaction(tx)
-                    .then((txHash: string) => {
-                        createListing(txHash, pubkey, mint, price);
-                    });
+                const txHash = await phantomProvider.signAndSendTransaction(tx);
+
+                if (txHash) {
+                    createListing(
+                        txHash.signature,
+                        txHash.publicKey,
+                        mint,
+                        price
+                    );
+                }
             } catch (err) {
                 console.log("listing failed", err);
             }
@@ -224,15 +241,13 @@ export default function Page() {
             const {
                 phantom: { solana: phantomProvider }
             }: any = window; // phantom
-            await phantomProvider
-                .signAndSendTransaction(tx)
-                .then((txHash: string) => {
-                    if (listingInfo) {
-                        deleteListing(listingInfo[0].id);
-                        // let txhash = await provider.sendAndConfirm(tx);
-                        console.log("tx hash", txHash);
-                    }
-                });
+            const txHash = await phantomProvider.signAndSendTransaction(tx);
+
+            if (listingInfo && txHash) {
+                deleteListing(listingInfo?.[0].id);
+                // let txhash = await provider.sendAndConfirm(tx);
+                console.log("tx hash", txHash);
+            }
         } catch (err) {
             console.log("deleting nft failed", err);
         }
@@ -262,15 +277,13 @@ export default function Page() {
                 const {
                     phantom: { solana: phantomProvider }
                 }: any = window; // phantom
-                await phantomProvider
-                    .signAndSendTransaction(tx)
-                    .then((txHash: string) => {
-                        if (listingInfo) {
-                            editListing(listingInfo[0].id, mint, newPrice);
-                            // let txhash = await provider.sendAndConfirm(tx);
-                            console.log("tx hash", txHash);
-                        }
-                    });
+                const txHash = await phantomProvider.signAndSendTransaction(tx);
+
+                if (listingInfo && txHash) {
+                    editListing(listingInfo?.[0].id, mint, newPrice);
+                    // let txhash = await provider.sendAndConfirm(tx);
+                    console.log("tx hash", txHash);
+                }
             } catch (err) {
                 console.log("edit failed", err);
             }
@@ -293,15 +306,11 @@ export default function Page() {
             const expiryDateInUnixTimestamp =
                 getUnixTimestampForExpiry(expiryDate);
 
-            console.log("ex p", expiryDateInUnixTimestamp);
-
-            console.log("ix starts");
             const ix = await soundworkBidSDK.placeBid(
                 mint,
-                1 * LAMPORTS_PER_SOL,
-                expiryDateInUnixTimestamp
+                new BN(offerPrice * LAMPORTS_PER_SOL),
+                new BN(expiryDateInUnixTimestamp)
             );
-            console.log("ix ends");
 
             const tx = new Transaction();
             let blockhash = (await connection.getLatestBlockhash("finalized"))
@@ -323,7 +332,7 @@ export default function Page() {
                         console.log("tx hash", txHash);
                     });
             } catch (err) {
-                console.log("edit failed", err);
+                console.log("bid failed", err);
             }
         },
         [anchorWallet, connection, pubkey]
@@ -357,12 +366,12 @@ export default function Page() {
     if (!metaDetails || !currentOwner) {
         return <div>Data not available. Try again later.</div>;
     }
-
-    // deleteListing(
-    //     "2BafxwsSwfyuH85U853B32jyvzF8Jr1wJZwyChAxRyUNhz1x3YxEk2aCiJvbPMnDtqUVMekaxGKT56P8z4Vc9Z2a"
-    // ).then((res) => {
-    //     console.log("Success", res);
-    // });
+    // createListing(
+    //     "4M3AFY6JcBtWnEKxkv5g1SN69DaCq822tZNnfaDzX52nhDXVmSAw5S5AsvjyGMUe7NLM4m3pw9HvGAStJLZW7P9c",
+    //     "5tvtJ9YCxLh2W2QzthXmhrVy91rK3XWptCFRSES5NE3K",
+    //     new PublicKey("A2QsAMagYto3gHTKZww5jGzqnjaCtNrp1uTXHdwRDFYC"),
+    //     4
+    // );
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap gap-x-10">
