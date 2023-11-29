@@ -1,5 +1,11 @@
 "use client";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, {
+    useEffect,
+    useState,
+    useRef,
+    useCallback,
+    useMemo
+} from "react";
 import { useParams } from "next/navigation";
 import {
     Box,
@@ -16,7 +22,11 @@ import {
 import { IconCopy, IconCheck, IconPlayerPlayFilled } from "@tabler/icons-react";
 import { SoundworkListSDK } from "@jimii/soundwork-sdk";
 import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import {
+    useAnchorWallet,
+    useConnection,
+    useWallet
+} from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 
@@ -30,11 +40,7 @@ import { MetaSchema, NftSchema, UserInfo } from "../../components/types";
 import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
 import { fetchUserByAddress } from "../../../services/user";
-import {
-    createListing,
-    deleteListing,
-    editListing
-} from "../../../services/listing";
+import { createListing, deleteListing } from "../../../services/listing";
 import getUnixTimestampForExpiry from "../../components/unixConvertor";
 
 const ExpiryDateOptions = [
@@ -47,7 +53,12 @@ const ExpiryDateOptions = [
 
 export default function Page() {
     const { id: nftAddress } = useParams();
-    const wallet = useAnchorWallet();
+
+    const wallet = useWallet();
+    const anchorWallet = useAnchorWallet();
+    const { connection } = useConnection();
+    const pubkey = anchorWallet?.publicKey.toBase58();
+    const mint = new PublicKey(nftAddress);
 
     const { setCurrentTrack } = useAudio();
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
@@ -57,20 +68,12 @@ export default function Page() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [value, setValue] = useState("");
-    // const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
-    // const [isListing, setIsListing] = useState(false);
-    const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
-    const pubkey = wallet?.publicKey.toBase58();
+
     const [author, setAuthor] = useState<UserInfo>();
     const [listingInfo, setListingInfo] = useState<NftSchema["listings"]>();
     const [solUsd, setSolUsd] = useState<string>();
     const [expiryDate, setExpiryDate] = useState("");
-
-    const anchorWallet = useAnchorWallet();
-    const { connection } = useConnection();
-
-    const mint = new PublicKey(nftAddress);
 
     // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
@@ -111,6 +114,27 @@ export default function Page() {
     const title = metaDetails?.title;
     const atrr = metaDetails?.attributes;
 
+    // initializing anchor provider
+    const anchorProvider = useMemo((): AnchorProvider => {
+        if (!anchorWallet) {
+            throw new Error("wallet not connected");
+        }
+        return new AnchorProvider(
+            connection,
+            anchorWallet,
+            AnchorProvider.defaultOptions()
+        );
+    }, [anchorWallet, connection]);
+
+    // initializing sound work SDKs
+    const listSDK = useMemo((): SoundworkListSDK => {
+        return new SoundworkListSDK(anchorProvider, connection);
+    }, [anchorProvider, connection]);
+
+    const bidSDK = useMemo((): SoundworkBidSDK => {
+        return new SoundworkBidSDK(anchorProvider, connection);
+    }, [anchorProvider, connection]);
+
     const handleClick = () => {
         if (!pubkey) {
             if (typeof window !== "undefined") {
@@ -138,204 +162,126 @@ export default function Page() {
 
     const handleBuy = useCallback(
         async (id: string) => {
-            if (!anchorWallet) throw new Error("wallet not connected");
-            if (!pubkey) throw new Error("wallet not connected");
-
-            const provider = await new AnchorProvider(
-                connection,
-                anchorWallet,
-                {}
-            );
-
-            const soundworkListSDK = new SoundworkListSDK(provider, connection);
-
-            let ix = await soundworkListSDK.buyListing(mint);
-            let tx = new Transaction();
-            let blockhash = (await connection.getLatestBlockhash("finalized"))
-                .blockhash;
-            tx.recentBlockhash = blockhash;
-            tx.feePayer = new PublicKey(pubkey);
-            tx.add(ix);
+            let ix = await listSDK.buyListing(mint);
+            let tx = new Transaction().add(ix);
 
             try {
-                const {
-                    phantom: { solana: phantomProvider }
-                }: any = window; // phantom
-                await phantomProvider
-                    .signAndSendTransaction(tx)
-                    .then(async (_txHash: string) => {
-                        await deleteListing(id).then((_res) => {
-                            console.log(
-                                "NFT bought and removed from the market"
-                            );
+                await wallet
+                    .sendTransaction(tx, connection)
+                    .then(async (txHash) => {
+                        console.log("tx hash", txHash);
+                        await deleteListing(id).then((res) => {
+                            console.log(res);
                         });
                     });
-                // let txhash = await provider.sendAndConfirm(tx);
-                // console.log("tx hash", txHash);
             } catch (err) {
                 console.log("buying failed", err);
             }
         },
-        [anchorWallet, connection, pubkey]
+        [listSDK, connection, pubkey, mint]
     );
 
     const handleListing = useCallback(
         async (price: number) => {
-            if (!anchorWallet) throw new Error("wallet not connected");
             if (!pubkey) throw new Error("wallet not connected");
 
-            const provider = await new AnchorProvider(
-                connection,
-                anchorWallet,
-                {}
-            );
-
-            const soundworkListSDK = new SoundworkListSDK(provider, connection);
-
-            const ix = await soundworkListSDK.createListing(mint, price);
-            let tx = new Transaction();
-            let blockhash = (await connection.getLatestBlockhash("finalized"))
-                .blockhash;
-            tx.recentBlockhash = blockhash;
-            tx.feePayer = new PublicKey(pubkey);
-            tx.add(ix);
+            const ix = await listSDK.createListing(mint, price);
+            let tx = new Transaction().add(ix);
 
             try {
-                const {
-                    phantom: { solana: phantomProvider }
-                }: any = window; // phantom
-                const txHash = await phantomProvider.signAndSendTransaction(tx);
-
-                if (txHash) {
-                    createListing(
-                        txHash.signature,
-                        txHash.publicKey,
-                        mint,
-                        price
-                    );
-                }
+                await wallet
+                    .sendTransaction(tx, connection)
+                    .then(async (txHash) => {
+                        console.log("tx hash", txHash);
+                        await createListing(txHash, pubkey, mint, price).then(
+                            (res) => {
+                                console.log(res);
+                            }
+                        );
+                    });
             } catch (err) {
                 console.log("listing failed", err);
             }
         },
-        [anchorWallet, connection, pubkey]
+        [listSDK, connection, pubkey, mint]
     );
 
-    const handleDeleteListing = useCallback(async () => {
-        if (!anchorWallet) throw new Error("wallet not connected");
-        if (!pubkey) throw new Error("wallet not connected");
-
-        const provider = await new AnchorProvider(connection, anchorWallet, {});
-
-        const soundworkListSDK = new SoundworkListSDK(provider, connection);
-
-        const ix = await soundworkListSDK.deleteListing(mint);
-        const tx = new Transaction();
-        let blockhash = (await connection.getLatestBlockhash("finalized"))
-            .blockhash;
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = new PublicKey(pubkey);
-        tx.add(ix);
-
-        try {
-            const {
-                phantom: { solana: phantomProvider }
-            }: any = window; // phantom
-            const txHash = await phantomProvider.signAndSendTransaction(tx);
-
-            if (listingInfo && txHash) {
-                deleteListing(listingInfo?.[0].id);
-                // let txhash = await provider.sendAndConfirm(tx);
-                console.log("tx hash", txHash);
-            }
-        } catch (err) {
-            console.log("deleting nft failed", err);
-        }
-    }, [anchorWallet, connection, pubkey]);
-
-    const handleEditListing = useCallback(
-        async (newPrice: number) => {
-            if (!anchorWallet) throw new Error("wallet not connected");
-            if (!pubkey) throw new Error("wallet not connected");
-
-            const provider = await new AnchorProvider(
-                connection,
-                anchorWallet,
-                {}
-            );
-            const soundworkListSDK = new SoundworkListSDK(provider, connection);
-
-            const ix = await soundworkListSDK.editListing(mint, 1);
-            const tx = new Transaction();
-            let blockhash = (await connection.getLatestBlockhash("finalized"))
-                .blockhash;
-            tx.recentBlockhash = blockhash;
-            tx.feePayer = new PublicKey(pubkey);
-            tx.add(ix);
+    const handleDeleteListing = useCallback(
+        async (nftID: string) => {
+            const ix = await listSDK.deleteListing(mint);
+            const tx = new Transaction().add(ix);
 
             try {
-                const {
-                    phantom: { solana: phantomProvider }
-                }: any = window; // phantom
-                const txHash = await phantomProvider.signAndSendTransaction(tx);
+                await wallet
+                    .sendTransaction(tx, connection)
+                    .then(async (txHash) => {
+                        console.log("tx hash", txHash);
+                        await deleteListing(nftID).then((res) => {
+                            console.log(res);
+                        });
+                    });
+            } catch (err) {
+                console.log("deleting nft failed", err);
+            }
+        },
+        [listSDK, connection, pubkey, mint]
+    );
 
-                if (listingInfo && txHash) {
-                    editListing(listingInfo?.[0].id, mint, newPrice);
-                    // let txhash = await provider.sendAndConfirm(tx);
-                    console.log("tx hash", txHash);
-                }
+    const handleEditListing = useCallback(
+        async (newPrice: number, nftID: string) => {
+            if (!pubkey) throw new Error("wallet not connected");
+
+            const ix = await listSDK.editListing(mint, newPrice);
+            const tx = new Transaction().add(ix);
+
+            try {
+                await wallet
+                    .sendTransaction(tx, connection)
+                    .then(async (txHash) => {
+                        console.log("tx hash", txHash);
+                        await deleteListing(nftID).then((res) => {
+                            console.log(res);
+                        });
+                        await createListing(
+                            txHash,
+                            pubkey,
+                            mint,
+                            newPrice
+                        ).then((res) => {
+                            console.log(res);
+                        });
+                    });
             } catch (err) {
                 console.log("edit failed", err);
             }
         },
-        [anchorWallet, connection, pubkey]
+        [listSDK, connection, pubkey, mint]
     );
 
     const handleBid = useCallback(
         async (offerPrice: number, expiryDate: string) => {
-            if (!anchorWallet) throw new Error("wallet not connected");
-            if (!pubkey) throw new Error("wallet not connected");
+            const expire_ts = getUnixTimestampForExpiry(expiryDate);
 
-            const provider = await new AnchorProvider(
-                connection,
-                anchorWallet,
-                {}
-            );
-            const soundworkBidSDK = new SoundworkBidSDK(provider, connection);
-
-            const expiryDateInUnixTimestamp =
-                getUnixTimestampForExpiry(expiryDate);
-
-            const ix = await soundworkBidSDK.placeBid(
+            const ix = await bidSDK.placeBid(
                 mint,
                 new BN(offerPrice * LAMPORTS_PER_SOL),
-                new BN(expiryDateInUnixTimestamp)
+                new BN(expire_ts)
             );
 
-            const tx = new Transaction();
-            let blockhash = (await connection.getLatestBlockhash("finalized"))
-                .blockhash;
-            tx.recentBlockhash = blockhash;
-            tx.feePayer = new PublicKey(pubkey);
-            tx.add(ix);
+            const tx = new Transaction().add(ix);
 
             try {
-                const {
-                    phantom: { solana: phantomProvider }
-                }: any = window; // phantom
-                await phantomProvider
-                    .signAndSendTransaction(tx)
-                    .then((txHash: string) => {
-                        // kasuba97 todo: post txHash to the bid route
-
-                        // let txhash = await provider.sendAndConfirm(tx);
-                        console.log("tx hash", txHash);
-                    });
+                const txHash = await wallet.sendTransaction(tx, connection);
+                // .then(async (txHash) => {
+                //     console.log("tx hash", txHash);
+                //     // kasuba97 todo: post txHash to the bid route
+                // });
+                console.log(txHash);
             } catch (err) {
                 console.log("bid failed", err);
             }
         },
-        [anchorWallet, connection, pubkey]
+        [bidSDK, mint, wallet, connection]
     );
 
     const handleExpiryDateChange = (value: string) => {
@@ -352,7 +298,7 @@ export default function Page() {
                         <Box className="max-w-[39vw] my-auto xl:max-w-full">
                             <div className="bg-[#1d1f2592] w-[8rem] h-[2.41175rem]"></div>
                             <div className="mt-2 mb-2 bg-[#1d1f2592] w-[10rem] h-[2.41175rem]"></div>
-                            <Box className="p-4 flex justify-stretch title-box h-[18.5rem] bg-[#1d1f2592] rounded-[1.1rem] w-screen"></Box>
+                            <Box className="p-4 flex justify-stretch title-box h-[18.5rem] bg-[#1d1f2592] rounded-[1.1rem] min-w-full"></Box>
                         </Box>
                     </Box>
                     <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
@@ -371,6 +317,9 @@ export default function Page() {
     //     "5tvtJ9YCxLh2W2QzthXmhrVy91rK3XWptCFRSES5NE3K",
     //     new PublicKey("A2QsAMagYto3gHTKZww5jGzqnjaCtNrp1uTXHdwRDFYC"),
     //     4
+    // );
+    // deleteListing(
+    //     "4EcggLmGkNJJQmTapPDgmGjUFByu8Tv3o1E5GCSFLtMxKWmjJAKSF12sLkTvk9T3dTvDMgFjv6ykzzoF8UpeqZAN"
     // );
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
@@ -619,15 +568,27 @@ export default function Page() {
                                     <button
                                         className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
                                         onClick={() => {
-                                            const newPrice = parseInt(value);
-                                            handleEditListing(newPrice);
+                                            if (listingInfo) {
+                                                const newPrice =
+                                                    parseInt(value);
+                                                handleEditListing(
+                                                    newPrice,
+                                                    listingInfo?.[0].id
+                                                );
+                                            }
                                         }}
                                     >
                                         Confirm
                                     </button>
                                     <button
                                         className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
-                                        onClick={handleDeleteListing}
+                                        onClick={() => {
+                                            if (listingInfo) {
+                                                handleDeleteListing(
+                                                    listingInfo?.[0].id
+                                                );
+                                            }
+                                        }}
                                     >
                                         Delete Listing
                                     </button>
@@ -686,7 +647,7 @@ export default function Page() {
                                     <button
                                         className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
                                         onClick={() => {
-                                            const price = parseInt(value);
+                                            const price = Number(value);
                                             console.log("price", price);
                                             handleBid(price, expiryDate);
                                         }}
