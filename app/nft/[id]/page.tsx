@@ -6,7 +6,7 @@ import React, {
     useCallback,
     useMemo
 } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
     Box,
     CopyButton,
@@ -42,6 +42,7 @@ import { useAudio } from "../../context/audioPlayerContext";
 import { fetchUserByAddress } from "../../../services/user";
 import { createListing, deleteListing } from "../../../services/listing";
 import getUnixTimestampForExpiry from "../../components/unixConvertor";
+import toast from "react-hot-toast";
 
 const ExpiryDateOptions = [
     { value: "1", label: "1 Day" },
@@ -52,6 +53,7 @@ const ExpiryDateOptions = [
 ];
 
 export default function Page() {
+    const router = useRouter();
     const { id: nftAddress } = useParams();
 
     const wallet = useWallet();
@@ -173,9 +175,29 @@ export default function Page() {
                         await deleteListing(id).then((res) => {
                             console.log(res);
                         });
+                        toast.success("NFT Successfully Bought!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
                     });
             } catch (err) {
                 console.log("buying failed", err);
+                toast.error("Failed to list NFT. Please try again.", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -198,9 +220,32 @@ export default function Page() {
                                 console.log(res);
                             }
                         );
+                        toast.success("NFT Successfully Listed!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
                     });
+                setIsSellModalOpen(false);
+                router.push("/");
             } catch (err) {
                 console.log("listing failed", err);
+                setIsSellModalOpen(false);
+                toast.error("Failed to list NFT. Please try again.", {
+                    duration: 3000,
+                    position: "top-left",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -219,9 +264,32 @@ export default function Page() {
                         await deleteListing(nftID).then((res) => {
                             console.log(res);
                         });
+                        toast.success("NFT Successfully Delisted!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
                     });
+                setIsSellModalOpen(false);
+                router.push("/");
             } catch (err) {
                 console.log("deleting nft failed", err);
+                setIsSellModalOpen(false);
+                toast.error("Failed to delist NFT. Please try again.", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -250,9 +318,32 @@ export default function Page() {
                         ).then((res) => {
                             console.log(res);
                         });
+                        toast.success("NFT Successfully Edited!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
                     });
+                setIsEditModalOpen(false);
+                router.push("/");
             } catch (err) {
                 console.log("edit failed", err);
+                setIsEditModalOpen(false);
+                toast.success("Failed to edit NFT. Please try again.", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -271,14 +362,36 @@ export default function Page() {
             const tx = new Transaction().add(ix);
 
             try {
-                const txHash = await wallet.sendTransaction(tx, connection);
-                // .then(async (txHash) => {
-                //     console.log("tx hash", txHash);
-                //     // kasuba97 todo: post txHash to the bid route
-                // });
-                console.log(txHash);
+                await wallet
+                    .sendTransaction(tx, connection)
+                    .then(async (txHash) => {
+                        console.log("tx hash", txHash);
+                        // kasuba97 todo: post txHash to the bid route
+                        toast.success("Bid Successfully Placed!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
+                    });
+                setIsOfferModalOpen(false);
             } catch (err) {
                 console.log("bid failed", err);
+                setIsOfferModalOpen(false);
+                toast.error(" Failed to place bid. Please try again.", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
             }
         },
         [bidSDK, mint, wallet, connection]
@@ -312,15 +425,7 @@ export default function Page() {
     if (!metaDetails || !currentOwner) {
         return <div>Data not available. Try again later.</div>;
     }
-    // createListing(
-    //     "4M3AFY6JcBtWnEKxkv5g1SN69DaCq822tZNnfaDzX52nhDXVmSAw5S5AsvjyGMUe7NLM4m3pw9HvGAStJLZW7P9c",
-    //     "5tvtJ9YCxLh2W2QzthXmhrVy91rK3XWptCFRSES5NE3K",
-    //     new PublicKey("A2QsAMagYto3gHTKZww5jGzqnjaCtNrp1uTXHdwRDFYC"),
-    //     4
-    // );
-    // deleteListing(
-    //     "4EcggLmGkNJJQmTapPDgmGjUFByu8Tv3o1E5GCSFLtMxKWmjJAKSF12sLkTvk9T3dTvDMgFjv6ykzzoF8UpeqZAN"
-    // );
+
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap gap-x-10">

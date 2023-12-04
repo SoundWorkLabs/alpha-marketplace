@@ -735,8 +735,10 @@ import toast from "react-hot-toast";
 import { notifyErr, notifyLoading, notifySuccess } from "../components/toasts";
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
 import { MintSingleResp } from "../../types";
+import { useRouter } from "next/navigation";
 
 export default function Create() {
+    const router = useRouter();
     const { publicKey } = useWallet();
     const { connection } = useConnection();
 
@@ -874,6 +876,8 @@ export default function Create() {
                     notifySuccess(
                         `https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`
                     );
+
+                    router.push("/sounds");
                 } else {
                     notifyErr(
                         "Error signing your transaction, please try again."
@@ -937,7 +941,9 @@ export default function Create() {
         <Flex justify="center">
             <Box mx={0} mb={20}>
                 <Box>
-                    <Title order={3}>Create New Sound NFT</Title>
+                    <div className="text-[1.75rem] font-[600] leading-[2.1rem] mb-[1.56rem]">
+                        Create New Sound NFT
+                    </div>
                 </Box>
                 <Box>
                     <form onSubmit={(e) => handleSubmit(e)}>
@@ -945,9 +951,12 @@ export default function Create() {
                             <Group>
                                 <Flex direction="column" gap="3" w={"40vw"}>
                                     <Box>
-                                        <Text fw="bold" size="lg" lh={3}>
+                                        <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
                                             Cover Image / Video
-                                        </Text>
+                                        </div>
+                                        <div className="text-[1.125rem] font-[400] leading-[1.35rem] my-[1.56rem]">
+                                            JPG, GIF, MP4, Max Size 10 MB
+                                        </div>
                                     </Box>
                                     <Box>
                                         <ImageDropzone
@@ -1263,9 +1272,12 @@ const CollapsibleField = ({
         <Flex direction="column" gap="3" w={"40vw"}>
             <Flex direction="row" justify="space-between">
                 <Box>
-                    <Text fw="bold" size="lg">
+                    {/* <Text fw="bold" size="lg">
                         {label}
-                    </Text>
+                    </Text> */}
+                    <div className="text-[1.625rem] font-[400] leading-[1.95rem]">
+                        {label}
+                    </div>
                     <Text size="sm" lh={3}>
                         {description}
                     </Text>
