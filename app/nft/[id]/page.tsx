@@ -29,6 +29,7 @@ import {
 } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
+import toast from "react-hot-toast";
 
 import {
     fetchSingleListedNfts,
@@ -42,7 +43,7 @@ import { useAudio } from "../../context/audioPlayerContext";
 import { fetchUserByAddress } from "../../../services/user";
 import { createListing, deleteListing } from "../../../services/listing";
 import getUnixTimestampForExpiry from "../../components/unixConvertor";
-import toast from "react-hot-toast";
+import { createBid } from "../../../services/bidding";
 
 const ExpiryDateOptions = [
     { value: "1", label: "1 Day" },
@@ -230,15 +231,15 @@ export default function Page() {
                                 color: "white"
                             }
                         });
+                        setIsSellModalOpen(false);
+                        router.push("/");
                     });
-                setIsSellModalOpen(false);
-                router.push("/");
             } catch (err) {
                 console.log("listing failed", err);
                 setIsSellModalOpen(false);
                 toast.error("Failed to list NFT. Please try again.", {
                     duration: 3000,
-                    position: "top-left",
+                    position: "top-center",
                     style: {
                         animation: "ease-in-out",
                         background: "#0091D766",
@@ -274,9 +275,9 @@ export default function Page() {
                                 color: "white"
                             }
                         });
+                        setIsSellModalOpen(false);
+                        router.push("/");
                     });
-                setIsSellModalOpen(false);
-                router.push("/");
             } catch (err) {
                 console.log("deleting nft failed", err);
                 setIsSellModalOpen(false);
@@ -328,9 +329,9 @@ export default function Page() {
                                 color: "white"
                             }
                         });
+                        setIsEditModalOpen(false);
+                        router.push("/");
                     });
-                setIsEditModalOpen(false);
-                router.push("/");
             } catch (err) {
                 console.log("edit failed", err);
                 setIsEditModalOpen(false);
@@ -351,6 +352,7 @@ export default function Page() {
 
     const handleBid = useCallback(
         async (offerPrice: number, expiryDate: string) => {
+            if (!pubkey) throw new Error("wallet not connected");
             const expire_ts = getUnixTimestampForExpiry(expiryDate);
 
             const ix = await bidSDK.placeBid(
@@ -366,19 +368,22 @@ export default function Page() {
                     .sendTransaction(tx, connection)
                     .then(async (txHash) => {
                         console.log("tx hash", txHash);
-                        // kasuba97 todo: post txHash to the bid route
-                        toast.success("Bid Successfully Placed!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
+                        await createBid(txHash, pubkey, mint, offerPrice).then(
+                            () => {
+                                toast.success("Bid Successfully Placed!", {
+                                    duration: 3000,
+                                    position: "top-center",
+                                    style: {
+                                        animation: "ease-in-out",
+                                        background: "#0091D766",
+                                        borderRadius: "20px",
+                                        color: "white"
+                                    }
+                                });
                             }
-                        });
+                        );
+                        setIsOfferModalOpen(false);
                     });
-                setIsOfferModalOpen(false);
             } catch (err) {
                 console.log("bid failed", err);
                 setIsOfferModalOpen(false);
