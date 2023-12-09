@@ -70,3 +70,20 @@ export interface UserInfo {
     user_id: number;
     username: string;
 }
+
+export interface BidSchema {
+    bid_id: string;
+    nft_address: string;
+    bidder_id: number;
+    bid_amount: string;
+    bid_date?: null;
+    account: {
+        active_address: string;
+    };
+    nft: {
+        current_owner: string;
+    };
+    bidMeta: MetaSchema;
+    bidderUsername: string;
+    sellerUsername: string;
+}

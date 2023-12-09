@@ -1,24 +1,59 @@
 "use client";
-import { Box, Flex, TextInput } from "@mantine/core";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { Box, Flex, TextInput, Image } from "@mantine/core";
+import {
+    useAnchorWallet,
+    useConnection,
+    useWallet
+} from "@solana/wallet-adapter-react";
 import { fetchUserNfts } from "../../services/NFT";
-import { NftSchema } from "../components/types";
-import { useEffect, useState } from "react";
+import { BidSchema, NftSchema } from "../components/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import NftCard from "../components/NftCard";
 import NftFallback from "../components/NftFallback";
-import { FilterIcon, SearchIcon, SortIcon } from "../components/icon";
+import { FilterIcon, SearchIcon, SolIcon, SortIcon } from "../components/icon";
 import { IconGhost2 } from "@tabler/icons-react";
+import {
+    deleteBid,
+    fetchOffersReceived,
+    fetchOffersSent
+} from "../../services/bidding";
+import { AnchorProvider } from "@coral-xyz/anchor";
+import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import toast from "react-hot-toast";
 
 export default function Sounds() {
     const { publicKey, connected } = useWallet();
+    const wallet = useWallet();
+    const anchorWallet = useAnchorWallet();
+    const { connection } = useConnection();
     const [nfts, setNfts] = useState<NftSchema[]>([]);
+    const [offersReceived, setOffersReceived] = useState<BidSchema[]>([]);
+    const [offersSent, setOffersSent] = useState<BidSchema[]>([]);
     const pubkey = publicKey?.toBase58();
     const [selectedOption, setSelectedOption] = useState(0);
 
     const [isEmpty, setIsEmpty] = useState(false);
 
+    // initializing anchor provider
+    const anchorProvider = useMemo((): AnchorProvider => {
+        if (!anchorWallet) {
+            throw new Error("wallet not connected");
+        }
+        return new AnchorProvider(
+            connection,
+            anchorWallet,
+            AnchorProvider.defaultOptions()
+        );
+    }, [anchorWallet, connection]);
+
+    // initializing sound work SDKs
+    const bidSDK = useMemo((): SoundworkBidSDK => {
+        return new SoundworkBidSDK(anchorProvider, connection);
+    }, [anchorProvider, connection]);
+
     useEffect(() => {
-        if (!connected) {
+        if (!connected || !pubkey) {
             const connectBtn = document.querySelector(
                 ".connectBtn"
             ) as HTMLButtonElement;
@@ -26,29 +61,147 @@ export default function Sounds() {
             return connectBtn?.click();
         }
         fetchUserNfts(pubkey as string)
-            .then((res) => {
-                if (res) {
-                    // test pubkey
-                    // const target =
-                    //     "C8HXcXRqA6UjWAf1NTQXY7i4DMvMY9x3zbUhj9dyw2Yi";
-
-                    // const ownedNfts = res.filter(
-                    //     (nft: NftSchema) => nft.current_owner === pubkey
-                    // );
-
-                    if (res.length > 0) {
-                        setNfts(res);
-                    } else {
-                        // If there are no matching NFTs
-                        setIsEmpty(true);
-                    }
+            .then(async (res) => {
+                if (res && res.length > 0) {
+                    setNfts(res);
+                } else {
+                    // If there are no matching NFTs
+                    setIsEmpty(true);
                 }
             })
             .catch((err) => {
                 console.error("Error fetching data:", err);
             });
-    }, [connected, publicKey]);
+        fetchOffersReceived(pubkey).then((res) => {
+            console.log("offers received", res);
+            if (res) {
+                setOffersReceived(res);
+            }
+        });
+
+        fetchOffersSent(pubkey).then((res) => {
+            console.log("offers received", res);
+            if (res) {
+                setOffersSent(res);
+            }
+        });
+    }, [connected, publicKey, pubkey]);
     const options = ["My Sounds", "Offers Received", "Offers made by me"];
+
+    const handleAcceptOffer = useCallback(
+        async (bidId: string, mint: string) => {
+            const ix = await bidSDK.acceptBid(new PublicKey(mint));
+            const tx = new Transaction().add(ix);
+
+            try {
+                await wallet.sendTransaction(tx, connection).then(async () => {
+                    await deleteBid(bidId).then(() => {
+                        console.log("success");
+                        toast.success("You Successfully accepted the offer!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
+                        window.location.reload();
+                    });
+                });
+            } catch (err) {
+                console.log("error", err);
+                toast.error("Failed to accepted the offer!", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
+            }
+        },
+        [bidSDK, connection, pubkey]
+    );
+    const handleRejectOffer = useCallback(
+        async (bidId: string, mint: string) => {
+            const ix = await bidSDK.rejectBid(new PublicKey(mint));
+            const tx = new Transaction().add(ix);
+
+            try {
+                await wallet.sendTransaction(tx, connection).then(async () => {
+                    await deleteBid(bidId).then(() => {
+                        console.log("success");
+                        toast.success("You Successfully rejected the offer!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
+                        window.location.reload();
+                    });
+                });
+            } catch (err) {
+                console.log("error", err);
+                toast.error("Failed to reject the offer!", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
+            }
+        },
+        [bidSDK, connection, pubkey]
+    );
+    const handleDeleteOffer = useCallback(
+        async (bidId: string, mint: string) => {
+            const ix = await bidSDK.deleteBid(new PublicKey(mint));
+            const tx = new Transaction().add(ix);
+
+            try {
+                await wallet.sendTransaction(tx, connection).then(async () => {
+                    await deleteBid(bidId).then(() => {
+                        console.log("success");
+                        toast.success("You Successfully deleted your offer!", {
+                            duration: 3000,
+                            position: "top-center",
+                            style: {
+                                animation: "ease-in-out",
+                                background: "#0091D766",
+                                borderRadius: "20px",
+                                color: "white"
+                            }
+                        });
+                        window.location.reload();
+                    });
+                });
+            } catch (err) {
+                console.log("error", err);
+                toast.error("Failed to delete offer!", {
+                    duration: 3000,
+                    position: "top-center",
+                    style: {
+                        animation: "ease-in-out",
+                        background: "#0091D766",
+                        borderRadius: "20px",
+                        color: "white"
+                    }
+                });
+            }
+        },
+        [bidSDK, connection, pubkey]
+    );
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="items-center">
@@ -119,6 +272,8 @@ export default function Sounds() {
                     )}
                 </Box>
             )} */}
+
+            {/* my sounds */}
             {!isEmpty ? (
                 selectedOption == 0 && (
                     <Box className="flex flex-wrap">
@@ -149,6 +304,126 @@ export default function Sounds() {
                     </div>
                 </div>
             )}
+
+            {/* offers received*/}
+            {!isEmpty &&
+                selectedOption == 1 &&
+                offersReceived &&
+                offersReceived.length > 0 && (
+                    <Box className="flex flex-col">
+                        {offersReceived
+                            .slice()
+                            .reverse()
+                            .map((bid, index) => (
+                                <Box
+                                    key={index}
+                                    className="my-2 flex flex-wrap border border-[#0091D766] p-5 rounded-[0.5525rem] justify-between items-center"
+                                >
+                                    <Box className="flex flex-wrap space-x-5">
+                                        <Image
+                                            className="w-[10rem] h-[10rem] "
+                                            src={bid.bidMeta?.image}
+                                            alt="bid-img"
+                                            radius="0.5525rem"
+                                        />
+                                        <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
+                                            <div>
+                                                {`Title: ${bid.bidMeta?.title}`}
+                                            </div>
+                                            <div>
+                                                {`Bidder: ${bid.bidderUsername}`}
+                                            </div>
+                                            <div className="flex flex-wrap space-x-5 items-center">
+                                                <div>Offer Amount:</div>
+                                                <div className="flex flex-wrap items-center space-x-2">
+                                                    <SolIcon />
+                                                    <div>{bid.bid_amount}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Box>
+                                    <Box className="flex flex-col">
+                                        <button
+                                            className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg p-3 w-nft-w text-[1rem] font-[300] leading-5"
+                                            onClick={() => {
+                                                handleAcceptOffer(
+                                                    bid.bid_id,
+                                                    bid.nft_address
+                                                );
+                                            }}
+                                        >
+                                            Accept Offer
+                                        </button>
+                                        <button
+                                            className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300] leading-5"
+                                            onClick={() => {
+                                                handleRejectOffer(
+                                                    bid.bid_id,
+                                                    bid.nft_address
+                                                );
+                                            }}
+                                        >
+                                            Reject Offer
+                                        </button>
+                                    </Box>
+                                </Box>
+                            ))}
+                    </Box>
+                )}
+
+            {/* offers made by me */}
+            {!isEmpty &&
+                selectedOption == 2 &&
+                offersSent &&
+                offersSent.length > 0 && (
+                    <Box className="flex flex-col">
+                        {offersSent
+                            .slice()
+                            .reverse()
+                            .map((bid, index) => (
+                                <Box
+                                    key={index}
+                                    className="my-2 space-y-5 flex flex-wrap border border-[#0091D766] p-5 rounded-[0.5525rem] justify-between items-center"
+                                >
+                                    <Box className="flex flex-wrap space-x-5">
+                                        <Image
+                                            className="w-[10rem] h-[10rem] "
+                                            src={bid.bidMeta?.image}
+                                            alt="bid-img"
+                                            radius="0.5525rem"
+                                        />
+                                        <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
+                                            <div>
+                                                {`Title: ${bid.bidMeta?.title}`}
+                                            </div>
+                                            <div>
+                                                {`Seller: ${bid.sellerUsername}`}
+                                            </div>
+                                            <div className="flex flex-wrap space-x-5 items-center">
+                                                <div>Offer Amount:</div>
+                                                <div className="flex flex-wrap items-center space-x-2">
+                                                    <SolIcon />
+                                                    <div>{bid.bid_amount}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Box>
+
+                                    <button
+                                        className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300] leading-5"
+                                        onClick={() => {
+                                            handleDeleteOffer(
+                                                bid.bid_id,
+                                                bid.nft_address
+                                            );
+                                        }}
+                                    >
+                                        Delete Offer
+                                    </button>
+                                </Box>
+                            ))}
+                    </Box>
+                )}
         </div>
     );
 }
