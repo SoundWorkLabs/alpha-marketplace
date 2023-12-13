@@ -23,34 +23,17 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import toast from "react-hot-toast";
 
 export default function Sounds() {
+    const anchorWallet = useAnchorWallet();
     const { publicKey, connected } = useWallet();
     const wallet = useWallet();
-    const anchorWallet = useAnchorWallet();
     const { connection } = useConnection();
     const [nfts, setNfts] = useState<NftSchema[]>([]);
     const [offersReceived, setOffersReceived] = useState<BidSchema[]>([]);
     const [offersSent, setOffersSent] = useState<BidSchema[]>([]);
     const pubkey = publicKey?.toBase58();
     const [selectedOption, setSelectedOption] = useState(0);
-
-    const [isEmpty, setIsEmpty] = useState(false);
-
-    // initializing anchor provider
-    const anchorProvider = useMemo((): AnchorProvider => {
-        if (!anchorWallet) {
-            throw new Error("wallet not connected");
-        }
-        return new AnchorProvider(
-            connection,
-            anchorWallet,
-            AnchorProvider.defaultOptions()
-        );
-    }, [anchorWallet, connection]);
-
-    // initializing sound work SDKs
-    const bidSDK = useMemo((): SoundworkBidSDK => {
-        return new SoundworkBidSDK(anchorProvider, connection);
-    }, [anchorProvider, connection]);
+    const [refreshReceived, setRefreshReceived] = useState(false);
+    const [refreshSent, setRefreshSent] = useState(false);
 
     useEffect(() => {
         if (!connected || !pubkey) {
@@ -72,132 +55,191 @@ export default function Sounds() {
             .catch((err) => {
                 console.error("Error fetching data:", err);
             });
-        fetchOffersReceived(pubkey).then((res) => {
-            console.log("offers received", res);
-            if (res) {
-                setOffersReceived(res);
-            }
-        });
-
-        fetchOffersSent(pubkey).then((res) => {
-            console.log("offers received", res);
-            if (res) {
-                setOffersSent(res);
-            }
-        });
     }, [connected, publicKey, pubkey]);
+    const [isEmpty, setIsEmpty] = useState(false);
+
+    // fetches sent offers
+    useEffect(() => {
+        if (pubkey) {
+            fetchOffersSent(pubkey).then((res) => {
+                console.log("offers received", res);
+                if (res) {
+                    setOffersSent(res);
+                    // setRefreshSent(false)
+                }
+            });
+        }
+    }, [refreshSent, connected, publicKey, pubkey]);
+
+    // fetches received offers
+    useEffect(() => {
+        if (pubkey) {
+            fetchOffersReceived(pubkey).then((res) => {
+                console.log("offers received", res);
+                if (res) {
+                    setOffersReceived(res);
+                }
+            });
+        }
+    }, [refreshReceived, connected, publicKey, pubkey]);
     const options = ["My Sounds", "Offers Received", "Offers made by me"];
+
+    // initializing anchor provider
+    const anchorProvider = useMemo((): AnchorProvider | undefined => {
+        try {
+            if (!anchorWallet) {
+                throw new Error("wallet not connected");
+            }
+            return new AnchorProvider(
+                connection,
+                anchorWallet,
+                AnchorProvider.defaultOptions()
+            );
+        } catch (err) {
+            console.log("wallet not connected");
+            return undefined;
+        }
+    }, [anchorWallet, connection]);
+
+    // initializing sound work SDKs
+    const bidSDK = useMemo((): SoundworkBidSDK | undefined => {
+        if (anchorProvider) {
+            return new SoundworkBidSDK(anchorProvider, connection);
+        }
+        return undefined;
+    }, [anchorProvider, connection]);
 
     const handleAcceptOffer = useCallback(
         async (bidId: string, mint: string) => {
-            const ix = await bidSDK.acceptBid(new PublicKey(mint));
-            const tx = new Transaction().add(ix);
+            const ix = await bidSDK?.acceptBid(new PublicKey(mint));
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            try {
-                await wallet.sendTransaction(tx, connection).then(async () => {
-                    await deleteBid(bidId).then(() => {
-                        console.log("success");
-                        toast.success("You Successfully accepted the offer!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async () => {
+                            await deleteBid(bidId).then(() => {
+                                console.log("success");
+                                toast.success(
+                                    "You Successfully accepted the offer!",
+                                    {
+                                        duration: 3000,
+                                        position: "top-center",
+                                        style: {
+                                            animation: "ease-in-out",
+                                            background: "#0091D766",
+                                            borderRadius: "20px",
+                                            color: "white"
+                                        }
+                                    }
+                                );
+                                setRefreshReceived(true);
+                            });
                         });
-                        window.location.reload();
+                } catch (err) {
+                    console.log("error", err);
+                    toast.error("Failed to accepted the offer!", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-                });
-            } catch (err) {
-                console.log("error", err);
-                toast.error("Failed to accepted the offer!", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [bidSDK, connection, pubkey]
     );
     const handleRejectOffer = useCallback(
         async (bidId: string, mint: string) => {
-            const ix = await bidSDK.rejectBid(new PublicKey(mint));
-            const tx = new Transaction().add(ix);
+            const ix = await bidSDK?.rejectBid(new PublicKey(mint));
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            try {
-                await wallet.sendTransaction(tx, connection).then(async () => {
-                    await deleteBid(bidId).then(() => {
-                        console.log("success");
-                        toast.success("You Successfully rejected the offer!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async () => {
+                            await deleteBid(bidId).then(() => {
+                                console.log("success");
+                                toast.success(
+                                    "You Successfully rejected the offer!",
+                                    {
+                                        duration: 3000,
+                                        position: "top-center",
+                                        style: {
+                                            animation: "ease-in-out",
+                                            background: "#0091D766",
+                                            borderRadius: "20px",
+                                            color: "white"
+                                        }
+                                    }
+                                );
+                                setRefreshReceived(true);
+                            });
                         });
-                        window.location.reload();
+                } catch (err) {
+                    console.log("error", err);
+                    toast.error("Failed to reject the offer!", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-                });
-            } catch (err) {
-                console.log("error", err);
-                toast.error("Failed to reject the offer!", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [bidSDK, connection, pubkey]
     );
     const handleDeleteOffer = useCallback(
         async (bidId: string, mint: string) => {
-            const ix = await bidSDK.deleteBid(new PublicKey(mint));
-            const tx = new Transaction().add(ix);
+            const ix = await bidSDK?.deleteBid(new PublicKey(mint));
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            try {
-                await wallet.sendTransaction(tx, connection).then(async () => {
-                    await deleteBid(bidId).then(() => {
-                        console.log("success");
-                        toast.success("You Successfully deleted your offer!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async () => {
+                            await deleteBid(bidId).then(() => {
+                                console.log("success");
+                                toast.success(
+                                    "You Successfully deleted your offer!",
+                                    {
+                                        duration: 3000,
+                                        position: "top-center",
+                                        style: {
+                                            animation: "ease-in-out",
+                                            background: "#0091D766",
+                                            borderRadius: "20px",
+                                            color: "white"
+                                        }
+                                    }
+                                );
+                                setRefreshSent(true);
+                            });
                         });
-                        window.location.reload();
+                } catch (err) {
+                    console.log("error", err);
+                    toast.error("Failed to delete offer!", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-                });
-            } catch (err) {
-                console.log("error", err);
-                toast.error("Failed to delete offer!", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [bidSDK, connection, pubkey]

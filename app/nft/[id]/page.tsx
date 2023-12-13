@@ -118,24 +118,39 @@ export default function Page() {
     const atrr = metaDetails?.attributes;
 
     // initializing anchor provider
-    const anchorProvider = useMemo((): AnchorProvider => {
-        if (!anchorWallet) {
-            throw new Error("wallet not connected");
+    const anchorProvider = useMemo((): AnchorProvider | undefined => {
+        try {
+            if (!anchorWallet) {
+                throw new Error("wallet not connected");
+            }
+            return new AnchorProvider(
+                connection,
+                anchorWallet,
+                AnchorProvider.defaultOptions()
+            );
+        } catch (err) {
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            connectBtn?.click();
+            return undefined;
         }
-        return new AnchorProvider(
-            connection,
-            anchorWallet,
-            AnchorProvider.defaultOptions()
-        );
     }, [anchorWallet, connection]);
 
     // initializing sound work SDKs
-    const listSDK = useMemo((): SoundworkListSDK => {
-        return new SoundworkListSDK(anchorProvider, connection);
+    const listSDK = useMemo((): SoundworkListSDK | undefined => {
+        if (anchorProvider) {
+            return new SoundworkListSDK(anchorProvider, connection);
+        }
+        return undefined;
     }, [anchorProvider, connection]);
 
-    const bidSDK = useMemo((): SoundworkBidSDK => {
-        return new SoundworkBidSDK(anchorProvider, connection);
+    const bidSDK = useMemo((): SoundworkBidSDK | undefined => {
+        if (anchorProvider) {
+            return new SoundworkBidSDK(anchorProvider, connection);
+        }
+        return undefined;
     }, [anchorProvider, connection]);
 
     const handleClick = () => {
@@ -165,40 +180,42 @@ export default function Page() {
 
     const handleBuy = useCallback(
         async (id: string) => {
-            let ix = await listSDK.buyListing(mint);
-            let tx = new Transaction().add(ix);
+            let ix = await listSDK?.buyListing(mint);
+            if (ix) {
+                let tx = new Transaction().add(ix);
 
-            try {
-                await wallet
-                    .sendTransaction(tx, connection)
-                    .then(async (txHash) => {
-                        console.log("tx hash", txHash);
-                        await deleteListing(id).then((res) => {
-                            console.log(res);
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(id).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Bought!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
                         });
-                        toast.success("NFT Successfully Bought!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
-                        });
+                } catch (err) {
+                    console.log("buying failed", err);
+                    toast.error("Failed to list NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-            } catch (err) {
-                console.log("buying failed", err);
-                toast.error("Failed to list NFT. Please try again.", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -208,45 +225,50 @@ export default function Page() {
         async (price: number) => {
             if (!pubkey) throw new Error("wallet not connected");
 
-            const ix = await listSDK.createListing(mint, price);
-            let tx = new Transaction().add(ix);
+            const ix = await listSDK?.createListing(mint, price);
+            if (ix) {
+                let tx = new Transaction().add(ix);
 
-            try {
-                await wallet
-                    .sendTransaction(tx, connection)
-                    .then(async (txHash) => {
-                        console.log("tx hash", txHash);
-                        await createListing(txHash, pubkey, mint, price).then(
-                            (res) => {
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await createListing(
+                                txHash,
+                                pubkey,
+                                mint,
+                                price
+                            ).then((res) => {
                                 console.log(res);
-                            }
-                        );
-                        toast.success("NFT Successfully Listed!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
+                            });
+                            toast.success("NFT Successfully Listed!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsSellModalOpen(false);
+                            router.push("/");
                         });
-                        setIsSellModalOpen(false);
-                        router.push("/");
+                } catch (err) {
+                    console.log("listing failed", err);
+                    setIsSellModalOpen(false);
+                    toast.error("Failed to list NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-            } catch (err) {
-                console.log("listing failed", err);
-                setIsSellModalOpen(false);
-                toast.error("Failed to list NFT. Please try again.", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -254,43 +276,45 @@ export default function Page() {
 
     const handleDeleteListing = useCallback(
         async (nftID: string) => {
-            const ix = await listSDK.deleteListing(mint);
-            const tx = new Transaction().add(ix);
+            const ix = await listSDK?.deleteListing(mint);
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            try {
-                await wallet
-                    .sendTransaction(tx, connection)
-                    .then(async (txHash) => {
-                        console.log("tx hash", txHash);
-                        await deleteListing(nftID).then((res) => {
-                            console.log(res);
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(nftID).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Delisted!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsSellModalOpen(false);
+                            router.push("/");
                         });
-                        toast.success("NFT Successfully Delisted!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
-                        });
-                        setIsSellModalOpen(false);
-                        router.push("/");
+                } catch (err) {
+                    console.log("deleting nft failed", err);
+                    setIsSellModalOpen(false);
+                    toast.error("Failed to delist NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-            } catch (err) {
-                console.log("deleting nft failed", err);
-                setIsSellModalOpen(false);
-                toast.error("Failed to delist NFT. Please try again.", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -300,51 +324,53 @@ export default function Page() {
         async (newPrice: number, nftID: string) => {
             if (!pubkey) throw new Error("wallet not connected");
 
-            const ix = await listSDK.editListing(mint, newPrice);
-            const tx = new Transaction().add(ix);
+            const ix = await listSDK?.editListing(mint, newPrice);
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            try {
-                await wallet
-                    .sendTransaction(tx, connection)
-                    .then(async (txHash) => {
-                        console.log("tx hash", txHash);
-                        await deleteListing(nftID).then((res) => {
-                            console.log(res);
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(nftID).then((res) => {
+                                console.log(res);
+                            });
+                            await createListing(
+                                txHash,
+                                pubkey,
+                                mint,
+                                newPrice
+                            ).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Edited!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsEditModalOpen(false);
+                            router.push("/");
                         });
-                        await createListing(
-                            txHash,
-                            pubkey,
-                            mint,
-                            newPrice
-                        ).then((res) => {
-                            console.log(res);
-                        });
-                        toast.success("NFT Successfully Edited!", {
-                            duration: 3000,
-                            position: "top-center",
-                            style: {
-                                animation: "ease-in-out",
-                                background: "#0091D766",
-                                borderRadius: "20px",
-                                color: "white"
-                            }
-                        });
-                        setIsEditModalOpen(false);
-                        router.push("/");
+                } catch (err) {
+                    console.log("edit failed", err);
+                    setIsEditModalOpen(false);
+                    toast.success("Failed to edit NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-            } catch (err) {
-                console.log("edit failed", err);
-                setIsEditModalOpen(false);
-                toast.success("Failed to edit NFT. Please try again.", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [listSDK, connection, pubkey, mint]
@@ -355,21 +381,25 @@ export default function Page() {
             if (!pubkey) throw new Error("wallet not connected");
             const expire_ts = getUnixTimestampForExpiry(expiryDate);
 
-            const ix = await bidSDK.placeBid(
+            const ix = await bidSDK?.placeBid(
                 mint,
                 new BN(offerPrice * LAMPORTS_PER_SOL),
                 new BN(expire_ts)
             );
+            if (ix) {
+                const tx = new Transaction().add(ix);
 
-            const tx = new Transaction().add(ix);
-
-            try {
-                await wallet
-                    .sendTransaction(tx, connection)
-                    .then(async (txHash) => {
-                        console.log("tx hash", txHash);
-                        await createBid(txHash, pubkey, mint, offerPrice).then(
-                            () => {
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await createBid(
+                                txHash,
+                                pubkey,
+                                mint,
+                                offerPrice
+                            ).then(() => {
                                 toast.success("Bid Successfully Placed!", {
                                     duration: 3000,
                                     position: "top-center",
@@ -380,23 +410,23 @@ export default function Page() {
                                         color: "white"
                                     }
                                 });
-                            }
-                        );
-                        setIsOfferModalOpen(false);
+                            });
+                            setIsOfferModalOpen(false);
+                        });
+                } catch (err) {
+                    console.log("bid failed", err);
+                    setIsOfferModalOpen(false);
+                    toast.error(" Failed to place bid. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
                     });
-            } catch (err) {
-                console.log("bid failed", err);
-                setIsOfferModalOpen(false);
-                toast.error(" Failed to place bid. Please try again.", {
-                    duration: 3000,
-                    position: "top-center",
-                    style: {
-                        animation: "ease-in-out",
-                        background: "#0091D766",
-                        borderRadius: "20px",
-                        color: "white"
-                    }
-                });
+                }
             }
         },
         [bidSDK, mint, wallet, connection]
