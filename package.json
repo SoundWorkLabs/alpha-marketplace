@@ -2,7 +2,9 @@
     "name": "mantine-minimal-next-template",
     "version": "0.1.0",
     "private": true,
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/*"
+    ],
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -12,6 +14,8 @@
         "format:staged": "prettier --write $(git diff --staged --name-only --diff-filter d | xargs)"
     },
     "dependencies": {
+        "@coral-xyz/anchor": "^0.29.0",
+        "@jimii/soundwork-sdk": "^0.0.11",
         "@mantine/core": "7.0.0",
         "@mantine/dropzone": "^7.0.0",
         "@mantine/form": "^7.0.0",
@@ -35,7 +39,6 @@
         "tailwindcss-gradients": "^3.0.0"
     },
     "devDependencies": {
-        "@jimii/soundwork-sdk": "^0.0.6",
         "@types/node": "20.2.5",
         "@types/react": "18.2.7",
         "@types/react-dom": "18.2.4",

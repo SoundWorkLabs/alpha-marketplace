@@ -42,14 +42,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 className="appearance-none w-full 
                 overflow-hidden bg-gray-600 h-1 rounded-lg focus:outline-none range-slider"
             />
-            <div className="time text-[13.336px] text-[#909090] flex items-center w-full justify-between">
+            <div className="time text-[0.71444rem] text-[#FFFFFF7A] flex items-center w-full justify-between">
                 <div>{isPlaying && formatTime(duration)}</div>
-                <div className="">
-                    <button className="p-2">
-                        <IconVolume />
+                <div className="space-x-[.54rem]">
+                    <button>
+                        <IconVolume className="h-[1.25025rem] w-[1.25025rem]" />
                     </button>
-                    <button className="p-2">
-                        <IconArrowsShuffle2 />
+                    <button>
+                        <IconArrowsShuffle2 className="h-[1.25025rem] w-[1.25025rem]" />
                     </button>
                 </div>
             </div>

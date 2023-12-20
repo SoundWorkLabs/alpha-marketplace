@@ -24,7 +24,7 @@ function LibAudioPlayer() {
         }
     }, [currentTrack]);
     return (
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between h-[4.70319rem] w-full">
             <div className="">
                 <div className="space-x-5 flex flex-wrap items-center">
                     <Controls
@@ -47,7 +47,7 @@ function LibAudioPlayer() {
                 </div>
             </div>
             <div>
-                <div className="w-[437.22px]">
+                <div className="w-[27.32625rem]">
                     <ProgressBar
                         progressBarRef={progressBarRef}
                         audioRef={audioRef}

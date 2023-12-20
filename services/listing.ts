@@ -50,10 +50,9 @@ export async function createListing(
 }
 
 // id is is the tx Hash
-// ! not implemented
-async function deleteListing(id: string) {
+export async function deleteListing(id: string) {
     try {
-        const response = await fetch(`${API_BASE_URL}/nfts/listings/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/listings/delete/${id}`, {
             method: "DELETE"
         });
 

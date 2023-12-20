@@ -1,56 +1,82 @@
 "use client";
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
-import { nftData } from "../../../services/NFT";
+import React, {
+    useEffect,
+    useState,
+    useRef,
+    useCallback,
+    useMemo
+} from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
     Box,
     CopyButton,
     ActionIcon,
     rem,
-    Pill,
     Modal,
-    TextInput
+    TextInput,
+    Avatar,
+    Image,
+    Container,
+    Select
 } from "@mantine/core";
-import Image from "next/image";
+import { IconCopy, IconCheck, IconPlayerPlayFilled } from "@tabler/icons-react";
+import { SoundworkListSDK } from "@jimii/soundwork-sdk";
+import { SoundworkBidSDK } from "@jimii/soundwork-sdk";
 import {
-    IconCopy,
-    IconCheck,
-    IconPlayerPlayFilled,
-    IconPlayerPause
-} from "@tabler/icons-react";
+    useAnchorWallet,
+    useConnection,
+    useWallet
+} from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
+import { AnchorProvider, BN } from "@coral-xyz/anchor";
+import toast from "react-hot-toast";
+
+import {
+    fetchSingleListedNfts,
+    fetchSolUsd,
+    nftData
+} from "../../../services/NFT";
 import LibAudioPlayer from "../../explore/components/AudioPlayer";
-import { MetaSchema } from "../../components/types";
+import { MetaSchema, NftSchema, UserInfo } from "../../components/types";
 import SoundWorkLogo, { SolIcon } from "../../components/icon";
 import { useAudio } from "../../context/audioPlayerContext";
+import { fetchUserByAddress } from "../../../services/user";
+import { createListing, deleteListing } from "../../../services/listing";
+import getUnixTimestampForExpiry from "../../components/unixConvertor";
+import { createBid } from "../../../services/bidding";
 
-import ListingNft from "../../components/modals/listingNft";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import BuyNow from "../../components/BuyNow";
-import { SoundworkSDK } from "@jimii/soundwork-sdk";
-import { PublicKey, Transaction } from "@solana/web3.js";
-
-import { AnchorProvider } from "@coral-xyz/anchor";
+const ExpiryDateOptions = [
+    { value: "1", label: "1 Day" },
+    { value: "3", label: "3 Days" },
+    { value: "7", label: "7 Days" },
+    { value: "30", label: "1 Month" }
+    // { value: "custom", label: "Custom" }
+];
 
 export default function Page() {
+    const router = useRouter();
     const { id: nftAddress } = useParams();
-    const wallet = useAnchorWallet();
 
-    const { isPlaying, togglePlayPause, setCurrentTrack, currentTrack } =
-        useAudio();
+    const wallet = useWallet();
+    const anchorWallet = useAnchorWallet();
+    const { connection } = useConnection();
+    const pubkey = anchorWallet?.publicKey.toBase58();
+    const mint = new PublicKey(nftAddress);
+
+    const { setCurrentTrack } = useAudio();
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
     const [currentOwner, setCurrentOwner] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [value, setValue] = useState("");
-    const [isPrice, setIsPrice] = useState<number>(0);
     const playPauseRef = useRef(null);
-    const [isListing, setIsListing] = useState(false);
-    const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
-    const pubkey = wallet?.publicKey.toBase58();
 
-    const anchorWallet = useAnchorWallet();
-    const { connection } = useConnection();
+    const [author, setAuthor] = useState<UserInfo>();
+    const [listingInfo, setListingInfo] = useState<NftSchema["listings"]>();
+    const [solUsd, setSolUsd] = useState<string>();
+    const [expiryDate, setExpiryDate] = useState("");
 
     // TODO: this data should be passed in from the page we are navigating from
     useEffect(() => {
@@ -59,6 +85,22 @@ export default function Page() {
                 if (res) {
                     setMetaDetails(res.metaDetails);
                     setCurrentOwner(res.nftDetails.current_owner);
+                    fetchUserByAddress(res.nftDetails.current_owner).then(
+                        (res) => {
+                            setAuthor(res);
+                        }
+                    );
+
+                    fetchSingleListedNfts(nftAddress).then((res) => {
+                        if (res) {
+                            res.listings.length > 0;
+                            return setListingInfo(res.listings);
+                        }
+                    });
+
+                    fetchSolUsd().then((res) => {
+                        setSolUsd(res);
+                    });
                 }
             })
             .catch((err) => {
@@ -75,6 +117,42 @@ export default function Page() {
     const title = metaDetails?.title;
     const atrr = metaDetails?.attributes;
 
+    // initializing anchor provider
+    const anchorProvider = useMemo((): AnchorProvider | undefined => {
+        try {
+            if (!anchorWallet) {
+                throw new Error("wallet not connected");
+            }
+            return new AnchorProvider(
+                connection,
+                anchorWallet,
+                AnchorProvider.defaultOptions()
+            );
+        } catch (err) {
+            const connectBtn = document.querySelector(
+                ".connectBtn"
+            ) as HTMLButtonElement;
+
+            connectBtn?.click();
+            return undefined;
+        }
+    }, [anchorWallet, connection]);
+
+    // initializing sound work SDKs
+    const listSDK = useMemo((): SoundworkListSDK | undefined => {
+        if (anchorProvider) {
+            return new SoundworkListSDK(anchorProvider, connection);
+        }
+        return undefined;
+    }, [anchorProvider, connection]);
+
+    const bidSDK = useMemo((): SoundworkBidSDK | undefined => {
+        if (anchorProvider) {
+            return new SoundworkBidSDK(anchorProvider, connection);
+        }
+        return undefined;
+    }, [anchorProvider, connection]);
+
     const handleClick = () => {
         if (!pubkey) {
             if (typeof window !== "undefined") {
@@ -86,46 +164,297 @@ export default function Page() {
             }
         } else if (currentOwner === pubkey) {
             const a = document.createElement("a");
-            a.href = animation_url ?? ""; // todo: handle err
-            a.download = title ?? ""; // todo: handle error
-            a.click();
+            a.href = animation_url ?? "";
+            a.download = title ?? "";
+            try {
+                a.click();
+            } catch (err) {
+                console.log("download failed");
+            }
         } else {
-            handleBuy();
+            if (listingInfo) {
+                handleBuy(listingInfo[0].id);
+            }
         }
     };
 
-    const handleBuy = useCallback(async () => {
-        if (!anchorWallet) throw new Error("wallet not connected");
-        if (!pubkey) throw new Error("wallet not connected");
+    const handleBuy = useCallback(
+        async (id: string) => {
+            let ix = await listSDK?.buyListing(mint);
+            if (ix) {
+                let tx = new Transaction().add(ix);
 
-        const provider = await new AnchorProvider(connection, anchorWallet, {});
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(id).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Bought!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                        });
+                } catch (err) {
+                    console.log("buying failed", err);
+                    toast.error("Failed to list NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
+                    });
+                }
+            }
+        },
+        [listSDK, connection, pubkey, mint]
+    );
 
-        const soundworkSDK = new SoundworkSDK(provider, connection);
+    const handleListing = useCallback(
+        async (price: number) => {
+            if (!pubkey) throw new Error("wallet not connected");
 
-        let nftMint = new PublicKey(nftAddress);
-        let ix = await soundworkSDK.buyListing(nftMint);
-        let tx = new Transaction();
-        let blockhash = (await connection.getLatestBlockhash("finalized"))
-            .blockhash;
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = new PublicKey(pubkey);
-        tx.add(ix);
+            const ix = await listSDK?.createListing(mint, price);
+            if (ix) {
+                let tx = new Transaction().add(ix);
 
-        try {
-            const {
-                phantom: { solana: phantomProvider }
-            }: any = window; // phantom
-            let txHash = await phantomProvider.signAndSendTransaction(tx);
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await createListing(
+                                txHash,
+                                pubkey,
+                                mint,
+                                price
+                            ).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Listed!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsSellModalOpen(false);
+                            router.push("/");
+                        });
+                } catch (err) {
+                    console.log("listing failed", err);
+                    setIsSellModalOpen(false);
+                    toast.error("Failed to list NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
+                    });
+                }
+            }
+        },
+        [listSDK, connection, pubkey, mint]
+    );
 
-            // let txhash = await provider.sendAndConfirm(tx);
-            console.log("tx hash", txHash);
-        } catch (err) {
-            console.log("buying failed", err);
-        }
-    }, [anchorWallet, connection, pubkey]);
+    const handleDeleteListing = useCallback(
+        async (nftID: string) => {
+            const ix = await listSDK?.deleteListing(mint);
+            if (ix) {
+                const tx = new Transaction().add(ix);
+
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(nftID).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Delisted!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsSellModalOpen(false);
+                            router.push("/");
+                        });
+                } catch (err) {
+                    console.log("deleting nft failed", err);
+                    setIsSellModalOpen(false);
+                    toast.error("Failed to delist NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
+                    });
+                }
+            }
+        },
+        [listSDK, connection, pubkey, mint]
+    );
+
+    const handleEditListing = useCallback(
+        async (newPrice: number, nftID: string) => {
+            if (!pubkey) throw new Error("wallet not connected");
+
+            const ix = await listSDK?.editListing(mint, newPrice);
+            if (ix) {
+                const tx = new Transaction().add(ix);
+
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await deleteListing(nftID).then((res) => {
+                                console.log(res);
+                            });
+                            await createListing(
+                                txHash,
+                                pubkey,
+                                mint,
+                                newPrice
+                            ).then((res) => {
+                                console.log(res);
+                            });
+                            toast.success("NFT Successfully Edited!", {
+                                duration: 3000,
+                                position: "top-center",
+                                style: {
+                                    animation: "ease-in-out",
+                                    background: "#0091D766",
+                                    borderRadius: "20px",
+                                    color: "white"
+                                }
+                            });
+                            setIsEditModalOpen(false);
+                            router.push("/");
+                        });
+                } catch (err) {
+                    console.log("edit failed", err);
+                    setIsEditModalOpen(false);
+                    toast.success("Failed to edit NFT. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
+                    });
+                }
+            }
+        },
+        [listSDK, connection, pubkey, mint]
+    );
+
+    const handleBid = useCallback(
+        async (offerPrice: number, expiryDate: string) => {
+            if (!pubkey) throw new Error("wallet not connected");
+            const expire_ts = getUnixTimestampForExpiry(expiryDate);
+
+            const ix = await bidSDK?.placeBid(
+                mint,
+                new BN(offerPrice * LAMPORTS_PER_SOL),
+                new BN(expire_ts)
+            );
+            if (ix) {
+                const tx = new Transaction().add(ix);
+
+                try {
+                    await wallet
+                        .sendTransaction(tx, connection)
+                        .then(async (txHash) => {
+                            console.log("tx hash", txHash);
+                            await createBid(
+                                txHash,
+                                pubkey,
+                                mint,
+                                offerPrice
+                            ).then(() => {
+                                toast.success("Bid Successfully Placed!", {
+                                    duration: 3000,
+                                    position: "top-center",
+                                    style: {
+                                        animation: "ease-in-out",
+                                        background: "#0091D766",
+                                        borderRadius: "20px",
+                                        color: "white"
+                                    }
+                                });
+                            });
+                            setIsOfferModalOpen(false);
+                        });
+                } catch (err) {
+                    console.log("bid failed", err);
+                    setIsOfferModalOpen(false);
+                    toast.error(" Failed to place bid. Please try again.", {
+                        duration: 3000,
+                        position: "top-center",
+                        style: {
+                            animation: "ease-in-out",
+                            background: "#0091D766",
+                            borderRadius: "20px",
+                            color: "white"
+                        }
+                    });
+                }
+            }
+        },
+        [bidSDK, mint, wallet, connection]
+    );
+
+    const handleExpiryDateChange = (value: string) => {
+        console.log("expiry date", value);
+        setExpiryDate(value);
+    };
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <>
+                <div className="p-5 my-2 mx-5 scroll-smooth animate-pulse">
+                    <Box className="flex flex-wrap gap-x-10">
+                        <div className="relative w-[26.375rem] h-[26.375rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                        <Box className="max-w-[39vw] my-auto xl:max-w-full">
+                            <div className="bg-[#1d1f2592] w-[8rem] h-[2.41175rem]"></div>
+                            <div className="mt-2 mb-2 bg-[#1d1f2592] w-[10rem] h-[2.41175rem]"></div>
+                            <Box className="p-4 flex justify-stretch title-box h-[18.5rem] bg-[#1d1f2592] rounded-[1.1rem] min-w-full"></Box>
+                        </Box>
+                    </Box>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                    <div className="my-[2.81rem] bg-[#1d1f2592] w-[15rem] h-[5.41175rem]"></div>
+                </div>
+            </>
+        );
     }
 
     if (!metaDetails || !currentOwner) {
@@ -135,14 +464,15 @@ export default function Page() {
     return (
         <div className="p-5 my-2 mx-5 scroll-smooth">
             <Box className="flex flex-wrap gap-x-10">
-                <div className="image-container">
+                <div className="relative w-[26.375rem] h-[26.375rem]">
                     <Image
-                        priority
+                        // priority
                         src={image ?? ""}
                         alt="nft image"
-                        className="rounded-md dynamic-image"
-                        height={600}
-                        width={600}
+                        className="dynamic-image"
+                        // height="26.375rem"
+                        // width="26.375rem"
+                        radius="0.5525rem"
                     />
                     <div
                         className="play-pause-container"
@@ -153,26 +483,35 @@ export default function Page() {
                                 author: currentOwner.slice(0, 10),
                                 coverArt: image
                             });
-                            togglePlayPause();
+                            // togglePlayPause();
                         }}
                     >
-                        {isPlaying ? (
-                            <IconPlayerPause
-                                className="pause-button"
-                                size={142}
-                            />
-                        ) : (
-                            <IconPlayerPlayFilled
-                                className="player-button"
-                                size={142}
-                            />
-                        )}
+                        {/* {isPlaying ? ( */}
+                        {/* <IconPlayerPause className="pause-button" size={142} />
+                        ) : ( */}
+                        <IconPlayerPlayFilled
+                            className="player-button"
+                            size={142}
+                        />
+                        {/* )} */}
                     </div>
                 </div>
 
                 <Box className="flex-1 max-w-[39vw] my-auto xl:max-w-full">
-                    <div className="flex flex-wrap my-5">
-                        <span className="text-[#E6E6E6]">Owner By: </span>
+                    <div className="flex flex-wrap items-center">
+                        <Avatar
+                            src={author?.avatar_url as string}
+                            size="2.41175rem"
+                        />
+                        <p className="text-[1.25rem] text-[#47DEF2] font-[500] ml-1">
+                            {/* {nft.current_owner.slice(0, 10)} */}
+                            {author?.username}
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap mt-2 mb-2">
+                        <span className="text-[#E6E6E6] text-[1rem] font-[300]">
+                            Owner By:{" "}
+                        </span>
                         <CopyButton
                             value={currentOwner ? (currentOwner as string) : ""}
                             timeout={250}
@@ -182,10 +521,12 @@ export default function Page() {
                                     onClick={copy}
                                     className="flex flex-wrap mx-3 cursor-pointer "
                                 >
-                                    {currentOwner?.slice(0, 10)}
+                                    {currentOwner === pubkey
+                                        ? "You"
+                                        : currentOwner?.slice(0, 10)}
                                     <ActionIcon
                                         color="transparent"
-                                        className="mx-2 hover:bg-transparent"
+                                        className="hover:bg-transparent"
                                     >
                                         {copied ? (
                                             <IconCheck
@@ -201,22 +542,45 @@ export default function Page() {
                             )}
                         </CopyButton>
                     </div>
-                    <Box className="custom-border1 p-4 justify-stretch title-box">
-                        <div className="mini-logo flex flex-wrap">
-                            <SoundWorkLogo />
-                            <p className="text-3xl mx-5">{title}</p>
+                    <Box className="custom-border1 p-4 justify-stretch title-box w-full h-[18.5rem]">
+                        <div className="flex flex-wrap items-center justify-between">
+                            <div className="mini-logo flex flex-wrap items-center space-x-5">
+                                <SoundWorkLogo />
+                                <p className="text-[2.25rem] font-[500]">
+                                    {title}
+                                </p>
+                            </div>
+
+                            {listingInfo && (
+                                <div className="flex flex-wrap items-center space-x-4">
+                                    <span className="sol-icon-price">
+                                        <SolIcon />
+                                    </span>
+                                    <p className="text-[2.25rem] font-[500] leading-[2.59875rem]">
+                                        {listingInfo! &&
+                                            `${listingInfo[0].list_price} ( $${(
+                                                parseFloat(
+                                                    listingInfo! &&
+                                                        listingInfo[0]
+                                                            .list_price
+                                                ) *
+                                                parseFloat(solUsd! && solUsd)
+                                            ).toFixed(2)} )`}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="my-5 flex justify-between">
+                        <div className="my-[1.12rem] flex justify-between">
                             <button
-                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w"
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300]"
                                 onClick={() => handleClick()}
                             >
                                 {currentOwner === pubkey
                                     ? "Download"
                                     : "Buy Now"}
                             </button>
-                            <>
+                            {/* <>
                                 {isBuyNowOpen && (
                                     <BuyNow
                                         nftAddress={nftAddress}
@@ -225,9 +589,9 @@ export default function Page() {
                                         }}
                                     />
                                 )}
-                            </>
+                            </> */}
                             <button
-                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg mx-8 my-2 p-3 w-nft-w"
+                                className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300]"
                                 onClick={() => {
                                     if (!pubkey) {
                                         const connectBtn =
@@ -235,18 +599,29 @@ export default function Page() {
                                                 ".connectBtn"
                                             ) as HTMLButtonElement;
                                         connectBtn?.click();
-                                    } else if (currentOwner === pubkey) {
+                                    } else if (
+                                        currentOwner === pubkey &&
+                                        !listingInfo!
+                                    ) {
                                         setIsSellModalOpen(true);
+                                    } else if (
+                                        currentOwner === pubkey &&
+                                        listingInfo!
+                                    ) {
+                                        setIsEditModalOpen(true);
                                     } else {
                                         setIsOfferModalOpen(true);
                                     }
                                 }}
                             >
                                 {currentOwner === pubkey
-                                    ? "Sell"
+                                    ? listingInfo! && listingInfo[0].list_price
+                                        ? "Edit Listing"
+                                        : "Sell"
                                     : "Make Offer"}
                             </button>
                         </div>
+                        {/* list an NFT modal */}
                         <Modal
                             opened={isSellModalOpen}
                             onClose={() => setIsSellModalOpen(false)}
@@ -285,29 +660,144 @@ export default function Page() {
                                     <button
                                         className="rounded-full bg-btn-bg w-nft-w"
                                         onClick={() => {
-                                            const price = parseFloat(value);
-                                            setIsPrice(price);
-                                            setIsListing(true);
+                                            const price = parseInt(value);
+                                            handleListing(price);
                                         }}
                                     >
                                         List for Sale
                                     </button>
-                                    <div>
-                                        {isListing && (
-                                            <ListingNft
-                                                price={isPrice}
-                                                nftAddress={nftAddress}
-                                                closeModal={() => {
-                                                    setValue("");
-                                                    setIsSellModalOpen(false);
-                                                    setIsListing(false);
-                                                }}
-                                            />
-                                        )}
-                                    </div>
                                 </div>
                             </div>
                         </Modal>
+                        {/* edit listing modal */}
+                        <Modal
+                            opened={isEditModalOpen}
+                            onClose={() => setIsEditModalOpen(false)}
+                            radius={17.681}
+                            top={200}
+                            withCloseButton={false}
+                            closeOnClickOutside={true}
+                            closeOnEscape={true}
+                            size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
+                        >
+                            <div className="mx-5">
+                                <div className="text-[2rem] font-[500] my-2">
+                                    Set Price
+                                </div>
+                                <div className="flex flex-wrap justify-between my-2 items-center">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
+                                            SOL
+                                        </div> */}
+                                    {/* </div> */}
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={() => {
+                                            if (listingInfo) {
+                                                const newPrice =
+                                                    parseInt(value);
+                                                handleEditListing(
+                                                    newPrice,
+                                                    listingInfo?.[0].id
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={() => {
+                                            if (listingInfo) {
+                                                handleDeleteListing(
+                                                    listingInfo?.[0].id
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        Delete Listing
+                                    </button>
+                                </div>
+                            </div>
+                        </Modal>
+                        {/* bid modal */}
+                        <Modal
+                            opened={isOfferModalOpen}
+                            onClose={() => setIsOfferModalOpen(false)}
+                            radius={17.681}
+                            top={200}
+                            withCloseButton={false}
+                            closeOnClickOutside={true}
+                            closeOnEscape={true}
+                            size={652}
+                            overlayProps={{
+                                backgroundOpacity: 0.55,
+                                blur: 3
+                            }}
+                            className="listing-nft-modal"
+                        >
+                            <div className="mx-5">
+                                <div className="text-[2rem] font-[500] my-2">
+                                    Set Offer
+                                </div>
+                                <div className="flex flex-wrap justify-evenly my-2 items-center">
+                                    {/* <div className="flex items-center space-x-2"> */}
+                                    <TextInput
+                                        className="modal-input border-[rgba(0, 145, 215, 0.40)] rounded-md font-mono font-bold"
+                                        withAsterisk
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => {
+                                            setValue(e.currentTarget.value);
+                                        }}
+                                        leftSection={<SolIcon />}
+                                    />
+                                    {/* <div className="sol-label px-[29px] border border-[#0091D766] rounded-full ">
+                                            SOL
+                                        </div> */}
+                                    {/* </div> */}
+                                    <div>
+                                        <Container className="w-[10rem]">
+                                            <Select
+                                                data={ExpiryDateOptions}
+                                                placeholder="Select Expiry Date"
+                                                value={expiryDate}
+                                                onChange={
+                                                    handleExpiryDateChange
+                                                }
+                                                id="expiryDate"
+                                            />
+                                        </Container>
+                                    </div>
+                                    <button
+                                        className="border border-[#0091D766] rounded-full hover:bg-btn-bg w-[10rem] h-[2.2rem] text-[1rem]"
+                                        onClick={() => {
+                                            const price = Number(value);
+                                            console.log("price", price);
+                                            handleBid(price, expiryDate);
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </Modal>
+
                         <table className="w-full table-auto overflow-y-auto">
                             <thead>
                                 <tr className=" mx-0 ">
@@ -349,26 +839,32 @@ export default function Page() {
                     </Box>
                 </Box>
             </Box>
-            <div className="my-3">
-                <p className="text-3xl my-3">Description</p>
-                <p>{description}</p>
+            <div className="my-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Description</p>
+                <p className="text-[1.25rem] font-[300] leading-[1.44375rem]">
+                    {description}
+                </p>
             </div>
-            <div className="my-5">
-                <p className="text-3xl my-3">Properties</p>
+            <div className="mb-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Properties</p>
                 {atrr
                     ? atrr.map((attributes, index) => {
                           return (
-                              <div key={index}>
+                              <div
+                                  key={index}
+                                  className="text-[1.25rem] font-[300] leading-[1.44375rem] bg-[#D9D9D90A] border border-[#D7D6D633] rounded-[0.75rem] w-[10.5rem] h-[3.9375rem] overflow-hidden"
+                              >
                                   {Object.entries(attributes).map(
                                       ([key, value]) => (
-                                          <Pill key={key}>
-                                              <span className="bg-audio-bg">
-                                                  {key}:
-                                              </span>
-                                              <span className="bg-transparent">
+                                          <div
+                                              key={key}
+                                              className="mx-[1.12rem] mt-[.44rem] text-[0.8125rem] font-[300]"
+                                          >
+                                              <div className="">{key}</div>
+                                              <div className="text-[1.375rem] font-[400]">
                                                   {value}
-                                              </span>
-                                          </Pill>
+                                              </div>
+                                          </div>
                                       )
                                   )}
                               </div>
@@ -376,8 +872,8 @@ export default function Page() {
                       })
                     : null}
             </div>
-            <div className="my-5">
-                <p className="text-3xl my-3">Price History</p>
+            <div className="mb-[2.81rem]">
+                <p className="text-[2.25rem] font-[500] my-3">Price History</p>
             </div>
             <div className="fixed bg-aduio-bg bottom-4 rounded-full w-3/4 h-76 px-7">
                 <LibAudioPlayer

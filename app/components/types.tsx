@@ -1,5 +1,4 @@
-import React, { ReactNode, createContext, useContext, useState } from "react";
-import { useAudio } from "../context/audioPlayerContext";
+import React from "react";
 export interface NftSchema {
     nft_address: string;
     collection_address: string | null;
@@ -63,4 +62,28 @@ export interface LibAudioPlayerProps {
     isPlaying: boolean;
     togglePlayPause: () => void;
     currentTrack: AudioContextData["currentTrack"];
+}
+export interface UserInfo {
+    active_address: string;
+    avatar_url: string;
+    is_admin: boolean;
+    user_id: number;
+    username: string;
+}
+
+export interface BidSchema {
+    bid_id: string;
+    nft_address: string;
+    bidder_id: number;
+    bid_amount: string;
+    bid_date?: null;
+    account: {
+        active_address: string;
+    };
+    nft: {
+        current_owner: string;
+    };
+    bidMeta: MetaSchema;
+    bidderUsername: string;
+    sellerUsername: string;
 }
