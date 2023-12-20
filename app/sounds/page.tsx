@@ -1,5 +1,6 @@
 "use client";
-import { Box, Flex, TextInput, Image } from "@mantine/core";
+import { Box, Flex, TextInput } from "@mantine/core";
+import Image from "next/image";
 import {
     useAnchorWallet,
     useConnection,
@@ -356,41 +357,67 @@ export default function Sounds() {
                         {offersReceived
                             .slice()
                             .reverse()
-                            .map((bid, index) => (
+                            .map((bidReceived, index) => (
                                 <Box
                                     key={index}
                                     className="my-2 flex flex-wrap border border-[#0091D766] p-5 rounded-[0.5525rem] justify-between items-center"
                                 >
-                                    <Box className="flex flex-wrap space-x-5">
-                                        <Image
-                                            className="w-[10rem] h-[10rem] "
-                                            src={bid.bidMeta?.image}
-                                            alt="bid-img"
-                                            radius="0.5525rem"
-                                        />
-                                        <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
-                                            <div>
-                                                {`Title: ${bid.bidMeta?.title}`}
+                                    {bidReceived.bidMeta?.image ? (
+                                        <Box className="flex flex-wrap space-x-5">
+                                            <div className="w-[10rem] h-[10rem]">
+                                                <Image
+                                                    className="w-[10rem] h-[10rem] rounded-[0.5525rem]"
+                                                    src={
+                                                        bidReceived.bidMeta
+                                                            ?.image
+                                                    }
+                                                    alt="bid-img"
+                                                    // radius="0.5525rem"
+                                                    width={300}
+                                                    height={300}
+                                                    quality={100}
+                                                    priority
+                                                />
                                             </div>
-                                            <div>
-                                                {`Bidder: ${bid.bidderUsername}`}
-                                            </div>
-                                            <div className="flex flex-wrap space-x-5 items-center">
-                                                <div>Offer Amount:</div>
-                                                <div className="flex flex-wrap items-center space-x-2">
-                                                    <SolIcon />
-                                                    <div>{bid.bid_amount}</div>
+
+                                            <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
+                                                <div>
+                                                    {`Title: ${bidReceived.bidMeta?.title}`}
+                                                </div>
+                                                <div>
+                                                    {`Bidder: ${bidReceived.bidderUsername}`}
+                                                </div>
+                                                <div className="flex flex-wrap space-x-5 items-center">
+                                                    <div>Offer Amount:</div>
+                                                    <div className="flex flex-wrap items-center space-x-2">
+                                                        <SolIcon />
+                                                        <div>
+                                                            {
+                                                                bidReceived.bid_amount
+                                                            }
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        </Box>
+                                    ) : (
+                                        <div className="flex flex-wrap space-x-5 animate-pulse">
+                                            <div className="w-[10rem] h-[10rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                            <div className="space-y-5 py-5">
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                            </div>
                                         </div>
-                                    </Box>
+                                    )}
+
                                     <Box className="flex flex-col">
                                         <button
                                             className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg p-3 w-nft-w text-[1rem] font-[300] leading-5"
                                             onClick={() => {
                                                 handleAcceptOffer(
-                                                    bid.bid_id,
-                                                    bid.nft_address
+                                                    bidReceived.bid_id,
+                                                    bidReceived.nft_address
                                                 );
                                             }}
                                         >
@@ -400,8 +427,8 @@ export default function Sounds() {
                                             className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300] leading-5"
                                             onClick={() => {
                                                 handleRejectOffer(
-                                                    bid.bid_id,
-                                                    bid.nft_address
+                                                    bidReceived.bid_id,
+                                                    bidReceived.nft_address
                                                 );
                                             }}
                                         >
@@ -422,41 +449,60 @@ export default function Sounds() {
                         {offersSent
                             .slice()
                             .reverse()
-                            .map((bid, index) => (
+                            .map((bidSent, index) => (
                                 <Box
                                     key={index}
                                     className="my-2 space-y-5 flex flex-wrap border border-[#0091D766] p-5 rounded-[0.5525rem] justify-between items-center"
                                 >
-                                    <Box className="flex flex-wrap space-x-5">
-                                        <Image
-                                            className="w-[10rem] h-[10rem] "
-                                            src={bid.bidMeta?.image}
-                                            alt="bid-img"
-                                            radius="0.5525rem"
-                                        />
-                                        <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
-                                            <div>
-                                                {`Title: ${bid.bidMeta?.title}`}
+                                    {bidSent.bidMeta?.image ? (
+                                        <Box className="flex flex-wrap space-x-5">
+                                            <div className="w-[10rem] h-[10rem]">
+                                                <Image
+                                                    className="w-[10rem] h-[10rem] rounded-[0.5525rem]"
+                                                    src={bidSent.bidMeta?.image}
+                                                    alt="bid-img"
+                                                    // radius="0.5525rem"
+                                                    width={300}
+                                                    height={300}
+                                                    quality={100}
+                                                    priority
+                                                />
                                             </div>
-                                            <div>
-                                                {`Seller: ${bid.sellerUsername}`}
-                                            </div>
-                                            <div className="flex flex-wrap space-x-5 items-center">
-                                                <div>Offer Amount:</div>
-                                                <div className="flex flex-wrap items-center space-x-2">
-                                                    <SolIcon />
-                                                    <div>{bid.bid_amount}</div>
+                                            <div className="space-y-5 py-5 text-[1.3rem] font-[300] leading-5">
+                                                <div>
+                                                    {`Title: ${bidSent.bidMeta?.title}`}
                                                 </div>
+                                                <div>
+                                                    {`Seller: ${bidSent.sellerUsername}`}
+                                                </div>
+                                                <div className="flex flex-wrap space-x-5 items-center">
+                                                    <div>Offer Amount:</div>
+                                                    <div className="flex flex-wrap items-center space-x-2">
+                                                        <SolIcon />
+                                                        <div>
+                                                            {bidSent.bid_amount}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>{" "}
+                                        </Box>
+                                    ) : (
+                                        <div className="flex flex-wrap space-x-5 animate-pulse">
+                                            <div className="w-[10rem] h-[10rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                            <div className="space-y-5 py-5">
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
+                                                <div className="w-[7.5rem] h-[1.5rem] bg-[#1d1f2592] rounded-[0.5525rem]"></div>
                                             </div>
                                         </div>
-                                    </Box>
+                                    )}
 
                                     <button
                                         className="border-2 border-[#0091D766] rounded-full hover:bg-btn-bg my-2 p-3 w-nft-w text-[1rem] font-[300] leading-5"
                                         onClick={() => {
                                             handleDeleteOffer(
-                                                bid.bid_id,
-                                                bid.nft_address
+                                                bidSent.bid_id,
+                                                bidSent.nft_address
                                             );
                                         }}
                                     >
