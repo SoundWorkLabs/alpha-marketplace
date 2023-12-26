@@ -15,14 +15,17 @@ import { SolIcon } from "./icon";
 import { usePlaylist } from "../context/playlistProviderContext";
 import { fetchUserByAddress } from "../../services/user";
 import { Avatar } from "@mantine/core";
+import { usePathname } from "next/navigation";
 
 const NftCard: React.FC<NftCardProps> = ({ nft }) => {
+    const pathname = usePathname();
     const [metaDetails, setMetaDetails] = useState<MetaSchema | undefined>();
     // const { togglePlayPause, setCurrentTrack, currentTrack, PlayList } =
     //     useAudio();
     const [isPlaying, setIsPlaying] = useState(false);
     const [like, setLike] = useState(true);
-    const { addToPlaylist } = usePlaylist();
+
+    const playList = usePlaylist();
     const [author, setAuthor] = useState<UserInfo>();
     // const [trackList, setTrackList] = useState<
     //     Array<AudioContextData["currentTrack"]>
@@ -55,9 +58,9 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
     // const author = nft?.current_owner.slice(0, 10);
     const coverArt = nft?.image_url;
     const handlePlayPauseClick = () => {
-        if (animation_url) {
+        if (animation_url && playList?.addToPlaylist) {
             setIsPlaying(!isPlaying);
-            addToPlaylist({
+            playList.addToPlaylist({
                 track: animation_url,
                 author: author?.username,
                 title: title,
@@ -75,7 +78,13 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
 
     return (
         <div className="nft-cards w-nft-card-w h-nft-card-h my-5 mr-5 overflow-hidden">
-            <div className="custom-border p-[.81rem] w-full h-full">
+            <div
+                className={
+                    pathname === "/"
+                        ? "custom-border1 p-[.81rem] w-full h-full"
+                        : "custom-border p-[.81rem] w-full h-full"
+                }
+            >
                 {/* <div className="border-[2px] border-[linear-gradient(90deg, rgba(0, 145, 215, 0.4) 0%, #0091D7 43.75%, #FE0FD4 100%)] rounded-[17.681px] p-[12px] w-full h-full"> */}
                 <div className="h-nft-h w-nft-w mb-5">
                     <Link
@@ -99,24 +108,26 @@ const NftCard: React.FC<NftCardProps> = ({ nft }) => {
                             />
                         )}
                     </Link>
-                    <div
-                        className="play-pause-nft w-fit h-fit"
-                        onClick={handlePlayPauseClick}
-                    >
-                        {/* TO DO: toggle play pause  for specify track*/}
+                    {pathname !== "/" && (
+                        <div
+                            className="play-pause-nft w-fit h-fit"
+                            onClick={handlePlayPauseClick}
+                        >
+                            {/* TO DO: toggle play pause  for specify track*/}
 
-                        {/* {isPlaying ? (
+                            {/* {isPlaying ? (
                             <IconPlayerPause
                                 className="pause-button-nft hover:text-gray-300"
                                 size={64}
                             />
                         ) : ( */}
-                        <IconPlayerPlayFilled
-                            className="player-button-nft hover:text-gray-300"
-                            size={"4rem"}
-                        />
-                        {/* )} */}
-                    </div>
+                            <IconPlayerPlayFilled
+                                className="player-button-nft hover:text-gray-300"
+                                size={"4rem"}
+                            />
+                            {/* )} */}
+                        </div>
+                    )}
                 </div>
                 <div className="flex flex-col overflow-hidden space-y-[.39rem]">
                     {author?.avatar_url !== undefined &&

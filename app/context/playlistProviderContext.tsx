@@ -2,10 +2,13 @@
 import React, { ReactNode, createContext, useContext, useState } from "react";
 import { AudioContextData, useAudio } from "./audioPlayerContext";
 import LibAudioPlayer from "../explore/components/AudioPlayer";
+import { usePathname } from "next/navigation";
 
 interface PlaylistContextType {
     PlayList: Array<AudioContextData["currentTrack"]>;
-    addToPlaylist: (track: AudioContextData["currentTrack"]) => void;
+    addToPlaylist?: (
+        track: AudioContextData["currentTrack"]
+    ) => void | undefined;
     removeFromPlaylist: () => void;
     removeAllFromPlaylist: () => void;
     skipBackward: () => void;
@@ -128,8 +131,9 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({
 };
 
 export const usePlaylist = () => {
+    const pathname = usePathname();
     const context = useContext(PlaylistContext);
-    if (!context) {
+    if (!context && pathname !== "/") {
         throw new Error("usePlaylist must be used within a PlaylistProvider");
     }
     return context;

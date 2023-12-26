@@ -40,7 +40,7 @@ const Music: React.FC<MusicProps> = ({
         progressBarRef.current!.max = String(seconds);
     };
 
-    const { PlayList, removeFromPlaylist } = usePlaylist();
+    const playList = usePlaylist();
     return (
         <div className="p-2">
             <audio
@@ -49,11 +49,11 @@ const Music: React.FC<MusicProps> = ({
                 onLoadedMetadata={onLoadedMetadata}
                 autoPlay={true}
                 onEnded={() => {
-                    if (PlayList?.length === 0) {
+                    if (playList?.PlayList?.length === 0) {
                         setCurrentTrack(undefined);
                         togglePlayPause();
                     } else {
-                        removeFromPlaylist();
+                        playList?.removeFromPlaylist();
                     }
                 }}
             />

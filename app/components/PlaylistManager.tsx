@@ -19,9 +19,9 @@ const PlaylistManager: React.FC<PlayListProps> = ({
     togglePlayPause,
     currentTrack
 }) => {
-    const { PlayList, removeAllFromPlaylist } = usePlaylist();
+    const PlayListHook = usePlaylist();
 
-    useEffect(() => {}, [PlayList]);
+    useEffect(() => {}, [PlayListHook?.PlayList]);
     return (
         <div className="p-2">
             <div className="font-[600] text-[20px]">Queue</div>
@@ -58,13 +58,16 @@ const PlaylistManager: React.FC<PlayListProps> = ({
             <div className="mt-3 ">
                 <div className="font-[500] text-gray-500 flex justify-between">
                     <div>Up Next:</div>
-                    {PlayList.length > 0 && (
-                        <button onClick={removeAllFromPlaylist}>
-                            <IconClearAll />
-                        </button>
-                    )}
+                    {PlayListHook?.PlayList &&
+                        PlayListHook?.PlayList.length > 0 && (
+                            <button
+                                onClick={PlayListHook?.removeAllFromPlaylist}
+                            >
+                                <IconClearAll />
+                            </button>
+                        )}
                 </div>
-                {PlayList.map((track, index) => (
+                {PlayListHook?.PlayList.map((track, index) => (
                     <div
                         className="pl-5 my-1  flex flex-wrap justify-between text-gray-500 items-end"
                         key={index}
@@ -92,8 +95,8 @@ const PlaylistManager: React.FC<PlayListProps> = ({
                         <button
                             className=""
                             onClick={() => {
-                                if (PlayList.length > 0) {
-                                    PlayList.splice(index, 1);
+                                if (PlayListHook.PlayList.length > 0) {
+                                    PlayListHook?.PlayList.splice(index, 1);
                                 }
                             }}
                         >

@@ -19,6 +19,9 @@ import { WalletContextProvider } from "./context/WalletContextProvider";
 import { AudioProvider } from "./context/audioPlayerContext";
 import { PlaylistProvider } from "./context/playlistProviderContext";
 
+import { headers } from "next/headers";
+import HomePage from "./page";
+
 export const metadata = {
     title: "Soundwork",
     description: "soundwork web app!"
@@ -29,6 +32,7 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const pathname = headers().get("x-invoke-path") || "";
     return (
         <html lang="en">
             <head>
@@ -39,46 +43,60 @@ export default function RootLayout({
                     content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
                 />
             </head>
-            <body className="bg-[#020415] bg-sw-bg">
+            <body className="bg-[#020415] bg-sw-bg text-white">
                 <MantineProvider>
                     <Wallet>
                         <WalletContextProvider>
-                            <div className="flex text-white p-0 m-0">
-                                <nav>
-                                    <SideNav />
-                                </nav>
-                                <main className="w-screen">
-                                    <div className="flex justify-end p-5 ">
-                                        <Group>
-                                            <Link href="/create" passHref>
-                                                <CustomPill
-                                                    label="Create"
-                                                    color="transparent"
-                                                />
-                                            </Link>
-                                            <CustomPill
-                                                label="sol"
-                                                color="transparent"
-                                            />
-                                            <CustomPill color="transparent">
-                                                {" "}
-                                                {/* // todo: enable user to change network settings here */}
-                                                <ConnectWallet />
-                                            </CustomPill>
-                                        </Group>
-                                    </div>
-                                    <AudioProvider>
-                                        <PlaylistProvider>
-                                            {children}
-                                        </PlaylistProvider>
-                                    </AudioProvider>
+                            {pathname === "/" ? (
+                                <AudioProvider>
+                                    <PlaylistProvider>
+                                        <HomePage />
+                                    </PlaylistProvider>
+                                </AudioProvider>
+                            ) : (
+                                <>
+                                    <div className="flex p-0 m-0">
+                                        <nav>
+                                            <SideNav />
+                                        </nav>
+                                        <main className="w-screen">
+                                            <div className="flex justify-end p-5 ">
+                                                <Group>
+                                                    <Link
+                                                        href="/create"
+                                                        passHref
+                                                    >
+                                                        <CustomPill
+                                                            label="Create"
+                                                            color="transparent"
+                                                        />
+                                                    </Link>
+                                                    <CustomPill
+                                                        label="sol"
+                                                        color="transparent"
+                                                    />
+                                                    <CustomPill color="transparent">
+                                                        {" "}
+                                                        {/* // todo: enable user to change network settings here */}
+                                                        <ConnectWallet />
+                                                    </CustomPill>
+                                                </Group>
+                                            </div>
+                                            <AudioProvider>
+                                                <PlaylistProvider>
+                                                    {children}
+                                                </PlaylistProvider>
+                                            </AudioProvider>
 
-                                    <Toaster position="bottom-center" />
-                                </main>
-                            </div>
-                            <footer className="text-white">
-                                <Footer />
-                            </footer>
+                                            <Toaster position="bottom-center" />
+                                        </main>
+                                    </div>
+
+                                    <footer className="text-white">
+                                        <Footer />
+                                    </footer>
+                                </>
+                            )}
                         </WalletContextProvider>
                     </Wallet>
                 </MantineProvider>

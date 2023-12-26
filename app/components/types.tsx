@@ -31,6 +31,7 @@ export interface MetaSchema {
 
 export interface NftCardProps {
     nft: NftSchema;
+    className?: string;
 }
 
 export interface ControlsProps {

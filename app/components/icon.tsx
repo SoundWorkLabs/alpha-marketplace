@@ -1,6 +1,10 @@
-import Explore from "../explore/page";
+import React from "react";
 
-export default function SoundWorkLogo() {
+interface ImportSVGComponentProps {
+    className?: string;
+}
+
+const SoundWorkLogo: React.FC<ImportSVGComponentProps> = ({ className }) => {
     return (
         <div>
             <svg
@@ -10,6 +14,7 @@ export default function SoundWorkLogo() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlnsXlink="http://www.w3.org/1999/xlink"
+                className={className}
             >
                 <rect
                     y="0.760742"
@@ -39,7 +44,7 @@ export default function SoundWorkLogo() {
             </svg>
         </div>
     );
-}
+};
 
 export function SoundWorkHeadPhone() {
     return (
@@ -199,3 +204,38 @@ export function FilterIcon() {
         </div>
     );
 }
+
+export function MarkerIcon() {
+    return (
+        <div className="w-fit">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="500"
+                height="42"
+                viewBox="0 0 500 42"
+                fill="none"
+                className="marker-icon"
+            >
+                <path
+                    d="M0 42C51.4033 25.7818 207.73 -3.21426 421.81 10.5466C689.409 27.7477 200.39 -41.0567 0 42Z"
+                    fill="url(#paint0_linear_208_218)"
+                />
+                <defs>
+                    <linearGradient
+                        id="paint0_linear_208_218"
+                        x1="0"
+                        y1="20.9983"
+                        x2="500"
+                        y2="20.9983"
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop stopColor="#0FA7F7" />
+                        <stop offset="1" stopColor="#FE0FD4" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    );
+}
+
+export default SoundWorkLogo;

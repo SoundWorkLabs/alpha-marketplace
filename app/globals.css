@@ -206,20 +206,46 @@ div.drop-down{
     background:#03061B;
 }
 
-.sol-icon-price svg{
+.sol-icon-price svg {
     width: 1.5625rem;
     height: 1.5625rem;
 }
-
-.loading-icon {
-    animation: spin 2s linear infinite;
+/* section.home{
+    position: relative;
 }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+section.home::before {
+
+    content: "";
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+
+    background-image: url('../public/nightmare-sauce-night-time-rave-big-crowd-midst-of-dubstep-lase-200359-cd-94-e-44326973259-e-8-d-4-b-8-d-7022.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(70%);
+} */
+
+section.home {
+    background-image: url('../public/nightmare-sauce-night-time-rave-big-crowd-midst-of-dubstep-lase-200359-cd-94-e-44326973259-e-8-d-4-b-8-d-7022.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* .logo-after-scroll a.nav-link div svg {
+    width: 1.89038rem;
+    height: auto;
+} */
+
+.marker-icon {
+    width: 31.25rem;
+    height: 2.625rem;
+    flex-shrink: 0;
 }

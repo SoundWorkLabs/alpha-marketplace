@@ -59,7 +59,7 @@ const Controls: React.FC<ControlsProps> = ({
         playAnimationRef.current = requestAnimationFrame(repeat);
     }, [audioRef, duration, progressBarRef, setTimeProgress]);
 
-    const { skipBackward, skipForward } = usePlaylist();
+    const playList = usePlaylist();
 
     useEffect(() => {
         if (isPlaying) {
@@ -75,7 +75,7 @@ const Controls: React.FC<ControlsProps> = ({
             <div className="flex items-center">
                 <button
                     className="p-2 mr-4 rounded-full bg-gray-500"
-                    onClick={skipBackward}
+                    onClick={playList?.skipBackward}
                 >
                     <IconPlayerSkipBackFilled />
                 </button>
@@ -88,7 +88,7 @@ const Controls: React.FC<ControlsProps> = ({
                 </button>
                 <button
                     className="p-2 mx-4 rounded-full bg-gray-500"
-                    onClick={skipForward}
+                    onClick={playList?.skipBackward}
                 >
                     <IconPlayerSkipForwardFilled />
                 </button>
