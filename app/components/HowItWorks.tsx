@@ -6,7 +6,7 @@ function HowItWorks() {
             id="how-it-works"
             className="px-[6.97rem] pt-[8.13rem] space-y-[2.62rem]"
         >
-            <div className="text-[4rem] leading-[4.62rem]">
+            <div className="text-[4rem] leading-[4.62rem] font-[700]">
                 <div>How do we</div>
                 <div>Soundwork?</div>
             </div>

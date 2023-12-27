@@ -27,9 +27,9 @@ function Features() {
                         MINT
                     </div>
                     <div>
-                        If it&aposs a sound, it belongs on Soundwork. Big or
-                        small, mint your favourite sound creations on the
-                        platform to be used and enjoyed by others.
+                        If it's a sound, it belongs on Soundwork. Big or small,
+                        mint your favourite sound creations on the platform to
+                        be used and enjoyed by others.
                     </div>
                 </div>
                 <div className="custom-border1 rounded-2xl w-[20.875rem] h-[20.125rem] p-5">

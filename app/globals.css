@@ -231,7 +231,7 @@ section.home::before {
 } */
 
 section.home {
-    background-image: url('../public/nightmare-sauce-night-time-rave-big-crowd-midst-of-dubstep-lase-200359-cd-94-e-44326973259-e-8-d-4-b-8-d-7022.png');
+    background: url('../public/nightmare-sauce-night-time-rave-big-crowd-midst-of-dubstep-lase-200359-cd-94-e-44326973259-e-8-d-4-b-8-d-7022.png'),50%;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
