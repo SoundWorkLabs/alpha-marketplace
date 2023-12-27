@@ -20,7 +20,12 @@ function Marketplace() {
                     purchasing them directly.
                 </div>
             </div>
-            <button className="bg-btn-bg w-[23.125rem] rounded-[3.125rem] mt-5 text-[1.125rem] font-normal leading-[1.8rem] py-3 px-8">
+            <button
+                className="bg-btn-bg w-[23.125rem] rounded-[3.125rem] mt-5 text-[1.125rem] font-normal leading-[1.8rem] py-3 px-8"
+                onClick={() => {
+                    window.open("/explore", "_blank");
+                }}
+            >
                 Explore Marketplace
             </button>
         </section>

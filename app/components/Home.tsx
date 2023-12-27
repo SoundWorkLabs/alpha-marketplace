@@ -14,7 +14,7 @@ export default function Home() {
     return (
         <section
             id="home"
-            className="home pt-[12rem] px-[6.97rem] flex flex-wrap"
+            className="home pt-[12rem] px-[6.97rem] flex flex-col"
         >
             <div className="relative text-[5.125rem] font-[800] leading-[5.40688rem] overflow-y-hidden">
                 <div>Unlock the</div>
